@@ -26,12 +26,17 @@ public class GenericCharacterController : MonoBehaviour
     private BaseEnum currentBase;
     private BaseEnum nextBase;
     private bool isPrepared = false;
+    private GenericPlayerBehaviour playerBehaviour;
+    private PlayerStatus playerStatusInformations;
 
     public void Start()
     {
+        PlayerStatusInformations = new PlayerStatus();
+        PlayerStatusInformations.PlayerFieldPosition = PlayerFieldPositionEnum.RUNNER;
+        playerBehaviour = PlayerUtils.FetchCorrespondingPlayerBehaviourScript(this.gameObject, PlayerStatusInformations);
+        playerBehaviour.enabled = true;
         isoRenderer = GetComponentInChildren<IsometricCharacterRenderer>();
         Vector3 playerPosition = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetPrimeBaseTilePosition());
-        playerPosition.Set(playerPosition.x, playerPosition.y, playerPosition.z);
         this.transform.position = playerPosition;
 
         Vector3 targetPosition = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetSecondBaseTilePosition());
@@ -133,4 +138,6 @@ public class GenericCharacterController : MonoBehaviour
     public BaseEnum NextBase { get => nextBase; set => nextBase = value; }
     public Vector3 Target { get => target; set => target = value; }
     public bool IsPrepared { get => isPrepared; set => isPrepared = value; }
+    public GenericPlayerBehaviour PlayerBehaviour { get => playerBehaviour; set => playerBehaviour = value; }
+    public PlayerStatus PlayerStatusInformations { get => playerStatusInformations; set => playerStatusInformations = value; }
 }

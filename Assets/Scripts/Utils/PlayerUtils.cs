@@ -4,6 +4,16 @@ using UnityEngine;
 
 public class PlayerUtils : MonoBehaviour
 {
+    public static PlayerStatus FetchPlayerStatusScript(GameObject player)
+    {
+        return FetchCharacterControllerScript(player).PlayerStatusInformations;
+    }
+
+    public static IsometricCharacterRenderer FetchPlayerIsometricRenderer(GameObject player)
+    {
+        return FetchCharacterControllerScript(player).IsoRenderer;
+    }
+
     public static BatterBehaviour FetchBatterBehaviourScript(GameObject player)
     {
         return player.GetComponent<BatterBehaviour>();
@@ -55,5 +65,54 @@ public class PlayerUtils : MonoBehaviour
         }
 
         return genericPlayerBehaviour;
+    }
+
+    public static bool IsPlayerAllowedToMove(GameObject player)
+    {
+        PlayerStatus playerStatus = FetchPlayerStatusScript(player);
+
+        bool isMoveAllowed = false;
+
+        switch (playerStatus.PlayerFieldPosition)
+        {
+            case PlayerFieldPositionEnum.BATTER:
+                isMoveAllowed = true;
+                break;
+            case PlayerFieldPositionEnum.PITCHER:
+                isMoveAllowed = false;
+                break;
+            case PlayerFieldPositionEnum.RUNNER:
+                isMoveAllowed = true;
+                break;
+            case PlayerFieldPositionEnum.CATCHER:
+                isMoveAllowed = false;
+                break;
+            case PlayerFieldPositionEnum.FIRST_BASEMAN:
+                isMoveAllowed = true;
+                break;
+            case PlayerFieldPositionEnum.SECOND_BASEMAN:
+                isMoveAllowed = true;
+                break;
+            case PlayerFieldPositionEnum.THIRD_BASEMAN:
+                isMoveAllowed = true;
+                break;
+            case PlayerFieldPositionEnum.SHORT_STOP:
+                isMoveAllowed = true;
+                break;
+            case PlayerFieldPositionEnum.LEFT_FIELDER:
+                isMoveAllowed = true;
+                break;
+            case PlayerFieldPositionEnum.CENTER_FIELDER:
+                isMoveAllowed = true;
+                break;
+            case PlayerFieldPositionEnum.RIGHT_FIELDER:
+                isMoveAllowed = true;
+                break;
+            default:
+                isMoveAllowed = false;
+                break;
+        }
+
+        return isMoveAllowed;
     }
 }

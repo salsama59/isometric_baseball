@@ -7,28 +7,42 @@ public class GameManager : MonoBehaviour
 {
     public Tilemap fieldTileMap = null;
     public Tilemap baseTileMap = null;
-    private List<Vector3> availablePlaces;
     public List<Tile> tilePool;
-    public enum TileType{
-        GRASS,
-        DIRT,
-        HORIZONTAL_PAINTED_DIRT,
-        BASE,
-        VERTICAL_PAINTED_DIRT
-    };
+    public GameObject playerModel = null;
 
-    private Dictionary<string, TileType> horizontalyPaintedDirtDictionary = new Dictionary<string, TileType>();
-    private Dictionary<string, TileType> verticalyPaintedDirtDictionary = new Dictionary<string, TileType>();
+    private Dictionary<string, TileTypeEnum> horizontalyPaintedDirtDictionary = new Dictionary<string, TileTypeEnum>();
+    private Dictionary<string, TileTypeEnum> verticalyPaintedDirtDictionary = new Dictionary<string, TileTypeEnum>();
 
     void Start()
     {
+        this.BuildGameField();
+        this.SetPlayersLocation(PlayerEnum.PLAYER_1);
+    }
 
-        this.CalculateHorizontalyPaintedDirtPositions(HorizontalyPaintedDirtDictionary, FieldUtils.GetPrimeBaseTilePosition(), FieldUtils.GetSecondBaseTilePosition(), TileType.HORIZONTAL_PAINTED_DIRT);
-        this.CalculateVerticalyPaintedDirtPositions(VerticalyPaintedDirtDictionary, FieldUtils.GetSecondBaseTilePosition(), FieldUtils.GetThirdBaseTilePosition(), TileType.VERTICAL_PAINTED_DIRT);
-        this.CalculateHorizontalyPaintedDirtPositions(HorizontalyPaintedDirtDictionary, FieldUtils.GetThirdBaseTilePosition(), FieldUtils.GetFourthBaseTilePosition(), TileType.HORIZONTAL_PAINTED_DIRT);
-        this.CalculateVerticalyPaintedDirtPositions(VerticalyPaintedDirtDictionary, FieldUtils.GetFourthBaseTilePosition(), FieldUtils.GetPrimeBaseTilePosition(), TileType.VERTICAL_PAINTED_DIRT);
+    private void SetPlayersLocation(PlayerEnum playerId)
+    {
+        foreach (KeyValuePair<PlayerFieldPositionEnum, Vector3> entry in TeamUtils.playerTeamMenberPositionLocation)
+        {
+            GameObject player = Instantiate(playerModel, entry.Value, Quaternion.identity);
+            PlayerStatus playerStatus = PlayerUtils.FetchPlayerStatusScript(player);
+            playerStatus.PlayerFieldPosition = entry.Key;
+            playerStatus.IsAllowedToMove = PlayerUtils.IsPlayerAllowedToMove(player);
+            TeamUtils.AddPlayerTeamMember(entry.Key, player, playerId);
+        }
+    }
 
-        availablePlaces = new List<Vector3>();
+    // Update is called once per frame
+    void Update()
+    {
+
+    }
+
+    private void BuildGameField()
+    {
+        this.CalculateHorizontalyPaintedDirtPositions(HorizontalyPaintedDirtDictionary, FieldUtils.GetPrimeBaseTilePosition(), FieldUtils.GetSecondBaseTilePosition(), TileTypeEnum.HORIZONTAL_PAINTED_DIRT);
+        this.CalculateVerticalyPaintedDirtPositions(VerticalyPaintedDirtDictionary, FieldUtils.GetSecondBaseTilePosition(), FieldUtils.GetThirdBaseTilePosition(), TileTypeEnum.VERTICAL_PAINTED_DIRT);
+        this.CalculateHorizontalyPaintedDirtPositions(HorizontalyPaintedDirtDictionary, FieldUtils.GetThirdBaseTilePosition(), FieldUtils.GetFourthBaseTilePosition(), TileTypeEnum.HORIZONTAL_PAINTED_DIRT);
+        this.CalculateVerticalyPaintedDirtPositions(VerticalyPaintedDirtDictionary, FieldUtils.GetFourthBaseTilePosition(), FieldUtils.GetPrimeBaseTilePosition(), TileTypeEnum.VERTICAL_PAINTED_DIRT);
 
         for (int collumn = fieldTileMap.cellBounds.xMin; collumn < fieldTileMap.cellBounds.xMax; collumn++)
         {
@@ -47,8 +61,6 @@ public class GameManager : MonoBehaviour
                 {
                     fieldTileMap.SetTile(localPlace, null);
                 }
-
-
             }
         }
 
@@ -67,7 +79,7 @@ public class GameManager : MonoBehaviour
                         baseTileMap.SetTile(localPlace, tilePool[tilePoolIndex]);
                         TileBase tileBase = baseTileMap.GetTile(localPlace);
                         tileBase.name = tileInformation.TileName;
-                        if (tilePoolIndex == (int)TileType.BASE)
+                        if (tilePoolIndex == (int)TileTypeEnum.BASE)
                         {
                             baseTileMap.SetColliderType(localPlace, Tile.ColliderType.Sprite);
                         }
@@ -86,7 +98,7 @@ public class GameManager : MonoBehaviour
         //float camHeight = this.GetCamHeight()/2;
         //float camWidth = this.GetCamWidth()/2;
         TileInformation tileInformation = new TileInformation();
-        tileInformation.TileIndex = (int)TileType.GRASS;
+        tileInformation.TileIndex = (int)TileTypeEnum.GRASS;
 
         string dictionarykey = this.BuildKey(collumn, line);
 
@@ -170,7 +182,7 @@ public class GameManager : MonoBehaviour
 
         if (isMiddleBasePosition || isPrimeBasePosition || isSecondBasePosition || isThirdBasePosition || isfourthBasePosition)
         {
-            tileInformation.TileIndex = (int)TileType.BASE;
+            tileInformation.TileIndex = (int)TileTypeEnum.BASE;
             return tileInformation;
         }
 
@@ -225,7 +237,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void CalculateHorizontalyPaintedDirtPositions(Dictionary<string, TileType> paintedDirtDictionary, Vector2Int firstBasePosition, Vector2Int secondBasePosition, TileType tileType)
+    private void CalculateHorizontalyPaintedDirtPositions(Dictionary<string, TileTypeEnum> paintedDirtDictionary, Vector2Int firstBasePosition, Vector2Int secondBasePosition, TileTypeEnum tileType)
     {
         if(firstBasePosition.x < secondBasePosition.x)
         {
@@ -254,7 +266,7 @@ public class GameManager : MonoBehaviour
         
     }
 
-    private void CalculateVerticalyPaintedDirtPositions(Dictionary<string, TileType> paintedDirtDictionary, Vector2Int firstBasePosition, Vector2Int secondBasePosition, TileType tileType)
+    private void CalculateVerticalyPaintedDirtPositions(Dictionary<string, TileTypeEnum> paintedDirtDictionary, Vector2Int firstBasePosition, Vector2Int secondBasePosition, TileTypeEnum tileType)
     {
         if(firstBasePosition.y < secondBasePosition.y)
         {
@@ -297,33 +309,6 @@ public class GameManager : MonoBehaviour
         return isXpositionEquals && isYpositionEquals;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
-    private void CalculateUsedTiles()
-    {
-        for (int n = fieldTileMap.cellBounds.xMin; n < fieldTileMap.cellBounds.xMax; n++)
-        {
-            for (int p = fieldTileMap.cellBounds.yMin; p < fieldTileMap.cellBounds.yMax; p++)
-            {
-                Vector3Int localPlace = (new Vector3Int(n, p, (int)fieldTileMap.transform.position.y));
-                Vector3 place = fieldTileMap.CellToWorld(localPlace);
-                if (fieldTileMap.HasTile(localPlace))
-                {
-                    //Tile at "place"
-                    availablePlaces.Add(place);
-                }
-                else
-                {
-                    //No tile at "place"
-                }
-            }
-        }
-    }
-
     private float GetCamHeight()
     {
         Camera cam = Camera.main;
@@ -339,7 +324,7 @@ public class GameManager : MonoBehaviour
         return width;
     }
 
-    public Dictionary<string, TileType> HorizontalyPaintedDirtDictionary { get => horizontalyPaintedDirtDictionary; set => horizontalyPaintedDirtDictionary = value; }
-    public Dictionary<string, TileType> VerticalyPaintedDirtDictionary { get => verticalyPaintedDirtDictionary; set => verticalyPaintedDirtDictionary = value; }
+    public Dictionary<string, TileTypeEnum> HorizontalyPaintedDirtDictionary { get => horizontalyPaintedDirtDictionary; set => horizontalyPaintedDirtDictionary = value; }
+    public Dictionary<string, TileTypeEnum> VerticalyPaintedDirtDictionary { get => verticalyPaintedDirtDictionary; set => verticalyPaintedDirtDictionary = value; }
 
 }

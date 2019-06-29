@@ -6,12 +6,12 @@ public class PlayerUtils : MonoBehaviour
 {
     public static PlayerStatus FetchPlayerStatusScript(GameObject player)
     {
-        return FetchCharacterControllerScript(player).PlayerStatusInformations;
+        return FetchPlayerCharacterControllerScript(player).PlayerStatusInformations;
     }
 
     public static IsometricCharacterRenderer FetchPlayerIsometricRenderer(GameObject player)
     {
-        return FetchCharacterControllerScript(player).IsoRenderer;
+        return player.GetComponentInChildren<IsometricCharacterRenderer>();
     }
 
     public static BatterBehaviour FetchBatterBehaviourScript(GameObject player)
@@ -24,9 +24,9 @@ public class PlayerUtils : MonoBehaviour
         return player.GetComponent<RunnerBehaviour>();
     }
 
-    public static GenericCharacterController FetchCharacterControllerScript(GameObject player)
+    public static PlayerCharacterController FetchPlayerCharacterControllerScript(GameObject player)
     {
-        return player.GetComponent<GenericCharacterController>();
+        return player.GetComponent<PlayerCharacterController>();
     }
 
     public static GenericPlayerBehaviour FetchCorrespondingPlayerBehaviourScript(GameObject player, PlayerStatus playerStatus)
@@ -76,7 +76,7 @@ public class PlayerUtils : MonoBehaviour
         switch (playerStatus.PlayerFieldPosition)
         {
             case PlayerFieldPositionEnum.BATTER:
-                isMoveAllowed = true;
+                isMoveAllowed = false;
                 break;
             case PlayerFieldPositionEnum.PITCHER:
                 isMoveAllowed = false;
@@ -115,4 +115,11 @@ public class PlayerUtils : MonoBehaviour
 
         return isMoveAllowed;
     }
+
+    public static bool IsCorrespondingPlayerPosition(GameObject player, PlayerFieldPositionEnum playerFieldPositionToTest)
+    {
+        PlayerStatus currentPlayerStatusScript = FetchPlayerStatusScript(player);
+        return currentPlayerStatusScript.PlayerFieldPosition.Equals(playerFieldPositionToTest);
+    }
+
 }

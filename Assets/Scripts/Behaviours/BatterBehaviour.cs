@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RunnerBehaviour : GenericPlayerBehaviour
+public class BatterBehaviour : GenericPlayerBehaviour
 {
     public override void Awake()
     {

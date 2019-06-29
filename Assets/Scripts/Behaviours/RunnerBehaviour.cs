@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BatterBehaviour : GenericPlayerBehaviour
+public class RunnerBehaviour : GenericPlayerBehaviour
 {
     public override void Awake()
     {
@@ -11,7 +11,7 @@ public class BatterBehaviour : GenericPlayerBehaviour
 
     public override void CalculateNextAction()
     {
-        GenericCharacterController genericCharacterController = PlayerUtils.FetchCharacterControllerScript(this.gameObject);
+        PlayerCharacterController genericCharacterController = PlayerUtils.FetchPlayerCharacterControllerScript(this.gameObject);
 
         BaseEnum nextBase = genericCharacterController.NextBase;
         genericCharacterController.CurrentBase = nextBase;

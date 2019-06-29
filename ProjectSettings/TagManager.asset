@@ -6,6 +6,7 @@ TagManager:
   tags:
   - GameManager
   - BaseballPlayer
+  - Ball
   layers:
   - Default
   - TransparentFX

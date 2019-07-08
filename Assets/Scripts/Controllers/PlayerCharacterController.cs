@@ -20,6 +20,8 @@ public class PlayerCharacterController : GenericController
         if(PlayerStatusInformations.PlayerFieldPosition == PlayerFieldPositionEnum.PITCHER)
         {
             GameObject ball = Instantiate(ballGameObject, this.transform.position, this.transform.rotation);
+            BallController ballControllerScript = ball.GetComponent<BallController>();
+            ballControllerScript.Pitcher = this.gameObject;
         }
     }
 

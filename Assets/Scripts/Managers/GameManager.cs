@@ -27,6 +27,25 @@ public class GameManager : MonoBehaviour
             PlayerStatus playerStatus = PlayerUtils.FetchPlayerStatusScript(player);
             playerStatus.PlayerFieldPosition = entry.Key;
             playerStatus.IsAllowedToMove = PlayerUtils.IsPlayerAllowedToMove(player);
+
+            switch (playerStatus.PlayerFieldPosition)
+            {
+                case PlayerFieldPositionEnum.BATTER:
+                    playerStatus.BattingEfficiency = 30f;
+                    playerStatus.BattingPower = 5;
+                    break;
+                case PlayerFieldPositionEnum.PITCHER:
+                    playerStatus.PitchEfficiency = 85f;
+                    playerStatus.PitchingPower = 3;
+                    playerStatus.PitchingEffect = 10f;
+                    break;
+                case PlayerFieldPositionEnum.RUNNER:
+                    playerStatus.Speed = 2f;
+                    break;
+                case PlayerFieldPositionEnum.CATCHER:
+                    playerStatus.CatchEfficiency = 70f;
+                    break;
+            }
             TeamUtils.AddPlayerTeamMember(entry.Key, player, playerId);
         }
     }

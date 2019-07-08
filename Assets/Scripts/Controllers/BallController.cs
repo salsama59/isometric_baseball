@@ -5,6 +5,7 @@ using UnityEngine;
 public class BallController : GenericController
 {
     private bool isThrown;
+    private GameObject pitcher;
 
     // Start is called before the first frame update
     public void Start()
@@ -27,4 +28,5 @@ public class BallController : GenericController
     }
 
     public bool IsThrown { get => isThrown; set => isThrown = value; }
+    public GameObject Pitcher { get => pitcher; set => pitcher = value; }
 }

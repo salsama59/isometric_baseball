@@ -15,10 +15,19 @@ public class TeamPlayerCollider : MonoBehaviour
         {
             if (PlayerUtils.IsCorrespondingPlayerPosition(this.gameObject, PlayerFieldPositionEnum.BATTER))
             {
-                playerCharacterController.PlayerBehaviour = PlayerUtils.FetchRunnerBehaviourScript(this.gameObject);
-                PlayerStatus playerStatusScript = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
-                playerStatusScript.IsAllowedToMove = true;
-                playerStatusScript.PlayerFieldPosition = PlayerFieldPositionEnum.RUNNER;
+                GameObject ballGameObject = collision.collider.gameObject;
+                GameObject pitcherGameObject =  ballGameObject.GetComponent<BallController>().Pitcher;
+
+                float pitchSuccesRate = ActionCalculationUtils.CalculatePitchSuccessRate(pitcherGameObject, this.gameObject);
+
+                if(!ActionCalculationUtils.HasActionSucceeded(pitchSuccesRate))
+                {
+                    playerCharacterController.PlayerBehaviour = PlayerUtils.FetchRunnerBehaviourScript(this.gameObject);
+                    PlayerStatus playerStatusScript = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
+                    playerStatusScript.IsAllowedToMove = true;
+                    playerStatusScript.PlayerFieldPosition = PlayerFieldPositionEnum.RUNNER;
+                }
+                
             }
         }
         else

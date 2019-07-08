@@ -42,6 +42,22 @@ public class FieldUtils
         return new Vector2Int(xTilePosition, yTilePosition);
     }
 
+    public static Vector2Int GetCatcherZonePosition()
+    {
+        Tilemap tileMap = FetchTileMap();
+        int xTilePosition = (tileMap.cellBounds.xMin - 3) / 2;
+        int yTilePosition = (tileMap.cellBounds.yMin - 2) / 2;
+        return new Vector2Int(xTilePosition, yTilePosition);
+    }
+
+    public static Vector2Int GetCathcherOutBallZonePosition()
+    {
+        Tilemap tileMap = FetchTileMap();
+        int xTilePosition = tileMap.cellBounds.xMin;
+        int yTilePosition = tileMap.cellBounds.yMin;
+        return new Vector2Int(xTilePosition, yTilePosition);
+    }
+
     public static Vector3 GetTileCenterPositionInGameWorld(Vector2Int tilePositionInGrid)
     {
         Tilemap fieldTileMap = FetchTileMap();

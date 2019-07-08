@@ -31,19 +31,19 @@ public class GameManager : MonoBehaviour
             switch (playerStatus.PlayerFieldPosition)
             {
                 case PlayerFieldPositionEnum.BATTER:
-                    playerStatus.BattingEfficiency = 30f;
+                    playerStatus.BattingEfficiency = 10f;
                     playerStatus.BattingPower = 5;
                     break;
                 case PlayerFieldPositionEnum.PITCHER:
-                    playerStatus.PitchEfficiency = 85f;
-                    playerStatus.PitchingPower = 3;
+                    playerStatus.PitchEfficiency = 50f;
+                    playerStatus.PitchingPower = 2;
                     playerStatus.PitchingEffect = 10f;
                     break;
                 case PlayerFieldPositionEnum.RUNNER:
                     playerStatus.Speed = 2f;
                     break;
                 case PlayerFieldPositionEnum.CATCHER:
-                    playerStatus.CatchEfficiency = 70f;
+                    playerStatus.CatchEfficiency = 100f;
                     break;
             }
             TeamUtils.AddPlayerTeamMember(entry.Key, player, playerId);

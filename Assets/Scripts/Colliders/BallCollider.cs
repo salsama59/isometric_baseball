@@ -8,11 +8,11 @@ public class BallCollider : MonoBehaviour
     {
         GameObject collidedGameObject = collision.collider.gameObject;
 
-        if (collidedGameObject.CompareTag(TagsConstants.BASEBALL_PLAYER_TAG))
+        /*if (collidedGameObject.CompareTag(TagsConstants.BASEBALL_PLAYER_TAG))
         {
             BallController ballControllerScript = this.gameObject.GetComponent<BallController>();
             ballControllerScript.IsThrown = true;
             ballControllerScript.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetSecondBaseTilePosition());
-        }
+        }*/
     }
 }

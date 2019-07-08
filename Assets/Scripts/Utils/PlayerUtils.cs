@@ -60,7 +60,6 @@ public class PlayerUtils : MonoBehaviour
             case PlayerFieldPositionEnum.RIGHT_FIELDER:
                 break;
             default:
-                genericPlayerBehaviour = FetchBatterBehaviourScript(player);
                 break;
         }
 

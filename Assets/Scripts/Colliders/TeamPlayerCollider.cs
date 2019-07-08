@@ -13,21 +13,45 @@ public class TeamPlayerCollider : MonoBehaviour
 
         if (HasBallCollided(collision))
         {
+            GameObject ballGameObject = collision.collider.gameObject;
+            BallController ballControllerScript = BallUtils.FetchBallControllerScript(ballGameObject);
+            GameObject pitcherGameObject = ballControllerScript.Pitcher;
+
             if (PlayerUtils.IsCorrespondingPlayerPosition(this.gameObject, PlayerFieldPositionEnum.BATTER))
             {
-                GameObject ballGameObject = collision.collider.gameObject;
-                GameObject pitcherGameObject =  ballGameObject.GetComponent<BallController>().Pitcher;
-
+                
                 float pitchSuccesRate = ActionCalculationUtils.CalculatePitchSuccessRate(pitcherGameObject, this.gameObject);
-
-                if(!ActionCalculationUtils.HasActionSucceeded(pitchSuccesRate))
+                Debug.Log("pitchSuccesRate = " + pitchSuccesRate);
+                
+                if (!ActionCalculationUtils.HasActionSucceeded(pitchSuccesRate))
                 {
+                    ballControllerScript.IsBeingHitten = true;
+                    ballControllerScript.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetSecondBaseTilePosition());
                     playerCharacterController.PlayerBehaviour = PlayerUtils.FetchRunnerBehaviourScript(this.gameObject);
                     PlayerStatus playerStatusScript = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
                     playerStatusScript.IsAllowedToMove = true;
                     playerStatusScript.PlayerFieldPosition = PlayerFieldPositionEnum.RUNNER;
                 }
+                else
+                {
+                    ballControllerScript.IsThrown = true;
+                    ballControllerScript.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetCatcherZonePosition());
+                }
                 
+            }
+            else if (PlayerUtils.IsCorrespondingPlayerPosition(this.gameObject, PlayerFieldPositionEnum.CATCHER))
+            {
+                float catchSuccesRate = ActionCalculationUtils.CalculateCatchSuccessRate(this.gameObject, pitcherGameObject);
+                Debug.Log("catchSuccesRate = " + catchSuccesRate);
+                if (!ActionCalculationUtils.HasActionSucceeded(catchSuccesRate))
+                {
+                    ballControllerScript.IsThrown = true;
+                    ballControllerScript.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetCathcherOutBallZonePosition());
+                }
+                else
+                {
+                    Destroy(ballGameObject);
+                }
             }
         }
         else

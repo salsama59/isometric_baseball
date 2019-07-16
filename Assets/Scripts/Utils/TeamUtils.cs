@@ -6,8 +6,11 @@ public class TeamUtils : MonoBehaviour
 {
     public static int teamSize = 9;
     public static Dictionary<PlayerFieldPositionEnum, Vector3> playerTeamMenberPositionLocation = new Dictionary<PlayerFieldPositionEnum, Vector3>() {
-        {PlayerFieldPositionEnum.BATTER,  FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetPrimeBaseTilePosition())},
-        {PlayerFieldPositionEnum.PITCHER,  FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetMiddleBaseTilePosition())}
+        {PlayerFieldPositionEnum.BATTER,  FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetHomeBaseTilePosition())},
+        {PlayerFieldPositionEnum.PITCHER,  FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetPitcherBaseTilePosition())},
+        {PlayerFieldPositionEnum.CATCHER,  FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetCatcherZonePosition())},
+        {PlayerFieldPositionEnum.FIRST_BASEMAN,  FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetFirstBaseTilePosition())},
+        {PlayerFieldPositionEnum.THIRD_BASEMAN,  FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetThirdBaseTilePosition())}
     };
     private static Dictionary<int, GameObject> player1Team = new Dictionary<int, GameObject>();
     private static Dictionary<int, GameObject> player2Team = new Dictionary<int, GameObject>();

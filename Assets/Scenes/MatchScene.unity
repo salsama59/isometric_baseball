@@ -11422,6 +11422,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: fec808140dde18b4d8f96969118ad338, type: 2}
   playerModel: {fileID: 1620097754099503367, guid: 4aacbb4bd6260504aa987244b2894f92,
     type: 3}
+  ballModel: {fileID: 5620586050490733030, guid: 767ca0324cc8b4b498cf9d1a5cd41d1a,
+    type: 3}
 --- !u!4 &814905037
 Transform:
   m_ObjectHideFlags: 0

@@ -1,12 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class PlayerUtils : MonoBehaviour
 {
     public static PlayerStatus FetchPlayerStatusScript(GameObject player)
     {
-        return FetchPlayerCharacterControllerScript(player).PlayerStatusInformations;
+        return player.GetComponent<PlayerStatus>();
     }
 
     public static IsometricCharacterRenderer FetchPlayerIsometricRenderer(GameObject player)
@@ -24,9 +25,19 @@ public class PlayerUtils : MonoBehaviour
         return player.GetComponent<RunnerBehaviour>();
     }
 
-    public static PlayerCharacterController FetchPlayerCharacterControllerScript(GameObject player)
+    public static FielderBehaviour FetchFielderBehaviourScript(GameObject player)
     {
-        return player.GetComponent<PlayerCharacterController>();
+        return player.GetComponent<FielderBehaviour>();
+    }
+
+    public static CatcherBehaviour FetchCatcherBehaviourScript(GameObject player)
+    {
+        return player.GetComponent<CatcherBehaviour>();
+    }
+
+    public static PitcherBehaviour FetchPitcherBehaviourScript(GameObject player)
+    {
+        return player.GetComponent<PitcherBehaviour>();
     }
 
     public static GenericPlayerBehaviour FetchCorrespondingPlayerBehaviourScript(GameObject player, PlayerStatus playerStatus)
@@ -39,17 +50,21 @@ public class PlayerUtils : MonoBehaviour
                 genericPlayerBehaviour = FetchBatterBehaviourScript(player);
                 break;
             case PlayerFieldPositionEnum.PITCHER:
+                genericPlayerBehaviour = FetchPitcherBehaviourScript(player);
                 break;
             case PlayerFieldPositionEnum.RUNNER:
                 genericPlayerBehaviour = FetchRunnerBehaviourScript(player);
                 break;
             case PlayerFieldPositionEnum.CATCHER:
+                genericPlayerBehaviour = FetchCatcherBehaviourScript(player);
                 break;
             case PlayerFieldPositionEnum.FIRST_BASEMAN:
+                genericPlayerBehaviour = FetchFielderBehaviourScript(player);
                 break;
             case PlayerFieldPositionEnum.SECOND_BASEMAN:
                 break;
             case PlayerFieldPositionEnum.THIRD_BASEMAN:
+                genericPlayerBehaviour = FetchFielderBehaviourScript(player);
                 break;
             case PlayerFieldPositionEnum.SHORT_STOP:
                 break;
@@ -60,7 +75,6 @@ public class PlayerUtils : MonoBehaviour
             case PlayerFieldPositionEnum.RIGHT_FIELDER:
                 break;
             default:
-                genericPlayerBehaviour = FetchBatterBehaviourScript(player);
                 break;
         }
 
@@ -91,7 +105,7 @@ public class PlayerUtils : MonoBehaviour
                 isMoveAllowed = true;
                 break;
             case PlayerFieldPositionEnum.SECOND_BASEMAN:
-                isMoveAllowed = true;
+                isMoveAllowed = false;
                 break;
             case PlayerFieldPositionEnum.THIRD_BASEMAN:
                 isMoveAllowed = true;
@@ -116,10 +130,17 @@ public class PlayerUtils : MonoBehaviour
         return isMoveAllowed;
     }
 
-    public static bool IsCorrespondingPlayerPosition(GameObject player, PlayerFieldPositionEnum playerFieldPositionToTest)
+    public static bool IsCurrentPlayerPosition(GameObject player, PlayerFieldPositionEnum playerFieldPositionToTest)
     {
         PlayerStatus currentPlayerStatusScript = FetchPlayerStatusScript(player);
         return currentPlayerStatusScript.PlayerFieldPosition.Equals(playerFieldPositionToTest);
+    }
+
+    public static List<GameObject> GetRunnersOnField()
+    {
+        return GameObject.FindGameObjectsWithTag(TagsConstants.BASEBALL_PLAYER_TAG)
+            .Where(baseBallPlayer => IsCurrentPlayerPosition(baseBallPlayer, PlayerFieldPositionEnum.RUNNER))
+            .ToList();
     }
 
 }

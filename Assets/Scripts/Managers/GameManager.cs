@@ -9,6 +9,7 @@ public class GameManager : MonoBehaviour
     public Tilemap baseTileMap = null;
     public List<Tile> tilePool;
     public GameObject playerModel = null;
+    public GameObject ballModel = null;
 
     private Dictionary<string, TileTypeEnum> horizontalyPaintedDirtDictionary = new Dictionary<string, TileTypeEnum>();
     private Dictionary<string, TileTypeEnum> verticalyPaintedDirtDictionary = new Dictionary<string, TileTypeEnum>();
@@ -16,10 +17,12 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         this.BuildGameField();
-        this.SetPlayersLocation(PlayerEnum.PLAYER_1);
+        GameObject ball = Instantiate(ballModel, this.transform.position, this.transform.rotation);
+        ball.SetActive(false);
+        this.SetPlayersCharacteristics(PlayerEnum.PLAYER_1, ball);
     }
 
-    private void SetPlayersLocation(PlayerEnum playerId)
+    private void SetPlayersCharacteristics(PlayerEnum playerId, GameObject ball)
     {
         foreach (KeyValuePair<PlayerFieldPositionEnum, Vector3> entry in TeamUtils.playerTeamMenberPositionLocation)
         {
@@ -33,21 +36,55 @@ public class GameManager : MonoBehaviour
                 case PlayerFieldPositionEnum.BATTER:
                     playerStatus.BattingEfficiency = 10f;
                     playerStatus.BattingPower = 5;
+                    player.AddComponent<BatterBehaviour>();
                     break;
                 case PlayerFieldPositionEnum.PITCHER:
+                    ball.SetActive(true);
                     playerStatus.PitchEfficiency = 50f;
                     playerStatus.PitchingPower = 2;
                     playerStatus.PitchingEffect = 10f;
+                    BallController ballControllerScript = BallUtils.FetchBallControllerScript(ball);
+                    ballControllerScript.CurrentPitcher = player;
+                    player.AddComponent<PitcherBehaviour>();
                     break;
                 case PlayerFieldPositionEnum.RUNNER:
                     playerStatus.Speed = 2f;
+                    player.AddComponent<RunnerBehaviour>();
                     break;
                 case PlayerFieldPositionEnum.CATCHER:
                     playerStatus.CatchEfficiency = 100f;
+                    player.AddComponent<CatcherBehaviour>();
+                    break;
+                case PlayerFieldPositionEnum.FIRST_BASEMAN:
+                    playerStatus.CatchEfficiency = 80f;
+                    playerStatus.Speed = 2f;
+                    UpdatePlayerColliderSettings(player);
+                    player.AddComponent<FielderBehaviour>();
+                    break;
+                case PlayerFieldPositionEnum.THIRD_BASEMAN:
+                    playerStatus.CatchEfficiency = 80f;
+                    playerStatus.Speed = 2f;
+                    UpdatePlayerColliderSettings(player);
+                    player.AddComponent<FielderBehaviour>();
                     break;
             }
+
+            GenericPlayerBehaviour genericPlayerBehaviourScript = PlayerUtils.FetchCorrespondingPlayerBehaviourScript(player, playerStatus);
+            if (genericPlayerBehaviourScript != null)
+            {
+                genericPlayerBehaviourScript.FieldBall = ball;
+            }
+            
+
             TeamUtils.AddPlayerTeamMember(entry.Key, player, playerId);
         }
+    }
+
+    private void UpdatePlayerColliderSettings(GameObject player)
+    {
+        BoxCollider2D boxCollider = player.AddComponent<BoxCollider2D>();
+        boxCollider.isTrigger = true;
+        boxCollider.size = new Vector2(2, 15);
     }
 
     // Update is called once per frame
@@ -58,10 +95,10 @@ public class GameManager : MonoBehaviour
 
     private void BuildGameField()
     {
-        this.CalculateHorizontalyPaintedDirtPositions(HorizontalyPaintedDirtDictionary, FieldUtils.GetPrimeBaseTilePosition(), FieldUtils.GetSecondBaseTilePosition(), TileTypeEnum.HORIZONTAL_PAINTED_DIRT);
-        this.CalculateVerticalyPaintedDirtPositions(VerticalyPaintedDirtDictionary, FieldUtils.GetSecondBaseTilePosition(), FieldUtils.GetThirdBaseTilePosition(), TileTypeEnum.VERTICAL_PAINTED_DIRT);
-        this.CalculateHorizontalyPaintedDirtPositions(HorizontalyPaintedDirtDictionary, FieldUtils.GetThirdBaseTilePosition(), FieldUtils.GetFourthBaseTilePosition(), TileTypeEnum.HORIZONTAL_PAINTED_DIRT);
-        this.CalculateVerticalyPaintedDirtPositions(VerticalyPaintedDirtDictionary, FieldUtils.GetFourthBaseTilePosition(), FieldUtils.GetPrimeBaseTilePosition(), TileTypeEnum.VERTICAL_PAINTED_DIRT);
+        this.CalculateHorizontalyPaintedDirtPositions(HorizontalyPaintedDirtDictionary, FieldUtils.GetHomeBaseTilePosition(), FieldUtils.GetFirstBaseTilePosition(), TileTypeEnum.HORIZONTAL_PAINTED_DIRT);
+        this.CalculateVerticalyPaintedDirtPositions(VerticalyPaintedDirtDictionary, FieldUtils.GetFirstBaseTilePosition(), FieldUtils.GetSecondBaseTilePosition(), TileTypeEnum.VERTICAL_PAINTED_DIRT);
+        this.CalculateHorizontalyPaintedDirtPositions(HorizontalyPaintedDirtDictionary, FieldUtils.GetSecondBaseTilePosition(), FieldUtils.GetThirdBaseTilePosition(), TileTypeEnum.HORIZONTAL_PAINTED_DIRT);
+        this.CalculateVerticalyPaintedDirtPositions(VerticalyPaintedDirtDictionary, FieldUtils.GetThirdBaseTilePosition(), FieldUtils.GetHomeBaseTilePosition(), TileTypeEnum.VERTICAL_PAINTED_DIRT);
 
         for (int collumn = fieldTileMap.cellBounds.xMin; collumn < fieldTileMap.cellBounds.xMax; collumn++)
         {
@@ -117,10 +154,9 @@ public class GameManager : MonoBehaviour
         //float camHeight = this.GetCamHeight()/2;
         //float camWidth = this.GetCamWidth()/2;
         TileInformation tileInformation = new TileInformation();
-        tileInformation.TileIndex = (int)TileTypeEnum.GRASS;
-
+        
         string dictionarykey = this.BuildKey(collumn, line);
-
+        tileInformation.TileIndex = (int)TileTypeEnum.GRASS;
         if (HorizontalyPaintedDirtDictionary.ContainsKey(dictionarykey))
         {
             tileInformation.TileIndex = (int)HorizontalyPaintedDirtDictionary[dictionarykey];
@@ -166,25 +202,29 @@ public class GameManager : MonoBehaviour
 
         TileInformation tileInformation = new TileInformation();
         Vector2Int currentTileCoordinates = new Vector2Int(localPlace.x, localPlace.y);
-        Vector2Int middleBaseTilePosition = FieldUtils.GetMiddleBaseTilePosition();
-        Vector2Int primeBaseTilePosition = FieldUtils.GetPrimeBaseTilePosition();
+        Vector2Int pitcherBaseTilePosition = FieldUtils.GetPitcherBaseTilePosition();
+        Vector2Int homeBaseTilePosition = FieldUtils.GetHomeBaseTilePosition();
+        Vector2Int firstBaseTilePosition = FieldUtils.GetFirstBaseTilePosition();
         Vector2Int secondBaseTilePosition = FieldUtils.GetSecondBaseTilePosition();
         Vector2Int thirdBaseTilePosition = FieldUtils.GetThirdBaseTilePosition();
-        Vector2Int fourthBaseTilePosition = FieldUtils.GetFourthBaseTilePosition();
 
-        bool isMiddleBasePosition = this.CompareTilePosition(middleBaseTilePosition, currentTileCoordinates);
-        bool isPrimeBasePosition = this.CompareTilePosition(primeBaseTilePosition, currentTileCoordinates);
+        bool isPitcherBasePosition = this.CompareTilePosition(pitcherBaseTilePosition, currentTileCoordinates);
+        bool isHomeBasePosition = this.CompareTilePosition(homeBaseTilePosition, currentTileCoordinates);
+        bool isFirstBasePosition = this.CompareTilePosition(firstBaseTilePosition, currentTileCoordinates);
         bool isSecondBasePosition = this.CompareTilePosition(secondBaseTilePosition, currentTileCoordinates);
         bool isThirdBasePosition = this.CompareTilePosition(thirdBaseTilePosition, currentTileCoordinates);
-        bool isfourthBasePosition = this.CompareTilePosition(fourthBaseTilePosition, currentTileCoordinates);
 
-        if (isMiddleBasePosition)
+        if (isPitcherBasePosition)
         {
-            tileInformation.TileName = "";
+            tileInformation.TileName = NameConstants.PITCHER_BASE_NAME;
         }
-        else if (isPrimeBasePosition)
+        else if (isHomeBasePosition)
         {
-            tileInformation.TileName = NameConstants.PRIME_BASE_NAME;
+            tileInformation.TileName = NameConstants.HOME_BASE_NAME;
+        }
+        else if (isFirstBasePosition)
+        {
+            tileInformation.TileName = NameConstants.FIRST_BASE_NAME;
         }
         else if (isSecondBasePosition)
         {
@@ -194,12 +234,8 @@ public class GameManager : MonoBehaviour
         {
             tileInformation.TileName = NameConstants.THIRD_BASE_NAME;
         }
-        else if (isfourthBasePosition)
-        {
-            tileInformation.TileName = NameConstants.FOURTH_BASE_NAME;
-        }
 
-        if (isMiddleBasePosition || isPrimeBasePosition || isSecondBasePosition || isThirdBasePosition || isfourthBasePosition)
+        if (isPitcherBasePosition || isHomeBasePosition || isFirstBasePosition || isSecondBasePosition || isThirdBasePosition)
         {
             tileInformation.TileIndex = (int)TileTypeEnum.BASE;
             return tileInformation;
@@ -215,7 +251,7 @@ public class GameManager : MonoBehaviour
 
         float slope = 0;
 
-        if (slopeDenominator != 0 || slopeDenominator != 0)
+        if (slopeDenominator != 0)
         {
             slope = slopeNumerator / slopeDenominator;
         }
@@ -239,7 +275,7 @@ public class GameManager : MonoBehaviour
 
         float slope = 0;
 
-        if (slopeDenominator != 0 || slopeDenominator != 0)
+        if (slopeDenominator != 0)
         {
             slope = slopeNumerator / slopeDenominator;
         }

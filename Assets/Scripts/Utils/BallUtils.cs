@@ -11,6 +11,6 @@ public class BallUtils
 
     public static GameObject FetchBallPitcherGameObject(GameObject ball)
     {
-        return FetchBallControllerScript(ball).Pitcher;
+        return FetchBallControllerScript(ball).CurrentPitcher;
     }
 }

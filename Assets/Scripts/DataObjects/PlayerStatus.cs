@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerStatus
+public class PlayerStatus : MonoBehaviour
 {
     private PlayerFieldPositionEnum playerFieldPosition;
     private string playerName;

@@ -6,6 +6,11 @@ public class ActionCalculationUtils
 {
     public static float MIN_PERCENTAGE_VALUE = 0f;
     public static float MAX_PERCENTAGE_VALUE = 100f;
+    public static int ISOMETRIC_ANGLE_FIX = 45;
+    public static List<int> criticalFactorList = new List<int>()
+    {
+        2,3,4,5
+    };
 
     public static float CalculatePitchSuccessRate(GameObject pitcherGameObject, GameObject opponentGameObject)
     {
@@ -53,9 +58,41 @@ public class ActionCalculationUtils
         return AdjustResult(result);
     }
 
-    private static float AdjustResult(float result)
+    public static List<Vector2Int> CalculateBallFallPositionList(GameObject playerInvolved, int angleMinRange, int angleMaxRange, int angleStep, bool Iscritical)
     {
-        return Mathf.Clamp(result, MIN_PERCENTAGE_VALUE, MAX_PERCENTAGE_VALUE);
+        List<Vector2Int> ballPositionList = new List<Vector2Int>();
+        int x = 0;
+        int y = 0;
+        int criticalFactor = 1;
+        PlayerStatus playerInvolvedStatus = PlayerUtils.FetchPlayerStatusScript(playerInvolved);
+        Vector2Int playerInvolvedPosition = FieldUtils.GetGameObjectTilePositionOnField(playerInvolved);
+        int property = playerInvolvedStatus.BattingPower;
+
+        /*
+        parametric circle equation : 
+        x = R * cos(theta) + a
+        y = R * sin(theta) + b*/
+
+        /*
+         pi => 180
+         ? => x
+         */
+        
+        if (Iscritical)
+        {
+            criticalFactor = CalculateCriticalFactor();
+        }
+
+        for (int angle = angleMinRange; angle < angleMaxRange - angleStep; angle = angle + angleStep)
+        {
+            float theta = ConvertDegreeAngleToRadianAngle(GetFixedIsometricAngle(angle));
+            x = (int)(property * criticalFactor * Mathf.Cos(theta) + playerInvolvedPosition.x);
+            y = (int)(property * criticalFactor * Mathf.Sin(theta) + playerInvolvedPosition.y);
+
+            ballPositionList.Add(new Vector2Int(x, y));
+        }
+
+        return ballPositionList;
     }
 
     public static bool HasActionSucceeded(float sucessRate)
@@ -64,5 +101,25 @@ public class ActionCalculationUtils
         Debug.Log("randomValue = " + randomValue);
         Debug.Log("Action has succeeded ?? => " + (randomValue <= (sucessRate / 100)));
         return randomValue <= (sucessRate / 100);
+    }
+
+    private static int CalculateCriticalFactor()
+    {
+        return criticalFactorList[Random.Range(0, criticalFactorList.Count - 1)];  
+    }
+
+    private static float ConvertDegreeAngleToRadianAngle(int angleToConvert)
+    {
+        return angleToConvert * Mathf.Deg2Rad;
+    }
+
+    private static int GetFixedIsometricAngle(int angle)
+    {
+        return angle - ISOMETRIC_ANGLE_FIX;
+    }
+
+    private static float AdjustResult(float result)
+    {
+        return Mathf.Clamp(result, MIN_PERCENTAGE_VALUE, MAX_PERCENTAGE_VALUE);
     }
 }

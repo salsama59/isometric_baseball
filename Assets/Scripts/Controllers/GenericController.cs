@@ -16,6 +16,7 @@ public abstract class GenericController : MonoBehaviour
     private bool isMoving = false;
     private IsometricCharacterRenderer isoRenderer;
     private Nullable<Vector3> target;
+    private bool isMoveCanceled;
 
     protected IEnumerator Move(Vector3 startPosition, Vector3 endPosition)
     {
@@ -33,6 +34,12 @@ public abstract class GenericController : MonoBehaviour
 
         while (t < 1f)
         {
+
+            if (IsMoveCanceled)
+            {
+                break;
+            }
+
             t += Time.deltaTime * (moveSpeed / gridSize) * factor;
             transform.position = Vector3.Lerp(startPosition, endPosition, t);
 
@@ -65,6 +72,7 @@ public abstract class GenericController : MonoBehaviour
             yield return null;
         }
 
+        IsMoveCanceled = false;
         IsMoving = false;
         yield return 0;
     }
@@ -72,4 +80,5 @@ public abstract class GenericController : MonoBehaviour
     public bool IsMoving { get => isMoving; set => isMoving = value; }
     public IsometricCharacterRenderer IsoRenderer { get => isoRenderer; set => isoRenderer = value; }
     public Nullable<Vector3> Target { get => target; set => target = value; }
+    public bool IsMoveCanceled { get => isMoveCanceled; set => isMoveCanceled = value; }
 }

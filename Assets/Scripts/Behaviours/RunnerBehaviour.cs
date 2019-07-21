@@ -6,6 +6,11 @@ using System;
 
 public class RunnerBehaviour : GenericPlayerBehaviour
 {
+    private bool hasReachedFirstBase = false;
+    private bool hasReachedSecondBase = false;
+    private bool hasReachedThirdBase = false;
+    private bool hasReachedHomeBase = false;
+
     public override void Awake()
     {
         base.Awake();
@@ -43,47 +48,64 @@ public class RunnerBehaviour : GenericPlayerBehaviour
     {
         Nullable<Vector3> targetPosition = new Nullable<Vector3>();
         targetPosition = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetFirstBaseTilePosition());
-        this.CurrentBase = BaseEnum.PRIME_BASE;
-        this.NextBase = BaseEnum.SECOND_BASE;
+        this.CurrentBase = BaseEnum.HOME_BASE;
+        this.NextBase = BaseEnum.FIRST_BASE;
         Target = targetPosition;
     }
 
-    public void CalculateRunnerColliderInterraction()
+    public void CalculateRunnerColliderInterraction(BaseEnum baseReached)
     {
-        RunnerBehaviour runnerBehaviourScript = PlayerUtils.FetchRunnerBehaviourScript(this.gameObject);
 
-        BaseEnum nextBase = runnerBehaviourScript.NextBase;
-        runnerBehaviourScript.CurrentBase = nextBase;
+        if (baseReached == BaseEnum.HOME_BASE && !this.HasPassedThroughThreeFirstBases())
+        {
+            return;
+        }
+        
+        this.CurrentBase = baseReached;
 
         PlayerStatus playerStatusScript = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
 
-        switch (nextBase)
+        switch (baseReached)
         {
-            case BaseEnum.PRIME_BASE:
-                Debug.Log("Get on FIRST BASE");
+            case BaseEnum.HOME_BASE:
+                Debug.Log("Get on HOME BASE");
                 Debug.Log("WIN ONE POINT !!!");
-                runnerBehaviourScript.Target = null;
-                runnerBehaviourScript.NextBase = runnerBehaviourScript.CurrentBase;
+                this.Target = null;
+                this.NextBase = this.CurrentBase;
                 playerStatusScript.IsAllowedToMove = false;
+                this.HasReachedHomeBase = true;
+                break;
+            case BaseEnum.FIRST_BASE:
+                Debug.Log("Get on FIRST BASE");
+                this.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetSecondBaseTilePosition());
+                this.NextBase = BaseEnum.SECOND_BASE;
+                this.HasReachedFirstBase = true;
                 break;
             case BaseEnum.SECOND_BASE:
                 Debug.Log("Get on SECOND BASE");
-                runnerBehaviourScript.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetSecondBaseTilePosition());
-                runnerBehaviourScript.NextBase = BaseEnum.THIRD_BASE;
+                this.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetThirdBaseTilePosition());
+                this.NextBase = BaseEnum.THIRD_BASE;
+                this.HasReachedSecondBase = true;
                 break;
             case BaseEnum.THIRD_BASE:
                 Debug.Log("Get on THIRD BASE");
-                runnerBehaviourScript.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetThirdBaseTilePosition());
-                runnerBehaviourScript.NextBase = BaseEnum.FOURTH_BASE;
-                break;
-            case BaseEnum.FOURTH_BASE:
-                Debug.Log("Get on FOURTH BASE");
-                runnerBehaviourScript.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetHomeBaseTilePosition());
-                runnerBehaviourScript.NextBase = BaseEnum.PRIME_BASE;
+                this.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetHomeBaseTilePosition());
+                this.NextBase = BaseEnum.HOME_BASE;
+                this.HasReachedThirdBase = true;
                 break;
             default:
                 Debug.Log("DO NOT KNOW WHAT HAPPEN");
                 break;
         }
     }
+
+    private bool HasPassedThroughThreeFirstBases()
+    {
+        return this.HasReachedFirstBase && this.HasReachedSecondBase && this.HasReachedThirdBase;
+    }
+
+    public bool HasReachedFirstBase { get => hasReachedFirstBase; set => hasReachedFirstBase = value; }
+    public bool HasReachedSecondBase { get => hasReachedSecondBase; set => hasReachedSecondBase = value; }
+    public bool HasReachedThirdBase { get => hasReachedThirdBase; set => hasReachedThirdBase = value; }
+    public bool HasReachedHomeBase { get => hasReachedHomeBase; set => hasReachedHomeBase = value; }
 }

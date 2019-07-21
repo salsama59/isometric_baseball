@@ -17,11 +17,7 @@ public class TeamPlayerCollider : MonoBehaviour
             BallController ballControllerScript = BallUtils.FetchBallControllerScript(ballGameObject);
             GameObject pitcherGameObject = ballControllerScript.CurrentPitcher;
 
-            if (PlayerUtils.IsCurrentPlayerPosition(this.gameObject, PlayerFieldPositionEnum.BATTER))
-            {
-                ((BatterBehaviour)genericPlayerBehaviourScript).CalculateBatterColliderInterraction(pitcherGameObject, ballControllerScript, playerStatusScript);
-            }
-            else if (PlayerUtils.IsCurrentPlayerPosition(this.gameObject, PlayerFieldPositionEnum.CATCHER))
+            if (PlayerUtils.IsCurrentPlayerPosition(this.gameObject, PlayerFieldPositionEnum.CATCHER))
             {
                 ((CatcherBehaviour)genericPlayerBehaviourScript).CalculateCatcherColliderInterraction(pitcherGameObject, ballGameObject, ballControllerScript);
             }
@@ -38,15 +34,8 @@ public class TeamPlayerCollider : MonoBehaviour
         {
             if (PlayerUtils.IsCurrentPlayerPosition(this.gameObject, PlayerFieldPositionEnum.RUNNER))
             {
-                ContactPoint2D contactPoint2D = collision.GetContact(0);
-                Tilemap currentTileMap = contactPoint2D.collider.GetComponent<Tilemap>();
-                Grid tileMapGrid = currentTileMap.layoutGrid;
-                Vector3 collisionContactPosition = contactPoint2D.collider.transform.position;
-                Vector3Int cellPosition = tileMapGrid.WorldToCell(collisionContactPosition);
-
-                TileBase currentCollidedTile = currentTileMap.GetTile(cellPosition);
-
-                if (!IsBaseTile(currentCollidedTile.name))
+                
+                if (!IsBaseTile(collision.gameObject.name))
                 {
                     return;
                 }
@@ -61,7 +50,7 @@ public class TeamPlayerCollider : MonoBehaviour
                     return;
                 }
 
-                ((RunnerBehaviour)genericPlayerBehaviourScript).CalculateRunnerColliderInterraction();
+                ((RunnerBehaviour)genericPlayerBehaviourScript).CalculateRunnerColliderInterraction(FieldUtils.GetTileEnumFromName(collision.gameObject.name));
             }
         }
     }

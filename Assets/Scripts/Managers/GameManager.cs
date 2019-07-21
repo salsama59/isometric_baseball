@@ -10,6 +10,8 @@ public class GameManager : MonoBehaviour
     public List<Tile> tilePool;
     public GameObject playerModel = null;
     public GameObject ballModel = null;
+    public GameObject batModel = null;
+    public GameObject baseModel = null;
 
     private Dictionary<string, TileTypeEnum> horizontalyPaintedDirtDictionary = new Dictionary<string, TileTypeEnum>();
     private Dictionary<string, TileTypeEnum> verticalyPaintedDirtDictionary = new Dictionary<string, TileTypeEnum>();
@@ -37,6 +39,8 @@ public class GameManager : MonoBehaviour
                     playerStatus.BattingEfficiency = 10f;
                     playerStatus.BattingPower = 5;
                     player.AddComponent<BatterBehaviour>();
+                    GameObject bat = Instantiate(batModel, FieldUtils.GetBatCorrectPosition(entry.Value), Quaternion.Euler(0f, 0f, -70f));
+                    bat.transform.parent = player.transform;
                     break;
                 case PlayerFieldPositionEnum.PITCHER:
                     ball.SetActive(true);
@@ -110,8 +114,8 @@ public class GameManager : MonoBehaviour
                     TileInformation tileInformation = this.GetFieldTileInformation(localPlace, fieldTileMap, collumn, line);
                     int tilePoolIndex = tileInformation.TileIndex;
                     fieldTileMap.SetTile(localPlace, tilePool[tilePoolIndex]);
-                    TileBase tileBase = fieldTileMap.GetTile(localPlace);
-                    tileBase.name = tileInformation.TileName;
+                    //TileBase tileBase = fieldTileMap.GetTile(localPlace);
+                    //tileBase.name = tileInformation.TileName;
                 }
                 else
                 {
@@ -129,24 +133,60 @@ public class GameManager : MonoBehaviour
                 {
                     TileInformation tileInformation = this.GetBaseTileInformation(localPlace, baseTileMap, collumn, line);
 
-                    if (tileInformation != null)
+                    if(tileInformation != null)
                     {
-                        int tilePoolIndex = tileInformation.TileIndex;
+                        Vector3 basePosition = FieldUtils.GetTileCenterPositionInGameWorld(new Vector2Int(localPlace.x, localPlace.y));
+                        GameObject baseGameObject = Instantiate(baseModel, basePosition, Quaternion.identity);
+                        baseGameObject.name = tileInformation.TileName;
+                        baseGameObject.tag = this.GetBaseTagFromName(tileInformation.TileName);
+                    }
+                    
+                    /*if (tileInformation != null)
+                    {
+                        //int tilePoolIndex = tileInformation.TileIndex;
                         baseTileMap.SetTile(localPlace, tilePool[tilePoolIndex]);
-                        TileBase tileBase = baseTileMap.GetTile(localPlace);
-                        tileBase.name = tileInformation.TileName;
+                        //TileBase tileBase = baseTileMap.GetTile(localPlace);
+                        //tileBase.name = tileInformation.TileName;
                         if (tilePoolIndex == (int)TileTypeEnum.BASE)
                         {
                             baseTileMap.SetColliderType(localPlace, Tile.ColliderType.Sprite);
                         }
                     }
                     else
-                    {
-                        baseTileMap.SetTile(localPlace, null);
-                    }
+                    {*/
+                    baseTileMap.SetTile(localPlace, null);
+                    //}
                 }
             }
         }
+    }
+
+    private string GetBaseTagFromName(string baseName)
+    {
+        string tagValue = TagsConstants.HOME_BASE_TAG;
+
+        if (baseName.Equals(NameConstants.HOME_BASE_NAME))
+        {
+            tagValue = TagsConstants.HOME_BASE_TAG;
+        }
+        else if (baseName.Equals(NameConstants.FIRST_BASE_NAME))
+        {
+            tagValue = TagsConstants.FIRST_BASE_TAG;
+        }
+        else if (baseName.Equals(NameConstants.SECOND_BASE_NAME))
+        {
+            tagValue = TagsConstants.SECOND_BASE_TAG;
+        }
+        else if (baseName.Equals(NameConstants.THIRD_BASE_NAME))
+        {
+            tagValue = TagsConstants.THIRD_BASE_TAG;
+        }
+        else if (baseName.Equals(NameConstants.PITCHER_BASE_NAME))
+        {
+            tagValue = TagsConstants.PITCHER_BASE_TAG;
+        }
+
+        return tagValue;
     }
 
     private TileInformation GetFieldTileInformation(Vector3Int localPlace, Tilemap tilemap, int collumn, int line)
@@ -208,11 +248,11 @@ public class GameManager : MonoBehaviour
         Vector2Int secondBaseTilePosition = FieldUtils.GetSecondBaseTilePosition();
         Vector2Int thirdBaseTilePosition = FieldUtils.GetThirdBaseTilePosition();
 
-        bool isPitcherBasePosition = this.CompareTilePosition(pitcherBaseTilePosition, currentTileCoordinates);
-        bool isHomeBasePosition = this.CompareTilePosition(homeBaseTilePosition, currentTileCoordinates);
-        bool isFirstBasePosition = this.CompareTilePosition(firstBaseTilePosition, currentTileCoordinates);
-        bool isSecondBasePosition = this.CompareTilePosition(secondBaseTilePosition, currentTileCoordinates);
-        bool isThirdBasePosition = this.CompareTilePosition(thirdBaseTilePosition, currentTileCoordinates);
+        bool isPitcherBasePosition = FieldUtils.CompareTilePosition(pitcherBaseTilePosition, currentTileCoordinates);
+        bool isHomeBasePosition = FieldUtils.CompareTilePosition(homeBaseTilePosition, currentTileCoordinates);
+        bool isFirstBasePosition = FieldUtils.CompareTilePosition(firstBaseTilePosition, currentTileCoordinates);
+        bool isSecondBasePosition = FieldUtils.CompareTilePosition(secondBaseTilePosition, currentTileCoordinates);
+        bool isThirdBasePosition = FieldUtils.CompareTilePosition(thirdBaseTilePosition, currentTileCoordinates);
 
         if (isPitcherBasePosition)
         {
@@ -354,14 +394,6 @@ public class GameManager : MonoBehaviour
     private string BuildKey(int collumn, int line)
     {
         return "x:" + collumn + "y:" + line;
-    }
-
-    private bool CompareTilePosition(Vector2Int firstTilePosition, Vector2Int secondTilePosition)
-    {
-        bool isXpositionEquals = firstTilePosition.x == secondTilePosition.x;
-        bool isYpositionEquals = firstTilePosition.y == secondTilePosition.y;
-
-        return isXpositionEquals && isYpositionEquals;
     }
 
     private float GetCamHeight()

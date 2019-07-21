@@ -11424,6 +11424,10 @@ MonoBehaviour:
     type: 3}
   ballModel: {fileID: 5620586050490733030, guid: 767ca0324cc8b4b498cf9d1a5cd41d1a,
     type: 3}
+  batModel: {fileID: 6034708160599703306, guid: fb7651eced1ec754ea3a188d9ba6a61f,
+    type: 3}
+  baseModel: {fileID: 1280159299384813743, guid: 604a6db8de9c1ff4e9c4d44510cb899c,
+    type: 3}
 --- !u!4 &814905037
 Transform:
   m_ObjectHideFlags: 0

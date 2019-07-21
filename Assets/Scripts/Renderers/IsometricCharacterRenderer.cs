@@ -36,12 +36,13 @@ public class IsometricCharacterRenderer : MonoBehaviour
             //use DirectionToIndex to get the index of the slice from the direction vector
             //save the answer to lastDirection
             directionArray = runDirections;
-            lastDirection = AnimationUtils.DirectionToIndex(direction, 8);
+            LastDirection = AnimationUtils.DirectionToIndex(direction, 8);
         }
 
         //tell the animator to play the requested state
-        Animator.Play(directionArray[lastDirection]);
+        Animator.Play(directionArray[LastDirection]);
     }
 
     public Animator Animator { get => animator; set => animator = value; }
+    public int LastDirection { get => lastDirection; set => lastDirection = value; }
 }

@@ -7,6 +7,12 @@ TagManager:
   - GameManager
   - BaseballPlayer
   - Ball
+  - BaseballBat
+  - homeBase
+  - firstBase
+  - secondBase
+  - thirdBase
+  - pitcherBase
   layers:
   - Default
   - TransparentFX

@@ -6,7 +6,7 @@ public class TeamUtils : MonoBehaviour
 {
     public static int teamSize = 9;
     public static Dictionary<PlayerFieldPositionEnum, Vector3> playerTeamMenberPositionLocation = new Dictionary<PlayerFieldPositionEnum, Vector3>() {
-        {PlayerFieldPositionEnum.BATTER,  FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetHomeBaseTilePosition())},
+        {PlayerFieldPositionEnum.BATTER,  FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetBatterTilePosition())},
         {PlayerFieldPositionEnum.PITCHER,  FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetPitcherBaseTilePosition())},
         {PlayerFieldPositionEnum.CATCHER,  FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetCatcherZonePosition())},
         {PlayerFieldPositionEnum.FIRST_BASEMAN,  FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetFirstBaseTilePosition())},

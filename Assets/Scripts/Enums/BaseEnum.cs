@@ -1,8 +1,8 @@
 ﻿public enum BaseEnum
 {
-    PRIME_BASE,
+    HOME_BASE,
+    FIRST_BASE,
     SECOND_BASE,
     THIRD_BASE,
-    FOURTH_BASE,
-    MIDDLE_BASE
+    PITCHER_BASE
 }

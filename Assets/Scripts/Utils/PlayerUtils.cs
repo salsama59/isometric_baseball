@@ -143,4 +143,11 @@ public class PlayerUtils : MonoBehaviour
             .ToList();
     }
 
+    public static GameObject GetPlayerBatGameObject(GameObject player)
+    {
+        return GameObject.FindGameObjectsWithTag(TagsConstants.BASEBALL_BAT_TAG)
+            .Where(bat => bat.transform.parent.gameObject == player)
+            .First();
+    }
+
 }

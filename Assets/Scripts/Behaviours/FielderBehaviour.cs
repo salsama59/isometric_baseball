@@ -74,5 +74,6 @@ public class FielderBehaviour : GenericPlayerBehaviour
         genericPlayerBehaviourScript.HasSpottedBall = true;
         playerStatus.IsAllowedToMove = true;
         genericPlayerBehaviourScript.Target = ballGameObject.transform.position;
+        this.transform.rotation = Quaternion.identity;
     }
 }

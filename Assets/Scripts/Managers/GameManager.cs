@@ -85,6 +85,8 @@ public class GameManager : MonoBehaviour
                     break;
             }
 
+            player.name = playerStatus.PlayerFieldPosition.ToString();
+
             GenericPlayerBehaviour genericPlayerBehaviourScript = PlayerUtils.FetchCorrespondingPlayerBehaviourScript(player, playerStatus);
             if (genericPlayerBehaviourScript != null)
             {

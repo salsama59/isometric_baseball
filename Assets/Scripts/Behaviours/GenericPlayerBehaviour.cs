@@ -14,7 +14,7 @@ public abstract class GenericPlayerBehaviour : MonoBehaviour
     private bool hasSpottedBall;
     private GameObject targetPlayerToTagOut;
     private bool isHoldingBall;
-    private float moveSpeed = 0.2f;
+    private float moveSpeed = 1.5f;
     private bool isMoving = false;
     private IsometricCharacterRenderer isoRenderer;
     private Nullable<Vector3> target;
@@ -31,7 +31,7 @@ public abstract class GenericPlayerBehaviour : MonoBehaviour
         this.enabled = true;
     }
 
-    protected IEnumerator Move(Vector3 startPosition, Vector3 endPosition)
+    protected IEnumerator MoveObject(Vector3 startPosition, Vector3 endPosition)
     {
         IsMoving = true;
         float interpolationPercentage = 0;
@@ -81,48 +81,34 @@ public abstract class GenericPlayerBehaviour : MonoBehaviour
         yield return 0;
     }
 
-    protected IEnumerator MovePlayer(Vector3 startPosition)
+    protected void MovePlayer()
     {
-        IsMoving = true;
-        float interpolationPercentage = 0;
+        transform.position = Vector3.MoveTowards(transform.position, Target.Value, this.MoveSpeed * Time.deltaTime);
 
-        while (interpolationPercentage < 1f)
+        if (IsoRenderer != null)
         {
+            Vector2 direction = new Vector2();
 
-            interpolationPercentage += Time.deltaTime * (MoveSpeed / FieldUtils.GRID_SIZE);
-            transform.position = Vector3.Lerp(startPosition, Target.Value, interpolationPercentage);
-
-            if (IsoRenderer != null)
+            if (transform.position.x < Target.Value.x)
             {
-                Vector2 direction = new Vector2();
-
-                if (startPosition.x < Target.Value.x)
-                {
-                    direction.x = 1;
-                }
-                else
-                {
-                    direction.x = -1;
-                }
-
-                if (startPosition.y < Target.Value.y)
-                {
-                    direction.y = 1;
-                }
-                else
-                {
-                    direction.y = -1;
-                }
-
-                IsoRenderer.SetDirection(direction);
-
+                direction.x = 1;
+            }
+            else
+            {
+                direction.x = -1;
             }
 
-            yield return null;
-        }
+            if (transform.position.y < Target.Value.y)
+            {
+                direction.y = 1;
+            }
+            else
+            {
+                direction.y = -1;
+            }
 
-        IsMoving = false;
-        yield return 0;
+            IsoRenderer.SetDirection(direction);
+        }
     }
 
     public bool IsMoving { get => isMoving; set => isMoving = value; }

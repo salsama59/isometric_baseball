@@ -13,33 +13,27 @@ public class FielderBehaviour : GenericPlayerBehaviour
 
     public void Update()
     {
-        if (!IsMoving)
+        if (TargetPlayerToTagOut != null && (PlayerUtils.IsCurrentPlayerPosition(this.gameObject, PlayerFieldPositionEnum.FIRST_BASEMAN) || PlayerUtils.IsCurrentPlayerPosition(this.gameObject, PlayerFieldPositionEnum.THIRD_BASEMAN)))
         {
-            if (Target.HasValue && Target.Value != this.transform.position)
-            {
-                StartCoroutine(MovePlayer(transform.position));
-                this.IsPrepared = true;
-            }
-            else
-            {
-                PlayerStatus playerStatus = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
-                if (playerStatus.IsAllowedToMove)
-                {
-                    this.Act(playerStatus);
-                }
-            }
+            Target = TargetPlayerToTagOut.transform.position;
+        }
+
+        if (Target.HasValue && Target.Value != this.transform.position)
+        {
+            MovePlayer();
+            this.IsPrepared = true;
         }
         else
         {
-            if (TargetPlayerToTagOut != null && (PlayerUtils.IsCurrentPlayerPosition(this.gameObject, PlayerFieldPositionEnum.FIRST_BASEMAN) || PlayerUtils.IsCurrentPlayerPosition(this.gameObject, PlayerFieldPositionEnum.THIRD_BASEMAN)))
+            PlayerStatus playerStatus = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
+            if (playerStatus.IsAllowedToMove)
             {
-                Target = TargetPlayerToTagOut.transform.position;
-
+                this.InitiateFielderAction(playerStatus);
             }
         }
     }
 
-    private void Act(PlayerStatus playerStatus)
+    private void InitiateFielderAction(PlayerStatus playerStatus)
     {
         Nullable<Vector3> targetPosition = new Nullable<Vector3>();
 
@@ -49,6 +43,7 @@ public class FielderBehaviour : GenericPlayerBehaviour
         }
         else if (!FieldBall.activeInHierarchy && IsHoldingBall)
         {
+            //TODO find the nearest runner on field
             List<GameObject> runners = PlayerUtils.GetRunnersOnField();
             TargetPlayerToTagOut = runners.First();
             targetPosition = TargetPlayerToTagOut.transform.position;
@@ -67,6 +62,7 @@ public class FielderBehaviour : GenericPlayerBehaviour
 
     public void CalculateFielderColliderInterraction(GameObject ballGameObject, BallController ballControllerScript, GenericPlayerBehaviour genericPlayerBehaviourScript)
     {
+        ballGameObject.transform.SetParent(this.gameObject.transform);
         ballGameObject.SetActive(false);
         ballControllerScript.CurrentHolder = this.gameObject;
         genericPlayerBehaviourScript.IsHoldingBall = true;
@@ -78,5 +74,6 @@ public class FielderBehaviour : GenericPlayerBehaviour
         genericPlayerBehaviourScript.HasSpottedBall = true;
         playerStatus.IsAllowedToMove = true;
         genericPlayerBehaviourScript.Target = ballGameObject.transform.position;
+        this.transform.rotation = Quaternion.identity;
     }
 }

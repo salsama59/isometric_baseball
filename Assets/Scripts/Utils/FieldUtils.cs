@@ -52,6 +52,22 @@ public class FieldUtils
         return new Vector2Int(xTilePosition, yTilePosition);
     }
 
+    public static Vector2Int GetSecondBasemanTilePosition()
+    {
+        Tilemap tileMap = FetchFieldTileMap();
+        int xTilePosition = tileMap.cellBounds.xMax * 6 / 9;
+        int yTilePosition = tileMap.cellBounds.yMax * 1 / 4;
+        return new Vector2Int(xTilePosition, yTilePosition);
+    }
+
+    public static Vector2Int GetShortStopTilePosition()
+    {
+        Tilemap tileMap = FetchFieldTileMap();
+        int xTilePosition = tileMap.cellBounds.xMax * 1 / 4;
+        int yTilePosition = (tileMap.cellBounds.yMax + 8) / 2;
+        return new Vector2Int(xTilePosition, yTilePosition);
+    }
+
     public static Vector2Int GetCathcherOutBallZonePosition()
     {
         Tilemap tileMap = FetchFieldTileMap();

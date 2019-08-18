@@ -71,6 +71,18 @@ public class GameManager : MonoBehaviour
                     UpdatePlayerColliderSettings(player);
                     player.AddComponent<FielderBehaviour>();
                     break;
+                case PlayerFieldPositionEnum.SECOND_BASEMAN:
+                    playerStatus.CatchEfficiency = 80f;
+                    playerStatus.Speed = 2f;
+                    UpdatePlayerColliderSettings(player);
+                    player.AddComponent<FielderBehaviour>();
+                    break;
+                case PlayerFieldPositionEnum.SHORT_STOP:
+                    playerStatus.CatchEfficiency = 80f;
+                    playerStatus.Speed = 2f;
+                    UpdatePlayerColliderSettings(player);
+                    player.AddComponent<FielderBehaviour>();
+                    break;
             }
 
             GenericPlayerBehaviour genericPlayerBehaviourScript = PlayerUtils.FetchCorrespondingPlayerBehaviourScript(player, playerStatus);

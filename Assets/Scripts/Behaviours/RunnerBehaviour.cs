@@ -18,33 +18,22 @@ public class RunnerBehaviour : GenericPlayerBehaviour
 
     public void Update()
     {
-        if (!IsMoving)
+        if (Target.HasValue && Target.Value != this.transform.position)
         {
-            if (Target.HasValue && Target.Value != this.transform.position)
-            {
-                StartCoroutine(Move(transform.position, Target.Value));
-                this.IsPrepared = true;
-            }
-            else
-            {
-                PlayerStatus playerStatus = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
-                if (playerStatus.IsAllowedToMove)
-                {
-                    this.Act(playerStatus);
-                }
-            }
+            MovePlayer();
+            this.IsPrepared = true;
         }
         else
         {
-            if (TargetPlayerToTagOut != null && (PlayerUtils.IsCurrentPlayerPosition(this.gameObject, PlayerFieldPositionEnum.FIRST_BASEMAN) || PlayerUtils.IsCurrentPlayerPosition(this.gameObject, PlayerFieldPositionEnum.THIRD_BASEMAN)))
+            PlayerStatus playerStatus = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
+            if (playerStatus.IsAllowedToMove)
             {
-                Target = TargetPlayerToTagOut.transform.position;
-
+                this.InitiateRunnerAction(playerStatus);
             }
         }
     }
 
-    private void Act(PlayerStatus playerStatus)
+    private void InitiateRunnerAction(PlayerStatus playerStatus)
     {
         Nullable<Vector3> targetPosition = new Nullable<Vector3>();
         targetPosition = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetFirstBaseTilePosition());

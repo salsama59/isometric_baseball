@@ -62,17 +62,22 @@ public class PlayerUtils : MonoBehaviour
                 genericPlayerBehaviour = FetchFielderBehaviourScript(player);
                 break;
             case PlayerFieldPositionEnum.SECOND_BASEMAN:
+                genericPlayerBehaviour = FetchFielderBehaviourScript(player);
                 break;
             case PlayerFieldPositionEnum.THIRD_BASEMAN:
                 genericPlayerBehaviour = FetchFielderBehaviourScript(player);
                 break;
             case PlayerFieldPositionEnum.SHORT_STOP:
+                genericPlayerBehaviour = FetchFielderBehaviourScript(player);
                 break;
             case PlayerFieldPositionEnum.LEFT_FIELDER:
+                genericPlayerBehaviour = FetchFielderBehaviourScript(player);
                 break;
             case PlayerFieldPositionEnum.CENTER_FIELDER:
+                genericPlayerBehaviour = FetchFielderBehaviourScript(player);
                 break;
             case PlayerFieldPositionEnum.RIGHT_FIELDER:
+                genericPlayerBehaviour = FetchFielderBehaviourScript(player);
                 break;
             default:
                 break;
@@ -105,7 +110,7 @@ public class PlayerUtils : MonoBehaviour
                 isMoveAllowed = true;
                 break;
             case PlayerFieldPositionEnum.SECOND_BASEMAN:
-                isMoveAllowed = false;
+                isMoveAllowed = true;
                 break;
             case PlayerFieldPositionEnum.THIRD_BASEMAN:
                 isMoveAllowed = true;

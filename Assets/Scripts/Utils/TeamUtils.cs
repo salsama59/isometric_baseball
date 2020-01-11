@@ -10,7 +10,12 @@ public class TeamUtils : MonoBehaviour
         {PlayerFieldPositionEnum.PITCHER,  FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetPitcherBaseTilePosition())},
         {PlayerFieldPositionEnum.CATCHER,  FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetCatcherZonePosition())},
         {PlayerFieldPositionEnum.FIRST_BASEMAN,  FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetFirstBaseTilePosition())},
-        {PlayerFieldPositionEnum.THIRD_BASEMAN,  FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetThirdBaseTilePosition())}
+        {PlayerFieldPositionEnum.THIRD_BASEMAN,  FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetThirdBaseTilePosition())},
+        {PlayerFieldPositionEnum.SECOND_BASEMAN,  FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetSecondBasemanTilePosition())},
+        {PlayerFieldPositionEnum.SHORT_STOP,  FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetShortStopTilePosition())},
+        {PlayerFieldPositionEnum.LEFT_FIELDER,  FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetLeftFielderTilePosition())},
+        {PlayerFieldPositionEnum.RIGHT_FIELDER,  FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetRightFielderTilePosition())},
+        {PlayerFieldPositionEnum.CENTER_FIELDER,  FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetCenterFielderTilePosition())}
     };
     private static Dictionary<int, GameObject> player1Team = new Dictionary<int, GameObject>();
     private static Dictionary<int, GameObject> player2Team = new Dictionary<int, GameObject>();

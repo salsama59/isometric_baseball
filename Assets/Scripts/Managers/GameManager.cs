@@ -5,6 +5,10 @@ using UnityEngine.Tilemaps;
 
 public class GameManager : MonoBehaviour
 {
+    private static int columnMaximum = 10;
+    private static int columnMinimum = -10;
+    private static int rowMinimum = -10;
+    private static int rowMaximum = 10;
     public Tilemap fieldTileMap = null;
     public Tilemap baseTileMap = null;
     public List<Tile> tilePool;
@@ -83,6 +87,24 @@ public class GameManager : MonoBehaviour
                     UpdatePlayerColliderSettings(player);
                     player.AddComponent<FielderBehaviour>();
                     break;
+                case PlayerFieldPositionEnum.LEFT_FIELDER:
+                    playerStatus.CatchEfficiency = 80f;
+                    playerStatus.Speed = 2f;
+                    UpdatePlayerColliderSettings(player);
+                    player.AddComponent<FielderBehaviour>();
+                    break;
+                case PlayerFieldPositionEnum.RIGHT_FIELDER:
+                    playerStatus.CatchEfficiency = 80f;
+                    playerStatus.Speed = 2f;
+                    UpdatePlayerColliderSettings(player);
+                    player.AddComponent<FielderBehaviour>();
+                    break;
+                case PlayerFieldPositionEnum.CENTER_FIELDER:
+                    playerStatus.CatchEfficiency = 80f;
+                    playerStatus.Speed = 2f;
+                    UpdatePlayerColliderSettings(player);
+                    player.AddComponent<FielderBehaviour>();
+                    break;
             }
 
             player.name = playerStatus.PlayerFieldPosition.ToString();
@@ -118,59 +140,32 @@ public class GameManager : MonoBehaviour
         this.CalculateHorizontalyPaintedDirtPositions(HorizontalyPaintedDirtDictionary, FieldUtils.GetSecondBaseTilePosition(), FieldUtils.GetThirdBaseTilePosition(), TileTypeEnum.HORIZONTAL_PAINTED_DIRT);
         this.CalculateVerticalyPaintedDirtPositions(VerticalyPaintedDirtDictionary, FieldUtils.GetThirdBaseTilePosition(), FieldUtils.GetHomeBaseTilePosition(), TileTypeEnum.VERTICAL_PAINTED_DIRT);
 
-        for (int collumn = fieldTileMap.cellBounds.xMin; collumn < fieldTileMap.cellBounds.xMax; collumn++)
+        for (int collumn = ColumnMinimum; collumn < ColumnMaximum + 1; collumn++)
         {
-            for (int line = fieldTileMap.cellBounds.yMin; line < fieldTileMap.cellBounds.yMax; line++)
+            for (int row = RowMinimum; row < RowMaximum + 1; row++)
             {
-                Vector3Int localPlace = new Vector3Int(collumn, line, (int)fieldTileMap.transform.position.y);
-                if (fieldTileMap.HasTile(localPlace))
-                {
-                    TileInformation tileInformation = this.GetFieldTileInformation(localPlace, fieldTileMap, collumn, line);
+                Vector3Int localPlace = new Vector3Int(collumn, row, (int)fieldTileMap.transform.position.y);
+               
+                    TileInformation tileInformation = this.GetFieldTileInformation(localPlace, fieldTileMap, collumn, row);
                     int tilePoolIndex = tileInformation.TileIndex;
                     fieldTileMap.SetTile(localPlace, tilePool[tilePoolIndex]);
-                    //TileBase tileBase = fieldTileMap.GetTile(localPlace);
-                    //tileBase.name = tileInformation.TileName;
-                }
-                else
-                {
-                    fieldTileMap.SetTile(localPlace, null);
-                }
             }
         }
 
-        for (int collumn = baseTileMap.cellBounds.xMin; collumn < baseTileMap.cellBounds.xMax; collumn++)
+        for (int collumn = ColumnMinimum; collumn < ColumnMaximum + 1; collumn++)
         {
-            for (int line = baseTileMap.cellBounds.yMin; line < baseTileMap.cellBounds.yMax; line++)
+            for (int row = RowMinimum; row < RowMaximum + 1; row++)
             {
-                Vector3Int localPlace = new Vector3Int(collumn, line, (int)baseTileMap.transform.position.y);
-                if (baseTileMap.HasTile(localPlace))
+                Vector3Int localPlace = new Vector3Int(collumn, row, (int)baseTileMap.transform.position.y);
+                TileInformation tileInformation = this.GetBaseTileInformation(localPlace, baseTileMap, collumn, row);
+                if(tileInformation != null)
                 {
-                    TileInformation tileInformation = this.GetBaseTileInformation(localPlace, baseTileMap, collumn, line);
-
-                    if(tileInformation != null)
-                    {
-                        Vector3 basePosition = FieldUtils.GetTileCenterPositionInGameWorld(new Vector2Int(localPlace.x, localPlace.y));
-                        GameObject baseGameObject = Instantiate(baseModel, basePosition, Quaternion.identity);
-                        baseGameObject.name = tileInformation.TileName;
-                        baseGameObject.tag = this.GetBaseTagFromName(tileInformation.TileName);
-                    }
-                    
-                    /*if (tileInformation != null)
-                    {
-                        //int tilePoolIndex = tileInformation.TileIndex;
-                        baseTileMap.SetTile(localPlace, tilePool[tilePoolIndex]);
-                        //TileBase tileBase = baseTileMap.GetTile(localPlace);
-                        //tileBase.name = tileInformation.TileName;
-                        if (tilePoolIndex == (int)TileTypeEnum.BASE)
-                        {
-                            baseTileMap.SetColliderType(localPlace, Tile.ColliderType.Sprite);
-                        }
-                    }
-                    else
-                    {*/
-                    baseTileMap.SetTile(localPlace, null);
-                    //}
+                    Vector3 basePosition = FieldUtils.GetTileCenterPositionInGameWorld(new Vector2Int(localPlace.x, localPlace.y));
+                    GameObject baseGameObject = Instantiate(baseModel, basePosition, Quaternion.identity);
+                    baseGameObject.name = tileInformation.TileName;
+                    baseGameObject.tag = this.GetBaseTagFromName(tileInformation.TileName);
                 }
+                baseTileMap.SetTile(localPlace, null);
             }
         }
     }
@@ -427,5 +422,8 @@ public class GameManager : MonoBehaviour
 
     public Dictionary<string, TileTypeEnum> HorizontalyPaintedDirtDictionary { get => horizontalyPaintedDirtDictionary; set => horizontalyPaintedDirtDictionary = value; }
     public Dictionary<string, TileTypeEnum> VerticalyPaintedDirtDictionary { get => verticalyPaintedDirtDictionary; set => verticalyPaintedDirtDictionary = value; }
-
+    public static int ColumnMaximum { get => columnMaximum; set => columnMaximum = value; }
+    public static int ColumnMinimum { get => columnMinimum; set => columnMinimum = value; }
+    public static int RowMinimum { get => rowMinimum; set => rowMinimum = value; }
+    public static int RowMaximum { get => rowMaximum; set => rowMaximum = value; }
 }

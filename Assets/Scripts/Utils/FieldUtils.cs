@@ -14,65 +14,85 @@ public class FieldUtils
 
     public static Vector2Int GetHomeBaseTilePosition()
     {
-        Tilemap tileMap = FetchFieldTileMap();
-        int xTilePosition = (tileMap.cellBounds.xMin + 1) / 2;
-        int yTilePosition = (tileMap.cellBounds.yMin + 1) / 2;
+        int xTilePosition = GameManager.ColumnMinimum;
+        int yTilePosition = GameManager.RowMinimum;
         return new Vector2Int(xTilePosition, yTilePosition);
     }
 
     public static Vector2Int GetFirstBaseTilePosition()
     {
-        Tilemap tileMap = FetchFieldTileMap();
-        int xTilePosition = tileMap.cellBounds.xMax * 4 / 9;
-        int yTilePosition = tileMap.cellBounds.yMin * 4 / 9;
+        int xTilePosition = GameManager.ColumnMaximum;
+        int yTilePosition = GameManager.RowMinimum;
         return new Vector2Int(xTilePosition, yTilePosition);
     }
 
     public static Vector2Int GetSecondBaseTilePosition()
     {
-        Tilemap tileMap = FetchFieldTileMap();
-        int xTilePosition = tileMap.cellBounds.xMax * 4 / 9;
-        int yTilePosition = tileMap.cellBounds.yMax * 1 / 2;
+        int xTilePosition = GameManager.ColumnMaximum;
+        int yTilePosition = GameManager.RowMaximum;
         return new Vector2Int(xTilePosition, yTilePosition);
     }
 
     public static Vector2Int GetThirdBaseTilePosition()
     {
-        Tilemap tileMap = FetchFieldTileMap();
-        int xTilePosition = (tileMap.cellBounds.xMin + 1) / 2;
-        int yTilePosition = tileMap.cellBounds.yMax * 1 / 2;
+        int xTilePosition = GameManager.ColumnMinimum;
+        int yTilePosition = GameManager.RowMaximum;
         return new Vector2Int(xTilePosition, yTilePosition);
     }
 
     public static Vector2Int GetCatcherZonePosition()
     {
-        Tilemap tileMap = FetchFieldTileMap();
-        int xTilePosition = (tileMap.cellBounds.xMin - 3) / 2;
-        int yTilePosition = (tileMap.cellBounds.yMin - 2) / 2;
+        int xTilePosition = GameManager.ColumnMinimum - (int)GRID_SIZE * 2;
+        int yTilePosition = GameManager.RowMinimum - (int)GRID_SIZE * 2;
+        return new Vector2Int(xTilePosition, yTilePosition);
+    }
+
+    public static Vector2Int GetBatterTilePosition()
+    {
+        int xTilePosition = GameManager.ColumnMinimum - (int)GRID_SIZE;
+        int yTilePosition = GameManager.RowMinimum;
         return new Vector2Int(xTilePosition, yTilePosition);
     }
 
     public static Vector2Int GetSecondBasemanTilePosition()
     {
-        Tilemap tileMap = FetchFieldTileMap();
-        int xTilePosition = tileMap.cellBounds.xMax * 6 / 9;
-        int yTilePosition = tileMap.cellBounds.yMax * 1 / 4;
+        int xTilePosition = GameManager.ColumnMaximum + (GameManager.ColumnMaximum/3);
+        int yTilePosition = GameManager.RowMaximum - (GameManager.RowMaximum/3);
         return new Vector2Int(xTilePosition, yTilePosition);
     }
 
     public static Vector2Int GetShortStopTilePosition()
     {
-        Tilemap tileMap = FetchFieldTileMap();
-        int xTilePosition = tileMap.cellBounds.xMax * 1 / 4;
-        int yTilePosition = (tileMap.cellBounds.yMax + 8) / 2;
+        int xTilePosition = GameManager.ColumnMaximum - (GameManager.ColumnMaximum / 3);
+        int yTilePosition = GameManager.RowMaximum + (GameManager.RowMaximum / 3);
+        return new Vector2Int(xTilePosition, yTilePosition);
+    }
+
+    public static Vector2Int GetLeftFielderTilePosition()
+    {
+        int xTilePosition = 0;
+        int yTilePosition = GameManager.RowMaximum * 2;
+        return new Vector2Int(xTilePosition, yTilePosition);
+    }
+
+    public static Vector2Int GetRightFielderTilePosition()
+    {
+        int xTilePosition = GameManager.ColumnMaximum * 2;
+        int yTilePosition = 0;
+        return new Vector2Int(xTilePosition, yTilePosition);
+    }
+
+    public static Vector2Int GetCenterFielderTilePosition()
+    {
+        int xTilePosition = GameManager.ColumnMaximum * 2;
+        int yTilePosition = GameManager.RowMaximum * 2;
         return new Vector2Int(xTilePosition, yTilePosition);
     }
 
     public static Vector2Int GetCathcherOutBallZonePosition()
     {
-        Tilemap tileMap = FetchFieldTileMap();
-        int xTilePosition = tileMap.cellBounds.xMin;
-        int yTilePosition = tileMap.cellBounds.yMin;
+        int xTilePosition = GameManager.ColumnMinimum - (int)GRID_SIZE * 3;
+        int yTilePosition = GameManager.RowMinimum - (int)GRID_SIZE * 3;
         return new Vector2Int(xTilePosition, yTilePosition);
     }
 
@@ -103,14 +123,6 @@ public class FieldUtils
     public static Vector3 GetBatCorrectPosition(Vector3 position)
     {
         return new Vector3(position.x + GRID_SIZE/3, position.y + GRID_SIZE/4, position.z);
-    }
-
-    public static Vector2Int GetBatterTilePosition()
-    {
-        Tilemap tileMap = FetchFieldTileMap();
-        int xTilePosition = (tileMap.cellBounds.xMin - 1) / 2;
-        int yTilePosition = (tileMap.cellBounds.yMin + 1) / 2;
-        return new Vector2Int(xTilePosition, yTilePosition);
     }
 
     public static Tilemap FetchFieldTileMap()

@@ -71,10 +71,13 @@ public class PlayerUtils : MonoBehaviour
                 genericPlayerBehaviour = FetchFielderBehaviourScript(player);
                 break;
             case PlayerFieldPositionEnum.LEFT_FIELDER:
+                genericPlayerBehaviour = FetchFielderBehaviourScript(player);
                 break;
             case PlayerFieldPositionEnum.CENTER_FIELDER:
+                genericPlayerBehaviour = FetchFielderBehaviourScript(player);
                 break;
             case PlayerFieldPositionEnum.RIGHT_FIELDER:
+                genericPlayerBehaviour = FetchFielderBehaviourScript(player);
                 break;
             default:
                 break;

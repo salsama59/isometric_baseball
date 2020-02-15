@@ -10,4 +10,11 @@ public class GameUtils : MonoBehaviour
         GameManager gameManager = gameManagerObject.GetComponent<GameManager>();
         return gameManager;
     }
+
+    public static PlayersTurnManager FetchPlayersTurnManager()
+    {
+        GameObject playersTurnManagerObject = GameObject.FindGameObjectWithTag(TagsConstants.PLAYERS_TURN_MANAGER_TAG);
+        PlayersTurnManager playersTurnManager = playersTurnManagerObject.GetComponent<PlayersTurnManager>();
+        return playersTurnManager;
+    }
 }

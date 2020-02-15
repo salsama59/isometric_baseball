@@ -9,20 +9,24 @@ public class BallController : GenericController
     private bool isBeingHitten;
     private bool isHeld;
     private GameObject currentHolder;
+    private Animator ballAnimator;
 
     // Start is called before the first frame update
     public void Start()
     {
+        BallAnimator = this.GetComponent<Animator>();
         IsHeld = false;
-        IsThrown = true;
+        //IsThrown = true;
         Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetHomeBaseTilePosition());
     }
 
     // Update is called once per frame
     public void Update()
     {
-        if (!IsMoving)
+        if (!IsMoving && !PlayersTurnManager.IsCommandPhase)
         {
+            BallAnimator.enabled = true;
+
             if ((IsThrown && Target.HasValue && Target.Value != this.transform.position) || IsBeingHitten)
             {
                 StartCoroutine(Move(transform.position, Target.Value));
@@ -33,6 +37,14 @@ public class BallController : GenericController
             {
                 this.transform.position = CurrentHolder.transform.position;
             }
+            else
+            {
+                BallAnimator.enabled = false;
+            }
+        }
+        else if (IsMoving && PlayersTurnManager.IsCommandPhase)
+        {
+            BallAnimator.enabled = false;
         }
     }
 
@@ -41,4 +53,5 @@ public class BallController : GenericController
     public bool IsBeingHitten { get => isBeingHitten; set => isBeingHitten = value; }
     public bool IsHeld { get => isHeld; set => isHeld = value; }
     public GameObject CurrentHolder { get => currentHolder; set => currentHolder = value; }
+    public Animator BallAnimator { get => ballAnimator; set => ballAnimator = value; }
 }

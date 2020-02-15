@@ -8,21 +8,27 @@ public class BatCollider : MonoBehaviour
     {
         if (this.HasBallCollided(collision))
         {
-            GameObject ballGameObject = collision.gameObject;
-            BallController ballControllerScript = BallUtils.FetchBallControllerScript(ballGameObject);
-            GameObject pitcherGameObject = ballControllerScript.CurrentPitcher;
+            Debug.Log("Ball has collide with the bat collider");
+            //GameObject ballGameObject = collision.gameObject;
+            //BallController ballControllerScript = BallUtils.FetchBallControllerScript(ballGameObject);
+            //GameObject pitcherGameObject = ballControllerScript.CurrentPitcher;
 
             GameObject batter = this.gameObject.transform.parent.gameObject;
             BatterBehaviour batterBehaviourScript = PlayerUtils.FetchBatterBehaviourScript(batter);
-            PlayerStatus playerStatusScript = PlayerUtils.FetchPlayerStatusScript(batter);
 
-            batterBehaviourScript.IsReadyToSwing = true;
-            batterBehaviourScript.IsSwingHasFinished = false;
+            PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
+            playersTurnManager.turnState = TurnStateEnum.BATTER_TURN;
+            PlayersTurnManager.IsCommandPhase = true;
 
-            if (PlayerUtils.IsCurrentPlayerPosition(batter, PlayerFieldPositionEnum.BATTER))
+            //PlayerStatus playerStatusScript = PlayerUtils.FetchPlayerStatusScript(batter);
+
+            //batterBehaviourScript.IsReadyToSwing = true;
+            //batterBehaviourScript.IsSwingHasFinished = false;
+
+            /*if (PlayerUtils.IsCurrentPlayerPosition(batter, PlayerFieldPositionEnum.BATTER))
             {
                 batterBehaviourScript.CalculateBatterColliderInterraction(pitcherGameObject, ballControllerScript, playerStatusScript);
-            }
+            }*/
         }
     }
 

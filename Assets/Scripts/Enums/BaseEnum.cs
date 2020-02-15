@@ -4,5 +4,6 @@
     FIRST_BASE,
     SECOND_BASE,
     THIRD_BASE,
-    PITCHER_BASE
+    PITCHER_BASE,
+    NONE
 }

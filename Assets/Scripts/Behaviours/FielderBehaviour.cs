@@ -6,6 +6,14 @@ using System;
 
 public class FielderBehaviour : GenericPlayerBehaviour
 {
+
+    public override void Start()
+    {
+        base.Start();
+        IsoRenderer.LastDirection = 4;
+        IsoRenderer.SetDirection(Vector2.zero);
+    }
+
     public override void Awake()
     {
         base.Awake();

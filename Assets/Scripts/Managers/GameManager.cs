@@ -26,6 +26,12 @@ public class GameManager : MonoBehaviour
         GameObject ball = Instantiate(ballModel, this.transform.position, this.transform.rotation);
         ball.SetActive(false);
         this.SetPlayersCharacteristics(PlayerEnum.PLAYER_1, ball);
+
+        PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
+        playersTurnManager.Ball = ball;
+        PlayersTurnManager.IsCommandPhase = true;
+        playersTurnManager.turnState = TurnStateEnum.PITCHER_TURN;
+
     }
 
     private void SetPlayersCharacteristics(PlayerEnum playerId, GameObject ball)
@@ -47,7 +53,7 @@ public class GameManager : MonoBehaviour
                     bat.transform.parent = player.transform;
                     break;
                 case PlayerFieldPositionEnum.PITCHER:
-                    ball.SetActive(true);
+                    //ball.SetActive(true);
                     playerStatus.PitchEfficiency = 50f;
                     playerStatus.PitchingPower = 2;
                     playerStatus.PitchingEffect = 10f;

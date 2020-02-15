@@ -13,6 +13,7 @@ TagManager:
   - secondBase
   - thirdBase
   - pitcherBase
+  - PlayersTurnManager
   layers:
   - Default
   - TransparentFX

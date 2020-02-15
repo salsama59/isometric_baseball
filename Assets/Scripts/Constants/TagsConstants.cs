@@ -13,4 +13,5 @@ public class TagsConstants
     public static string SECOND_BASE_TAG = "secondBase";
     public static string THIRD_BASE_TAG = "thirdBase";
     public static string PITCHER_BASE_TAG = "pitcherBase";
+    public static string PLAYERS_TURN_MANAGER_TAG = "PlayersTurnManager";
 }

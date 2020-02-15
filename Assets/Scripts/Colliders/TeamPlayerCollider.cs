@@ -15,11 +15,14 @@ public class TeamPlayerCollider : MonoBehaviour
         {
             GameObject ballGameObject = collision.collider.gameObject;
             BallController ballControllerScript = BallUtils.FetchBallControllerScript(ballGameObject);
-            GameObject pitcherGameObject = ballControllerScript.CurrentPitcher;
+            //GameObject pitcherGameObject = ballControllerScript.CurrentPitcher;
 
             if (PlayerUtils.IsCurrentPlayerPosition(this.gameObject, PlayerFieldPositionEnum.CATCHER))
             {
-                ((CatcherBehaviour)genericPlayerBehaviourScript).CalculateCatcherColliderInterraction(pitcherGameObject, ballGameObject, ballControllerScript);
+                PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
+                playersTurnManager.turnState = TurnStateEnum.CATCHER_TURN;
+                PlayersTurnManager.IsCommandPhase = true;
+                //((CatcherBehaviour)genericPlayerBehaviourScript).CalculateCatcherColliderInterraction(pitcherGameObject, ballGameObject, ballControllerScript);
             }
             else if(PlayerUtils.IsCurrentPlayerPosition(this.gameObject, PlayerFieldPositionEnum.FIRST_BASEMAN) || PlayerUtils.IsCurrentPlayerPosition(this.gameObject, PlayerFieldPositionEnum.THIRD_BASEMAN))
             {
@@ -50,7 +53,22 @@ public class TeamPlayerCollider : MonoBehaviour
                     return;
                 }
 
-                ((RunnerBehaviour)genericPlayerBehaviourScript).CalculateRunnerColliderInterraction(FieldUtils.GetTileEnumFromName(collision.gameObject.name));
+                RunnerBehaviour runnerBehaviour = ((RunnerBehaviour)genericPlayerBehaviourScript);
+                BaseEnum baseReached = runnerBehaviour.NextBase;
+
+                //win a point automaticaly without issuing commands if arrived at home base after a complete turn
+                if (baseReached == BaseEnum.HOME_BASE && runnerBehaviour.HasPassedThroughThreeFirstBases())
+                {
+                    runnerBehaviour.CalculateRunnerColliderInterraction(FieldUtils.GetTileEnumFromName(collision.gameObject.name));
+                }
+                else
+                {
+                    PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
+                    playersTurnManager.turnState = TurnStateEnum.RUNNER_TURN;
+                    PlayersTurnManager.IsCommandPhase = true;
+                }
+
+                //((RunnerBehaviour)genericPlayerBehaviourScript).CalculateRunnerColliderInterraction(FieldUtils.GetTileEnumFromName(collision.gameObject.name));
             }
         }
     }

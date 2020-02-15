@@ -83,31 +83,39 @@ public abstract class GenericPlayerBehaviour : MonoBehaviour
 
     protected void MovePlayer()
     {
-        transform.position = Vector3.MoveTowards(transform.position, Target.Value, this.MoveSpeed * Time.deltaTime);
-
-        if (IsoRenderer != null)
+        if (!PlayersTurnManager.IsCommandPhase)
         {
-            Vector2 direction = new Vector2();
+            IsoRenderer.Animator.enabled = true;
+            transform.position = Vector3.MoveTowards(transform.position, Target.Value, this.MoveSpeed * Time.deltaTime);
 
-            if (transform.position.x < Target.Value.x)
+            if (IsoRenderer != null)
             {
-                direction.x = 1;
-            }
-            else
-            {
-                direction.x = -1;
-            }
+                Vector2 direction = new Vector2();
 
-            if (transform.position.y < Target.Value.y)
-            {
-                direction.y = 1;
-            }
-            else
-            {
-                direction.y = -1;
-            }
+                if (transform.position.x < Target.Value.x)
+                {
+                    direction.x = 1;
+                }
+                else
+                {
+                    direction.x = -1;
+                }
 
-            IsoRenderer.SetDirection(direction);
+                if (transform.position.y < Target.Value.y)
+                {
+                    direction.y = 1;
+                }
+                else
+                {
+                    direction.y = -1;
+                }
+
+                IsoRenderer.SetDirection(direction);
+            }
+        }
+        else
+        {
+            IsoRenderer.Animator.enabled = false;
         }
     }
 

@@ -35,11 +35,8 @@ public abstract class GenericController : MonoBehaviour
         while (t < 1f)
         {
 
-            if (IsMoveCanceled)
-            {
-                break;
-            }
-
+            yield return new WaitUntil(() => !PlayersTurnManager.IsCommandPhase);
+            
             t += Time.deltaTime * (moveSpeed / gridSize) * factor;
             transform.position = Vector3.Lerp(startPosition, endPosition, t);
 

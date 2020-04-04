@@ -14,4 +14,7 @@ public class TagsConstants
     public static string THIRD_BASE_TAG = "thirdBase";
     public static string PITCHER_BASE_TAG = "pitcherBase";
     public static string PLAYERS_TURN_MANAGER_TAG = "PlayersTurnManager";
+    public static string COMMAND_MENU_MANAGER_TAG = "CommandMenuManager";
+    public static string PLAYER_ACTIONS_MANAGER_TAG = "PlayerActionsManager";
+    public static string COMMAND_MENU_TAG = "CommandMenu";
 }

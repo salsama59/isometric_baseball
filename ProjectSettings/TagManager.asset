@@ -14,6 +14,9 @@ TagManager:
   - thirdBase
   - pitcherBase
   - PlayersTurnManager
+  - CommandMenu
+  - CommandMenuManager
+  - PlayerActionsManager
   layers:
   - Default
   - TransparentFX

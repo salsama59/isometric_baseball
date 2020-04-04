@@ -6,70 +6,53 @@ public class PlayersTurnManager : MonoBehaviour
 {
 
     public TurnStateEnum turnState;
-    private GameObject ball;
     public static bool IsCommandPhase;
+    private CommandMenuManager commandMenuManager;
+
+    private void Start()
+    {
+        CommandMenuManager = GameUtils.FetchCommandMenuManager();
+    }
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyUp(KeyCode.Return))
+        if (CommandMenuManager.isMenuDisplayEnabled)
         {
 
-            BallController ballControllerScript = BallUtils.FetchBallControllerScript(ball);
-            GameObject pitcherGameObject = ballControllerScript.CurrentPitcher;
+            PlayerAbilities playerAbilitiesScript = null;
 
             switch (this.turnState)
             {
                 case TurnStateEnum.STANDBY:
                     break;
                 case TurnStateEnum.PITCHER_TURN:
-                    Debug.Log("Activate pitcher action");
-                    //PITCHER TURN
-                    //literaly throw the ball!!!
-                    ball.SetActive(true);
-                    ballControllerScript.IsThrown = true;
+                    GameObject pitcher = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.PITCHER, PlayerEnum.PLAYER_1);
+                    playerAbilitiesScript = PlayerUtils.FetchPlayerAbilitiesScript(pitcher);
                     break;
                 case TurnStateEnum.BATTER_TURN:
                     GameObject batter = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.BATTER, PlayerEnum.PLAYER_1);
-                    BatterBehaviour batterBehaviourScript = PlayerUtils.FetchBatterBehaviourScript(batter);
-                    Debug.Log("Activate batter action");
-
-                    batterBehaviourScript.IsReadyToSwing = true;
-                    batterBehaviourScript.IsSwingHasFinished = false;
-                    //BATTER TURN
-                    if (PlayerUtils.IsCurrentPlayerPosition(batter, PlayerFieldPositionEnum.BATTER))
-                    {
-                        PlayerStatus playerStatusScript = PlayerUtils.FetchPlayerStatusScript(batter);
-                        batterBehaviourScript.CalculateBatterColliderInterraction(pitcherGameObject, ballControllerScript, playerStatusScript);
-                    }
+                    playerAbilitiesScript = PlayerUtils.FetchPlayerAbilitiesScript(batter);
                     break;
                 case TurnStateEnum.RUNNER_TURN:
-                    //RUNNER TURN
-
-                    Debug.Log("Runner choice!!!!");
                     GameObject runner = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.RUNNER, PlayerEnum.PLAYER_1);
-                    PlayerStatus runnerStatusScript = PlayerUtils.FetchPlayerStatusScript(runner);
-                    GenericPlayerBehaviour genericRunnerBehaviourScript = PlayerUtils.FetchCorrespondingPlayerBehaviourScript(runner, runnerStatusScript);
-                    RunnerBehaviour runnerBehaviour = ((RunnerBehaviour)genericRunnerBehaviourScript);
-                    BaseEnum baseEnum = runnerBehaviour.NextBase;
-                    runnerBehaviour.CalculateRunnerColliderInterraction(baseEnum);
+                    playerAbilitiesScript = PlayerUtils.FetchPlayerAbilitiesScript(runner);
                     break;
                 case TurnStateEnum.CATCHER_TURN:
-                    //CATCHER TURN
                     GameObject catcher = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.CATCHER, PlayerEnum.PLAYER_1);
-                    PlayerStatus catcherStatusScript = PlayerUtils.FetchPlayerStatusScript(catcher);
-                    GenericPlayerBehaviour genericCatcherBehaviourScript = PlayerUtils.FetchCorrespondingPlayerBehaviourScript(catcher, catcherStatusScript);
-                    ((CatcherBehaviour)genericCatcherBehaviourScript).CalculateCatcherColliderInterraction(pitcherGameObject, ball, ballControllerScript);
+                    playerAbilitiesScript = PlayerUtils.FetchPlayerAbilitiesScript(catcher);
                     break;
                 default:
                     break;
             }
 
-            PlayersTurnManager.IsCommandPhase = false;
-
+            if(playerAbilitiesScript != null)
+            {
+                CommandMenuManager.GenerateCommandMenu(playerAbilitiesScript);
+            }
+            
         }
     }
 
-
-    public GameObject Ball { get => ball; set => ball = value; }
+    public CommandMenuManager CommandMenuManager { get => commandMenuManager; set => commandMenuManager = value; }
 }

@@ -5,6 +5,12 @@ using System.Linq;
 
 public class PlayerUtils : MonoBehaviour
 {
+
+    public static PlayerAbilities FetchPlayerAbilitiesScript(GameObject player)
+    {
+        return player.GetComponent<PlayerAbilities>();
+    }
+
     public static PlayerStatus FetchPlayerStatusScript(GameObject player)
     {
         return player.GetComponent<PlayerStatus>();

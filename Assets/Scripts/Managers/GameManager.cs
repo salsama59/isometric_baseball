@@ -27,8 +27,12 @@ public class GameManager : MonoBehaviour
         ball.SetActive(false);
         this.SetPlayersCharacteristics(PlayerEnum.PLAYER_1, ball);
 
+        PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
+        playerActionsManager.BallGameObject = ball;
+        playerActionsManager.BallControllerScript = BallUtils.FetchBallControllerScript(ball);
+        playerActionsManager.PitcherGameObject = playerActionsManager.BallControllerScript.CurrentPitcher;
+
         PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
-        playersTurnManager.Ball = ball;
         PlayersTurnManager.IsCommandPhase = true;
         playersTurnManager.turnState = TurnStateEnum.PITCHER_TURN;
 
@@ -43,6 +47,11 @@ public class GameManager : MonoBehaviour
             playerStatus.PlayerFieldPosition = entry.Key;
             playerStatus.IsAllowedToMove = PlayerUtils.IsPlayerAllowedToMove(player);
 
+            PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(player);
+
+            PlayerActionsManager playerActionsManager =  GameUtils.FetchPlayerActionsManager();
+
+
             switch (playerStatus.PlayerFieldPosition)
             {
                 case PlayerFieldPositionEnum.BATTER:
@@ -51,6 +60,8 @@ public class GameManager : MonoBehaviour
                     player.AddComponent<BatterBehaviour>();
                     GameObject bat = Instantiate(batModel, FieldUtils.GetBatCorrectPosition(entry.Value), Quaternion.Euler(0f, 0f, -70f));
                     bat.transform.parent = player.transform;
+                    PlayerAbility hitBallPlayerAbility = new PlayerAbility("Hit ball", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.HitBallAction);
+                    playerAbilities.AddAbility(hitBallPlayerAbility);
                     break;
                 case PlayerFieldPositionEnum.PITCHER:
                     //ball.SetActive(true);
@@ -60,14 +71,27 @@ public class GameManager : MonoBehaviour
                     BallController ballControllerScript = BallUtils.FetchBallControllerScript(ball);
                     ballControllerScript.CurrentPitcher = player;
                     player.AddComponent<PitcherBehaviour>();
+                    PlayerAbility throwBallPlayerAbility = new PlayerAbility("Throw", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.ThrowBallAction);
+                    PlayerAbility gyroBallSpecialPlayerAbility = new PlayerAbility("Gyro ball", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.NORMAL, playerActionsManager.ThrowBallAction);
+                    PlayerAbility fireBallSpecialPlayerAbility = new PlayerAbility("Fire ball", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.NORMAL, playerActionsManager.ThrowBallAction);
+                    PlayerAbility menuBackAction = new PlayerAbility("Back", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.UI, null);
+                    playerAbilities.AddAbility(throwBallPlayerAbility);
+                    playerAbilities.AddAbility(gyroBallSpecialPlayerAbility);
+                    playerAbilities.AddAbility(fireBallSpecialPlayerAbility);
+                    playerAbilities.AddAbility(menuBackAction);
+                    playerAbilities.HasSpecialAbilities = true;
                     break;
                 case PlayerFieldPositionEnum.RUNNER:
                     playerStatus.Speed = 2f;
                     player.AddComponent<RunnerBehaviour>();
+                    PlayerAbility RunPlayerAbility = new PlayerAbility("Run to next base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.RunAction);
+                    playerAbilities.AddAbility(RunPlayerAbility);
                     break;
                 case PlayerFieldPositionEnum.CATCHER:
                     playerStatus.CatchEfficiency = 100f;
                     player.AddComponent<CatcherBehaviour>();
+                    PlayerAbility catchPlayerAbility = new PlayerAbility("Catch ball", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.CatchBallAction);
+                    playerAbilities.AddAbility(catchPlayerAbility);
                     break;
                 case PlayerFieldPositionEnum.FIRST_BASEMAN:
                     playerStatus.CatchEfficiency = 80f;

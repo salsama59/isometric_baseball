@@ -58,13 +58,19 @@ public class BatterBehaviour : GenericPlayerBehaviour
             GameObject bat = PlayerUtils.GetPlayerBatGameObject(this.gameObject);
             bat.SetActive(false);
             Destroy(this.gameObject.GetComponent<BatterBehaviour>());
-            RunnerBehaviour runnerBehaviour = this.gameObject.AddComponent<RunnerBehaviour>();
-            playerStatusScript.IsAllowedToMove = true;
+            
             playerStatusScript.PlayerFieldPosition = PlayerFieldPositionEnum.RUNNER;
             TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.RUNNER, this.gameObject, PlayerEnum.PLAYER_1);
-            runnerBehaviour.EnableMovement = true;
             PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
             playersTurnManager.turnState = TurnStateEnum.STANDBY;
+            RunnerBehaviour runnerBehaviour = this.gameObject.AddComponent<RunnerBehaviour>();
+            PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
+            PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(this.gameObject);
+            playerAbilities.PlayerAbilityList.Clear();
+            PlayerAbility runPlayerAbility = new PlayerAbility("Run to next base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.RunAction);
+            playerAbilities.AddAbility(runPlayerAbility);
+            playerStatusScript.IsAllowedToMove = true;
+            runnerBehaviour.EnableMovement = true;
             //PlayersTurnManager.IsCommandPhase = false;
         }
         else

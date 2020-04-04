@@ -17,4 +17,19 @@ public class GameUtils : MonoBehaviour
         PlayersTurnManager playersTurnManager = playersTurnManagerObject.GetComponent<PlayersTurnManager>();
         return playersTurnManager;
     }
+
+    public static CommandMenuManager FetchCommandMenuManager()
+    {
+        GameObject commandMenuManagerObject = GameObject.FindGameObjectWithTag(TagsConstants.COMMAND_MENU_MANAGER_TAG);
+        CommandMenuManager commandMenuManager = commandMenuManagerObject.GetComponent<CommandMenuManager>();
+        return commandMenuManager;
+    }
+
+    public static PlayerActionsManager FetchPlayerActionsManager()
+    {
+        GameObject playerActionsManagerObject = GameObject.FindGameObjectWithTag(TagsConstants.PLAYER_ACTIONS_MANAGER_TAG);
+        PlayerActionsManager playerActionsManager = playerActionsManagerObject.GetComponent<PlayerActionsManager>();
+        return playerActionsManager;
+    }
+
 }

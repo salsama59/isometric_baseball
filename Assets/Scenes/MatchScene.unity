@@ -160,7 +160,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f2035dea105f074fbbd892b74078788, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 0.1
+  cameraMovementSpeed: 0.1
+  zoomAmount: 10
+  zoomSpeed: 2
+  minimumZoomAmount: 0
+  maximumZoomAmount: 0
 --- !u!20 &519420031
 Camera:
   m_ObjectHideFlags: 0

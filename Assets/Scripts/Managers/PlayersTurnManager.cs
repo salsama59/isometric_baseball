@@ -12,7 +12,7 @@ public class PlayersTurnManager : MonoBehaviour
 
     private void Start()
     {
-        CameraController = GameUtils.FetchCameraController();
+        CameraController = CameraUtils.FetchCameraController();
         CommandMenuManager = GameUtils.FetchCommandMenuManager();
     }
 
@@ -50,8 +50,8 @@ public class PlayersTurnManager : MonoBehaviour
 
             if(playerAbilitiesScript != null)
             {
-                CommandMenuManager.GenerateCommandMenu(playerAbilitiesScript);
                 CameraController.TargetTransform = playerAbilitiesScript.gameObject.transform;
+                CommandMenuManager.GenerateCommandMenu(playerAbilitiesScript);
             }
             
         }

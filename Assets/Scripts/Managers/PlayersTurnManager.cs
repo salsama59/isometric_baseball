@@ -8,9 +8,11 @@ public class PlayersTurnManager : MonoBehaviour
     public TurnStateEnum turnState;
     public static bool IsCommandPhase;
     private CommandMenuManager commandMenuManager;
+    private CameraController cameraController;
 
     private void Start()
     {
+        CameraController = GameUtils.FetchCameraController();
         CommandMenuManager = GameUtils.FetchCommandMenuManager();
     }
 
@@ -49,10 +51,12 @@ public class PlayersTurnManager : MonoBehaviour
             if(playerAbilitiesScript != null)
             {
                 CommandMenuManager.GenerateCommandMenu(playerAbilitiesScript);
+                CameraController.TargetTransform = playerAbilitiesScript.gameObject.transform;
             }
             
         }
     }
 
     public CommandMenuManager CommandMenuManager { get => commandMenuManager; set => commandMenuManager = value; }
+    public CameraController CameraController { get => cameraController; set => cameraController = value; }
 }

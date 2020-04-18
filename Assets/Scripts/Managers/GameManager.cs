@@ -51,7 +51,6 @@ public class GameManager : MonoBehaviour
 
             PlayerActionsManager playerActionsManager =  GameUtils.FetchPlayerActionsManager();
 
-
             switch (playerStatus.PlayerFieldPosition)
             {
                 case PlayerFieldPositionEnum.BATTER:

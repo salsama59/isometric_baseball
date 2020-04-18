@@ -32,4 +32,11 @@ public class GameUtils : MonoBehaviour
         return playerActionsManager;
     }
 
+    public static CameraController FetchCameraController()
+    {
+        GameObject cameraGameObject = GameObject.FindGameObjectWithTag(TagsConstants.MAIN_CAMERA);
+        CameraController cameraController = cameraGameObject.GetComponent<CameraController>();
+        return cameraController;
+    }
+
 }

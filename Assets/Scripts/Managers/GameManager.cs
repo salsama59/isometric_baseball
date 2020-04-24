@@ -25,6 +25,10 @@ public class GameManager : MonoBehaviour
         this.BuildGameField();
         GameObject ball = Instantiate(ballModel, this.transform.position, this.transform.rotation);
         ball.SetActive(false);
+
+        CameraController cameraController = CameraUtils.FetchCameraController();
+        cameraController.BallGameObject = ball;
+
         this.SetPlayersCharacteristics(PlayerEnum.PLAYER_1, ball);
 
         PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();

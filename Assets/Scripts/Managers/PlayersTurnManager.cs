@@ -50,7 +50,7 @@ public class PlayersTurnManager : MonoBehaviour
 
             if(playerAbilitiesScript != null)
             {
-                CameraController.TargetTransform = playerAbilitiesScript.gameObject.transform;
+                CameraController.FocusOnPlayer(playerAbilitiesScript.gameObject.transform);
                 CommandMenuManager.GenerateCommandMenu(playerAbilitiesScript);
             }
             

@@ -17,6 +17,8 @@ public class CameraController : MonoBehaviour
     private float minimumZoomAmount;
     private float maximumZoomAmount;
     private float targetZoom;
+    private bool isFocusedOnPlayerForTurn;
+    private GameObject ballGameObject;
 
     // Start is called before the first frame update
     void Start()
@@ -31,16 +33,41 @@ public class CameraController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        this.UpdateCameraFocusState();
+        if (!IsFocusedOnPlayerForTurn)
+        {
+            this.SwitchToBallTarget();
+        }
         this.FollowTarget();
         this.ZoomCamera();
+    }
+
+    public void FocusOnPlayer(Transform playerTransform)
+    {
+        IsFocusedOnPlayerForTurn = true;
+        TargetTransform = playerTransform;
+    }
+
+    private void UpdateCameraFocusState()
+    {
+        if (!PlayersTurnManager.IsCommandPhase)
+        {
+            IsFocusedOnPlayerForTurn = false;
+        }
+    }
+
+    private void SwitchToBallTarget()
+    {
+        //Simplified form to check null value instead of a ternary condition
+        TargetTransform = BallGameObject?.transform;
     }
 
     private void ZoomCamera()
     {
         float mouseScrollAmount = Input.GetAxis("Mouse ScrollWheel");
         TargetZoom -= mouseScrollAmount * zoomAmount;
-        targetZoom = Mathf.Clamp(targetZoom, MinimumZoomAmount, MaximumZoomAmount);
-        CameraComponent.orthographicSize = Mathf.Lerp(CameraComponent.orthographicSize, targetZoom, Time.deltaTime * zoomSpeed);
+        TargetZoom = Mathf.Clamp(TargetZoom, MinimumZoomAmount, MaximumZoomAmount);
+        CameraComponent.orthographicSize = Mathf.Lerp(CameraComponent.orthographicSize, TargetZoom, Time.deltaTime * zoomSpeed);
     }
 
     private void FollowTarget()
@@ -61,4 +88,6 @@ public class CameraController : MonoBehaviour
     public float MinimumZoomAmount { get => minimumZoomAmount; set => minimumZoomAmount = value; }
     public float MaximumZoomAmount { get => maximumZoomAmount; set => maximumZoomAmount = value; }
     public float TargetZoom { get => targetZoom; set => targetZoom = value; }
+    public bool IsFocusedOnPlayerForTurn { get => isFocusedOnPlayerForTurn; set => isFocusedOnPlayerForTurn = value; }
+    public GameObject BallGameObject { get => ballGameObject; set => ballGameObject = value; }
 }

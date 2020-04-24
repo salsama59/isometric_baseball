@@ -31,5 +31,4 @@ public class GameUtils : MonoBehaviour
         PlayerActionsManager playerActionsManager = playerActionsManagerObject.GetComponent<PlayerActionsManager>();
         return playerActionsManager;
     }
-
 }

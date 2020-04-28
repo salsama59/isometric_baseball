@@ -151,12 +151,10 @@ public class CommandMenuManager : MonoBehaviour
         }
     }
 
-    private GameObject SetMenuPosition(GameObject playerGameObject)
+    private void SetMenuPosition(GameObject playerGameObject)
     {
-        GameObject panelGameObject = GetMenuPanelGameObject();
-        RectTransform panelRectTransform = panelGameObject.GetComponentInChildren<RectTransform>();
-        panelRectTransform.transform.position = Camera.main.WorldToScreenPoint(playerGameObject.transform.position);
-        return panelGameObject;
+        RectTransform canvasRectransform = MenuGameObject.transform.GetComponentInChildren<RectTransform>();
+        canvasRectransform.anchoredPosition = Camera.main.WorldToScreenPoint(playerGameObject.transform.position);
     }
 
     private GameObject GetMenuPanelGameObject()

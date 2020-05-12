@@ -16,6 +16,8 @@ public class PlayerStatus : MonoBehaviour
     private int pitchingPower;
     private float pitchingEffect;
     private int stamina;
+    [SerializeField]
+    private PlayerEnum playerOwner;
 
     public PlayerFieldPositionEnum PlayerFieldPosition { get => playerFieldPosition; set => playerFieldPosition = value; }
     public string PlayerName { get => playerName; set => playerName = value; }
@@ -29,4 +31,5 @@ public class PlayerStatus : MonoBehaviour
     public int PitchingPower { get => pitchingPower; set => pitchingPower = value; }
     public float PitchingEffect { get => pitchingEffect; set => pitchingEffect = value; }
     public int Stamina { get => stamina; set => stamina = value; }
+    public PlayerEnum PlayerOwner { get => playerOwner; set => playerOwner = value; }
 }

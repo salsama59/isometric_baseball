@@ -29,19 +29,19 @@ public class PlayersTurnManager : MonoBehaviour
                 case TurnStateEnum.STANDBY:
                     break;
                 case TurnStateEnum.PITCHER_TURN:
-                    GameObject pitcher = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.PITCHER, PlayerEnum.PLAYER_1);
+                    GameObject pitcher = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.PITCHER, TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum.PITCHER));
                     playerAbilitiesScript = PlayerUtils.FetchPlayerAbilitiesScript(pitcher);
                     break;
                 case TurnStateEnum.BATTER_TURN:
-                    GameObject batter = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.BATTER, PlayerEnum.PLAYER_1);
+                    GameObject batter = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.BATTER, TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum.BATTER));
                     playerAbilitiesScript = PlayerUtils.FetchPlayerAbilitiesScript(batter);
                     break;
                 case TurnStateEnum.RUNNER_TURN:
-                    GameObject runner = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.RUNNER, PlayerEnum.PLAYER_1);
+                    GameObject runner = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.RUNNER, TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum.RUNNER));
                     playerAbilitiesScript = PlayerUtils.FetchPlayerAbilitiesScript(runner);
                     break;
                 case TurnStateEnum.CATCHER_TURN:
-                    GameObject catcher = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.CATCHER, PlayerEnum.PLAYER_1);
+                    GameObject catcher = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.CATCHER, TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum.CATCHER));
                     playerAbilitiesScript = PlayerUtils.FetchPlayerAbilitiesScript(catcher);
                     break;
                 default:

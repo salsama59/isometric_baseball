@@ -17,6 +17,12 @@ TagManager:
   - CommandMenu
   - CommandMenuManager
   - PlayerActionsManager
+  - TeamsScoreManager
+  - TeamOneName
+  - TeamTwoName
+  - TeamTwoScore
+  - TeamOneScore
+  - TeamsInformationsPanel
   layers:
   - Default
   - TransparentFX

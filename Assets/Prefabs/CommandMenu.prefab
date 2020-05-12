@@ -103,7 +103,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 512, y: 384}
+  m_SizeDelta: {x: 400, y: 384}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2017268141118452284
 CanvasRenderer:
@@ -128,6 +128,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.4804184, g: 0.3331765, b: 0.7058824, a: 0.62352943}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -226,6 +227,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -331,7 +333,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2017268141905402755}
   m_Layer: 0
-  m_Name: Command_menu
+  m_Name: CommandMenu
   m_TagString: CommandMenu
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -18,4 +18,10 @@ public class TagsConstants
     public static string COMMAND_MENU_MANAGER_TAG = "CommandMenuManager";
     public static string PLAYER_ACTIONS_MANAGER_TAG = "PlayerActionsManager";
     public static string COMMAND_MENU_TAG = "CommandMenu";
+    public static string TEAMS_SCORE_MANAGER = "TeamsScoreManager";
+    public static string TEAMS_INFORMATIONS_PANEL = "TeamsInformationsPanel";
+    public static string TEAM_1_NAME = "TeamOneName";
+    public static string TEAM_2_NAME = "TeamTwoName";
+    public static string TEAM_1_SCORE = "TeamOneScore";
+    public static string TEAM_2_SCORE = "TeamTwoScore";
 }

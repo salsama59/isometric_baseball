@@ -31,4 +31,11 @@ public class GameUtils : MonoBehaviour
         PlayerActionsManager playerActionsManager = playerActionsManagerObject.GetComponent<PlayerActionsManager>();
         return playerActionsManager;
     }
+
+    public static TeamsScoreManager FetchTeamsScoreManager()
+    {
+        GameObject teamsScoreManagerObject = GameObject.FindGameObjectWithTag(TagsConstants.TEAMS_SCORE_MANAGER);
+        TeamsScoreManager teamsScoreManager = teamsScoreManagerObject.GetComponent<TeamsScoreManager>();
+        return teamsScoreManager;
+    }
 }

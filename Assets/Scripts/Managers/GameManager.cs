@@ -40,6 +40,11 @@ public class GameManager : MonoBehaviour
         PlayersTurnManager.IsCommandPhase = true;
         playersTurnManager.turnState = TurnStateEnum.PITCHER_TURN;
 
+        TeamsScoreManager teamsScoreManager = GameUtils.FetchTeamsScoreManager();
+        teamsScoreManager.UpdateTeamName(TeamIdEnum.TEAM_1, "FC.TOUTOU");
+        teamsScoreManager.UpdateTeamName(TeamIdEnum.TEAM_2, "AS.DETERMINE");
+        //teamsScoreManager.ToggleScoreUiDisplay();
+
     }
 
     private void SetPlayersCharacteristics(PlayerEnum playerId, GameObject ball)

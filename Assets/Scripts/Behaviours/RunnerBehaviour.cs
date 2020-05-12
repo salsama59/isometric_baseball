@@ -88,6 +88,10 @@ public class RunnerBehaviour : GenericPlayerBehaviour
                     this.NextBase = this.CurrentBase;
                     playerStatusScript.IsAllowedToMove = false;
                     this.HasReachedHomeBase = true;
+                    TeamsScoreManager teamsScoreManagerScript =  GameUtils.FetchTeamsScoreManager();
+
+                    teamsScoreManagerScript.IncrementTeamScore(TeamIdEnum.TEAM_1);
+
                 }
                 
                 break;

@@ -51,6 +51,20 @@ public class TeamUtils : MonoBehaviour
         return playerTeamMember;
     }
 
+
+    public static PlayerEnum GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum playerFieldPositionEnum)
+    {
+        foreach (KeyValuePair<PlayerEnum, List<PlayerFieldPositionEnum>> entry in GameData.playerEligibilityMap)
+        {
+            if(entry.Value.Contains(playerFieldPositionEnum))
+            {
+                return entry.Key;
+            }
+        }
+
+        return PlayerEnum.PLAYER_1;
+    }
+
     public static Dictionary<int, GameObject> GetPlayerTeam(PlayerEnum playerId)
     {
         Dictionary<int, GameObject> playerTeam = null;

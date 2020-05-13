@@ -30,18 +30,25 @@ public class GameManager : MonoBehaviour
         CameraController cameraController = CameraUtils.FetchCameraController();
         cameraController.BallGameObject = ball;
 
-        for(int i = 0; i < 2; i++)
+        PlayerEnum playerEnum = PlayerEnum.PLAYER_1;
+        TeamIdEnum teamIdEnum = TeamIdEnum.TEAM_1;
+
+        for (int i = 0; i < GameData.playerNumber; i++)
         {
-            PlayerEnum playerEnum = PlayerEnum.PLAYER_1;
+            
 
             if(i == (int)PlayerEnum.PLAYER_1)
             {
                 playerEnum = PlayerEnum.PLAYER_1;
+                teamIdEnum = TeamIdEnum.TEAM_1;
             }
             else
             {
                 playerEnum = PlayerEnum.PLAYER_2;
+                teamIdEnum = TeamIdEnum.TEAM_2;
             }
+
+            GameData.playerEnumTeamMap.Add(playerEnum, teamIdEnum);
 
             this.SetPlayersCharacteristics(playerEnum, ball);
         }

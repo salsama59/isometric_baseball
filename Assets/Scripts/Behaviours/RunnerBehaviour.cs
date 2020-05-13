@@ -88,9 +88,10 @@ public class RunnerBehaviour : GenericPlayerBehaviour
                     this.NextBase = this.CurrentBase;
                     playerStatusScript.IsAllowedToMove = false;
                     this.HasReachedHomeBase = true;
-                    TeamsScoreManager teamsScoreManagerScript =  GameUtils.FetchTeamsScoreManager();
 
-                    teamsScoreManagerScript.IncrementTeamScore(TeamIdEnum.TEAM_1);
+                    PlayerEnum playerEnum = TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum.RUNNER);
+                    TeamsScoreManager teamsScoreManagerScript = GameUtils.FetchTeamsScoreManager();
+                    teamsScoreManagerScript.IncrementTeamScore(GameData.playerEnumTeamMap[playerEnum]);
 
                 }
                 

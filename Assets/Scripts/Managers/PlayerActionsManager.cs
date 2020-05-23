@@ -47,12 +47,26 @@ public class PlayerActionsManager : MonoBehaviour
     public void RunAction()
     {
         //RUNNER TURN
+        RunnerBehaviour genericRunnerBehaviourScript;
+        BaseEnum baseReachedEnum = this.GetCurrentBaseReached(out genericRunnerBehaviourScript);
+        genericRunnerBehaviourScript.CalculateRunnerColliderInterraction(baseReachedEnum, false);
+    }
+
+    private BaseEnum GetCurrentBaseReached(out RunnerBehaviour genericRunnerBehaviourScript)
+    {
         Debug.Log("Runner choice!!!!");
         GameObject runner = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.RUNNER, TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum.RUNNER));
         PlayerStatus runnerStatusScript = PlayerUtils.FetchPlayerStatusScript(runner);
-        RunnerBehaviour genericRunnerBehaviourScript = ((RunnerBehaviour)PlayerUtils.FetchCorrespondingPlayerBehaviourScript(runner, runnerStatusScript));
-        BaseEnum baseEnum = genericRunnerBehaviourScript.NextBase;
-        genericRunnerBehaviourScript.CalculateRunnerColliderInterraction(baseEnum);
+        genericRunnerBehaviourScript = ((RunnerBehaviour)PlayerUtils.FetchCorrespondingPlayerBehaviourScript(runner, runnerStatusScript));
+        return genericRunnerBehaviourScript.NextBase;
+    }
+
+    public void StayAction()
+    {
+        //RUNNER TURN
+        RunnerBehaviour genericRunnerBehaviourScript;
+        BaseEnum baseReachedEnum = this.GetCurrentBaseReached(out genericRunnerBehaviourScript);
+        genericRunnerBehaviourScript.CalculateRunnerColliderInterraction(baseReachedEnum, true);
     }
 
     public GameObject BallGameObject { get => ballGameObject; set => ballGameObject = value; }

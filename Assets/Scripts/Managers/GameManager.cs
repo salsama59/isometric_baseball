@@ -65,7 +65,6 @@ public class GameManager : MonoBehaviour
         TeamsScoreManager teamsScoreManager = GameUtils.FetchTeamsScoreManager();
         teamsScoreManager.UpdateTeamName(TeamIdEnum.TEAM_1, "FC.TOUTOU");
         teamsScoreManager.UpdateTeamName(TeamIdEnum.TEAM_2, "AS.DETERMINE");
-        //teamsScoreManager.ToggleScoreUiDisplay();
 
     }
 
@@ -154,8 +153,10 @@ public class GameManager : MonoBehaviour
                     case PlayerFieldPositionEnum.RUNNER:
                         playerStatus.Speed = 2f;
                         player.AddComponent<RunnerBehaviour>();
-                        PlayerAbility RunPlayerAbility = new PlayerAbility("Run to next base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.RunAction);
-                        playerAbilities.AddAbility(RunPlayerAbility);
+                        PlayerAbility runPlayerAbility = new PlayerAbility("Run to next base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.RunAction);
+                        PlayerAbility staySafePlayerAbility = new PlayerAbility("Stay on base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.StayAction);
+                        playerAbilities.AddAbility(runPlayerAbility);
+                        playerAbilities.AddAbility(staySafePlayerAbility);
                         break;
                     case PlayerFieldPositionEnum.CATCHER:
                         playerStatus.CatchEfficiency = 100f;

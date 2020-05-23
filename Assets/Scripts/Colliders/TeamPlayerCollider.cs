@@ -29,15 +29,15 @@ public class TeamPlayerCollider : MonoBehaviour
         }
         else if (this.HasPlayerCollided(collision))
         {
-            Debug.Log("I've collided with a player");
-            Debug.Log("As a fielder => " + PlayerUtils.HasFielderPosition(this.gameObject));
-            Debug.Log("And I'm holding the ball => " + genericPlayerBehaviourScript.IsHoldingBall);
-            Debug.Log("I colided with a Runner => " + PlayerUtils.IsCurrentPlayerPosition(collision.gameObject, PlayerFieldPositionEnum.RUNNER));
             if (PlayerUtils.HasFielderPosition(this.gameObject) && genericPlayerBehaviourScript.IsHoldingBall && PlayerUtils.IsCurrentPlayerPosition(collision.gameObject, PlayerFieldPositionEnum.RUNNER))
             {
-                Debug.Log("I am a fielder who's holding the ball and collided with a runner");
-                ((FielderBehaviour)genericPlayerBehaviourScript).TagOutRunner(collision.transform.gameObject);
-                Debug.Log("The fielder tagout the runner");
+                PlayerStatus runnerToTagOutStatus = PlayerUtils.FetchPlayerStatusScript(collision.transform.gameObject);
+                RunnerBehaviour runnerBehaviourScript = ((RunnerBehaviour)PlayerUtils.FetchCorrespondingPlayerBehaviourScript(collision.transform.gameObject, runnerToTagOutStatus));
+
+                if (!runnerBehaviourScript.IsSafe)
+                {
+                    ((FielderBehaviour)genericPlayerBehaviourScript).TagOutRunner(collision.transform.gameObject);
+                }
             }
         }
         else
@@ -66,7 +66,7 @@ public class TeamPlayerCollider : MonoBehaviour
                 //win a point automaticaly without issuing commands if arrived at home base after a complete turn
                 if (baseReached == BaseEnum.HOME_BASE && runnerBehaviour.HasPassedThroughThreeFirstBases())
                 {
-                    runnerBehaviour.CalculateRunnerColliderInterraction(FieldUtils.GetTileEnumFromName(collision.gameObject.name));
+                    runnerBehaviour.CalculateRunnerColliderInterraction(FieldUtils.GetTileEnumFromName(collision.gameObject.name), true);
                 }
                 else
                 {
@@ -75,6 +75,26 @@ public class TeamPlayerCollider : MonoBehaviour
                     PlayersTurnManager.IsCommandPhase = true;
                 }
             }
+        }
+    }
+
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        if (PlayerUtils.IsCurrentPlayerPosition(this.gameObject, PlayerFieldPositionEnum.RUNNER) && IsBaseTile(collision.gameObject.name))
+        {
+            PlayerStatus playerStatusScript = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
+            RunnerBehaviour runnerBehaviourScript = ((RunnerBehaviour)PlayerUtils.FetchCorrespondingPlayerBehaviourScript(this.gameObject, playerStatusScript));
+            runnerBehaviourScript.ToggleRunnerSafeStatus();
+        }
+    }
+
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        if (PlayerUtils.IsCurrentPlayerPosition(this.gameObject, PlayerFieldPositionEnum.RUNNER) && IsBaseTile(collision.gameObject.name))
+        {
+            PlayerStatus playerStatusScript = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
+            RunnerBehaviour runnerBehaviourScript = ((RunnerBehaviour)PlayerUtils.FetchCorrespondingPlayerBehaviourScript(this.gameObject, playerStatusScript));
+            runnerBehaviourScript.ToggleRunnerSafeStatus();
         }
     }
 

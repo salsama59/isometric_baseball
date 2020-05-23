@@ -147,6 +147,21 @@ public class PlayerUtils : MonoBehaviour
         return currentPlayerStatusScript.PlayerFieldPosition.Equals(playerFieldPositionToTest);
     }
 
+
+    public static bool HasFielderPosition(GameObject player)
+    {
+        PlayerStatus currentPlayerStatusScript = FetchPlayerStatusScript(player);
+        PlayerFieldPositionEnum playerPosition = currentPlayerStatusScript.PlayerFieldPosition;
+
+        return playerPosition == PlayerFieldPositionEnum.CENTER_FIELDER
+            || playerPosition == PlayerFieldPositionEnum.LEFT_FIELDER
+            || playerPosition == PlayerFieldPositionEnum.RIGHT_FIELDER
+            || playerPosition == PlayerFieldPositionEnum.SECOND_BASEMAN
+            || playerPosition == PlayerFieldPositionEnum.SHORT_STOP
+            || playerPosition == PlayerFieldPositionEnum.THIRD_BASEMAN
+            || playerPosition == PlayerFieldPositionEnum.FIRST_BASEMAN;
+    }
+
     public static List<GameObject> GetRunnersOnField()
     {
         return GameObject.FindGameObjectsWithTag(TagsConstants.BASEBALL_PLAYER_TAG)

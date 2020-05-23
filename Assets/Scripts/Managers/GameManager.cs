@@ -30,8 +30,8 @@ public class GameManager : MonoBehaviour
         CameraController cameraController = CameraUtils.FetchCameraController();
         cameraController.BallGameObject = ball;
 
-        PlayerEnum playerEnum = PlayerEnum.PLAYER_1;
-        TeamIdEnum teamIdEnum = TeamIdEnum.TEAM_1;
+        PlayerEnum playerEnum;
+        TeamIdEnum teamIdEnum;
 
         for (int i = 0; i < GameData.playerNumber; i++)
         {
@@ -70,7 +70,7 @@ public class GameManager : MonoBehaviour
     }
 
 
-    private List<PlayerFieldPositionEnum> GetEligibleplayerFieldPositionList(PlayerEnum playerEnum)
+    private List<PlayerFieldPositionEnum> GetEligiblePlayerFieldPositionList(PlayerEnum playerEnum)
     {
 
         List<PlayerFieldPositionEnum> playerFieldPositions = new List<PlayerFieldPositionEnum>();
@@ -103,7 +103,7 @@ public class GameManager : MonoBehaviour
     private void SetPlayersCharacteristics(PlayerEnum playerId, GameObject ball)
     {
 
-        List<PlayerFieldPositionEnum> eligibilityList = this.GetEligibleplayerFieldPositionList(playerId);
+        List<PlayerFieldPositionEnum> eligibilityList = this.GetEligiblePlayerFieldPositionList(playerId);
 
         GameData.playerEligibilityMap.Add(playerId, eligibilityList);
 

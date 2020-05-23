@@ -42,14 +42,6 @@ public class RunnerBehaviour : GenericPlayerBehaviour
             }
             
         }
-        /*else
-        {
-            PlayerStatus playerStatus = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
-            if (playerStatus.IsAllowedToMove)
-            {
-                this.InitiateRunnerAction(playerStatus);
-            }
-        }*/
     }
 
     private void InitiateRunnerAction(PlayerStatus playerStatus)

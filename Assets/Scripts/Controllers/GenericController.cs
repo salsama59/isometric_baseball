@@ -7,11 +7,9 @@ public abstract class GenericController : MonoBehaviour
 {
     private bool allowDiagonals = false;
     private bool correctDiagonalSpeed = false;
-    private Vector3 startPosition;
-    private Vector3 endPosition;
     private float t;
     private float factor;
-    private float moveSpeed = 0.2f;
+    protected float moveSpeed = 0.2f;
     private float gridSize = 1f;
     private bool isMoving = false;
     private IsometricCharacterRenderer isoRenderer;
@@ -35,7 +33,7 @@ public abstract class GenericController : MonoBehaviour
         while (t < 1f)
         {
 
-            yield return new WaitUntil(() => !PlayersTurnManager.IsCommandPhase);
+            yield return new WaitUntil(() => !PlayersTurnManager.IsCommandPhase && !GameData.isPaused);
             
             t += Time.deltaTime * (moveSpeed / gridSize) * factor;
             transform.position = Vector3.Lerp(startPosition, endPosition, t);
@@ -69,7 +67,6 @@ public abstract class GenericController : MonoBehaviour
             yield return null;
         }
 
-        IsMoveCanceled = false;
         IsMoving = false;
         yield return 0;
     }

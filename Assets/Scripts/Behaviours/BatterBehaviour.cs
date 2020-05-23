@@ -46,7 +46,7 @@ public class BatterBehaviour : GenericPlayerBehaviour
 
     private void DoBattingAction(BallController ballControllerScript, PlayerStatus playerStatusScript, float pitchSuccesRate)
     {
-        if (!ActionCalculationUtils.HasActionSucceeded(pitchSuccesRate))
+        if (/*!ActionCalculationUtils.HasActionSucceeded(pitchSuccesRate)*/true)
         {
             Debug.Log("Pitch has not succeed");
             Debug.Log("Batter has hit the ball");
@@ -64,6 +64,7 @@ public class BatterBehaviour : GenericPlayerBehaviour
             PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
             playersTurnManager.turnState = TurnStateEnum.STANDBY;
             RunnerBehaviour runnerBehaviour = this.gameObject.AddComponent<RunnerBehaviour>();
+            runnerBehaviour.EquipedBat = bat;
             PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
             PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(this.gameObject);
             playerAbilities.PlayerAbilityList.Clear();
@@ -71,7 +72,6 @@ public class BatterBehaviour : GenericPlayerBehaviour
             playerAbilities.AddAbility(runPlayerAbility);
             playerStatusScript.IsAllowedToMove = true;
             runnerBehaviour.EnableMovement = true;
-            //PlayersTurnManager.IsCommandPhase = false;
         }
         else
         {

@@ -21,7 +21,7 @@ public class PlayerActionsManager : MonoBehaviour
     public void CatchBallAction()
     {
         //CATCHER TURN
-        GameObject catcher = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.CATCHER, PlayerEnum.PLAYER_1);
+        GameObject catcher = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.CATCHER, TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum.CATCHER));
         PlayerStatus catcherStatusScript = PlayerUtils.FetchPlayerStatusScript(catcher);
         CatcherBehaviour genericCatcherBehaviourScript = ((CatcherBehaviour)PlayerUtils.FetchCorrespondingPlayerBehaviourScript(catcher, catcherStatusScript));
         genericCatcherBehaviourScript.CalculateCatcherColliderInterraction(PitcherGameObject, ballGameObject, ballControllerScript);
@@ -30,7 +30,7 @@ public class PlayerActionsManager : MonoBehaviour
     public void HitBallAction()
     {
         //BATTER TURN
-        GameObject batter = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.BATTER, PlayerEnum.PLAYER_1);
+        GameObject batter = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.BATTER, TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum.BATTER));
         BatterBehaviour batterBehaviourScript = PlayerUtils.FetchBatterBehaviourScript(batter);
         Debug.Log("Activate batter action");
 
@@ -48,7 +48,7 @@ public class PlayerActionsManager : MonoBehaviour
     {
         //RUNNER TURN
         Debug.Log("Runner choice!!!!");
-        GameObject runner = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.RUNNER, PlayerEnum.PLAYER_1);
+        GameObject runner = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.RUNNER, TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum.RUNNER));
         PlayerStatus runnerStatusScript = PlayerUtils.FetchPlayerStatusScript(runner);
         RunnerBehaviour genericRunnerBehaviourScript = ((RunnerBehaviour)PlayerUtils.FetchCorrespondingPlayerBehaviourScript(runner, runnerStatusScript));
         BaseEnum baseEnum = genericRunnerBehaviourScript.NextBase;

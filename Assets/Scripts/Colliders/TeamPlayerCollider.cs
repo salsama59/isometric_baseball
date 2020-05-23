@@ -15,14 +15,12 @@ public class TeamPlayerCollider : MonoBehaviour
         {
             GameObject ballGameObject = collision.collider.gameObject;
             BallController ballControllerScript = BallUtils.FetchBallControllerScript(ballGameObject);
-            //GameObject pitcherGameObject = ballControllerScript.CurrentPitcher;
 
             if (PlayerUtils.IsCurrentPlayerPosition(this.gameObject, PlayerFieldPositionEnum.CATCHER))
             {
                 PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
                 playersTurnManager.turnState = TurnStateEnum.CATCHER_TURN;
                 PlayersTurnManager.IsCommandPhase = true;
-                //((CatcherBehaviour)genericPlayerBehaviourScript).CalculateCatcherColliderInterraction(pitcherGameObject, ballGameObject, ballControllerScript);
             }
             else if(PlayerUtils.IsCurrentPlayerPosition(this.gameObject, PlayerFieldPositionEnum.FIRST_BASEMAN) || PlayerUtils.IsCurrentPlayerPosition(this.gameObject, PlayerFieldPositionEnum.THIRD_BASEMAN))
             {
@@ -31,7 +29,16 @@ public class TeamPlayerCollider : MonoBehaviour
         }
         else if (this.HasPlayerCollided(collision))
         {
-            return;
+            Debug.Log("I've collided with a player");
+            Debug.Log("As a fielder => " + PlayerUtils.HasFielderPosition(this.gameObject));
+            Debug.Log("And I'm holding the ball => " + genericPlayerBehaviourScript.IsHoldingBall);
+            Debug.Log("I colided with a Runner => " + PlayerUtils.IsCurrentPlayerPosition(collision.gameObject, PlayerFieldPositionEnum.RUNNER));
+            if (PlayerUtils.HasFielderPosition(this.gameObject) && genericPlayerBehaviourScript.IsHoldingBall && PlayerUtils.IsCurrentPlayerPosition(collision.gameObject, PlayerFieldPositionEnum.RUNNER))
+            {
+                Debug.Log("I am a fielder who's holding the ball and collided with a runner");
+                ((FielderBehaviour)genericPlayerBehaviourScript).TagOutRunner(collision.transform.gameObject);
+                Debug.Log("The fielder tagout the runner");
+            }
         }
         else
         {
@@ -67,8 +74,6 @@ public class TeamPlayerCollider : MonoBehaviour
                     playersTurnManager.turnState = TurnStateEnum.RUNNER_TURN;
                     PlayersTurnManager.IsCommandPhase = true;
                 }
-
-                //((RunnerBehaviour)genericPlayerBehaviourScript).CalculateRunnerColliderInterraction(FieldUtils.GetTileEnumFromName(collision.gameObject.name));
             }
         }
     }

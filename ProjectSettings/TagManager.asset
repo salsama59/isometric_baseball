@@ -23,6 +23,7 @@ TagManager:
   - TeamTwoScore
   - TeamOneScore
   - TeamsInformationsPanel
+  - DialogBoxManager
   layers:
   - Default
   - TransparentFX

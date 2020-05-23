@@ -16,7 +16,6 @@ public class CommandMenuManager : MonoBehaviour
     private List<GameObject> subMenuButtons;
     private List<GameObject> menuButtons;
 
-
     private void Start()
     {
         PlayersTurnManager = GameUtils.FetchPlayersTurnManager();

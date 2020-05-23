@@ -15,15 +15,14 @@ public class BallController : GenericController
     public void Start()
     {
         BallAnimator = this.GetComponent<Animator>();
-        IsHeld = false;
-        //IsThrown = true;
         Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetHomeBaseTilePosition());
+        moveSpeed = 0.6f;
     }
 
     // Update is called once per frame
     public void Update()
     {
-        if (!IsMoving && !PlayersTurnManager.IsCommandPhase)
+        if (!IsMoving && !PlayersTurnManager.IsCommandPhase && !GameData.isPaused)
         {
             BallAnimator.enabled = true;
 
@@ -33,16 +32,12 @@ public class BallController : GenericController
                 IsThrown = false;
                 IsBeingHitten = false;
             }
-            else if (IsHeld)
-            {
-                this.transform.position = CurrentHolder.transform.position;
-            }
             else
             {
                 BallAnimator.enabled = false;
             }
         }
-        else if (IsMoving && PlayersTurnManager.IsCommandPhase)
+        else if (IsMoving && PlayersTurnManager.IsCommandPhase || GameData.isPaused)
         {
             BallAnimator.enabled = false;
         }

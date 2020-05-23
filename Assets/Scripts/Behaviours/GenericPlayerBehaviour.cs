@@ -19,6 +19,7 @@ public abstract class GenericPlayerBehaviour : MonoBehaviour
     private IsometricCharacterRenderer isoRenderer;
     private Nullable<Vector3> target;
     private bool isMoveCanceled;
+    private GameObject equipedBat;
 
     public virtual void Start()
     {
@@ -83,7 +84,7 @@ public abstract class GenericPlayerBehaviour : MonoBehaviour
 
     protected void MovePlayer()
     {
-        if (!PlayersTurnManager.IsCommandPhase)
+        if (!PlayersTurnManager.IsCommandPhase && !GameData.isPaused)
         {
             IsoRenderer.Animator.enabled = true;
             transform.position = Vector3.MoveTowards(transform.position, Target.Value, this.MoveSpeed * Time.deltaTime);
@@ -132,4 +133,5 @@ public abstract class GenericPlayerBehaviour : MonoBehaviour
     public GameObject TargetPlayerToTagOut { get => targetPlayerToTagOut; set => targetPlayerToTagOut = value; }
     public bool IsHoldingBall { get => isHoldingBall; set => isHoldingBall = value; }
     public float MoveSpeed { get => moveSpeed; set => moveSpeed = value; }
+    public GameObject EquipedBat { get => equipedBat; set => equipedBat = value; }
 }

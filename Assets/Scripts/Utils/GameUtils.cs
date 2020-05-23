@@ -38,4 +38,11 @@ public class GameUtils : MonoBehaviour
         TeamsScoreManager teamsScoreManager = teamsScoreManagerObject.GetComponent<TeamsScoreManager>();
         return teamsScoreManager;
     }
+
+    public static DialogBoxManager FetchDialogBoxManager()
+    {
+        GameObject dialogBoxManagerObject = GameObject.FindGameObjectWithTag(TagsConstants.DIALOG_BOX_MANAGER);
+        DialogBoxManager dialogBoxManager = dialogBoxManagerObject.GetComponent<DialogBoxManager>();
+        return dialogBoxManager;
+    }
 }

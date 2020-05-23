@@ -11,6 +11,7 @@ public class RunnerBehaviour : GenericPlayerBehaviour
     private bool hasReachedThirdBase = false;
     private bool hasReachedHomeBase = false;
     private bool enableMovement = false;
+    private bool isSafe = false;
 
     public override void Start()
     {
@@ -46,19 +47,20 @@ public class RunnerBehaviour : GenericPlayerBehaviour
 
     private void InitiateRunnerAction(PlayerStatus playerStatus)
     {
-        Nullable<Vector3> targetPosition = new Nullable<Vector3>();
+        Nullable<Vector3> targetPosition;
         targetPosition = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetFirstBaseTilePosition());
         this.CurrentBase = BaseEnum.NONE;
         this.NextBase = BaseEnum.HOME_BASE;
         Target = targetPosition;
     }
 
-    public void CalculateRunnerColliderInterraction(BaseEnum baseReached)
+    public void CalculateRunnerColliderInterraction(BaseEnum baseReached, bool isStaying)
     {
 
         this.CurrentBase = baseReached;
 
         PlayerStatus playerStatusScript = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
+        this.EnableMovement = false;
 
         switch (baseReached)
         {
@@ -67,10 +69,13 @@ public class RunnerBehaviour : GenericPlayerBehaviour
                 if (baseReached == BaseEnum.HOME_BASE && !this.HasPassedThroughThreeFirstBases())
                 {
                     Debug.Log("Get on HOME BASE FIRST TIME !!");
-                    this.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetFirstBaseTilePosition());
+                    if (!isStaying)
+                    {
+                        this.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetFirstBaseTilePosition());
+                        this.EnableMovement = true;
+                    }
                     this.NextBase = BaseEnum.FIRST_BASE;
                     this.HasReachedFirstBase = true;
-                    EnableMovement = true;
                 }
                 else
                 {
@@ -90,24 +95,33 @@ public class RunnerBehaviour : GenericPlayerBehaviour
                 break;
             case BaseEnum.FIRST_BASE:
                 Debug.Log("Get on FIRST BASE");
-                this.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetSecondBaseTilePosition());
+                if (!isStaying)
+                {
+                    this.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetSecondBaseTilePosition());
+                    this.EnableMovement = true;
+                }
                 this.NextBase = BaseEnum.SECOND_BASE;
                 this.HasReachedFirstBase = true;
-                EnableMovement = true;
                 break;
             case BaseEnum.SECOND_BASE:
                 Debug.Log("Get on SECOND BASE");
-                this.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetThirdBaseTilePosition());
+                if (!isStaying)
+                {
+                    this.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetThirdBaseTilePosition());
+                    this.EnableMovement = true;
+                }
                 this.NextBase = BaseEnum.THIRD_BASE;
                 this.HasReachedSecondBase = true;
-                EnableMovement = true;
                 break;
             case BaseEnum.THIRD_BASE:
                 Debug.Log("Get on THIRD BASE");
-                this.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetHomeBaseTilePosition());
+                if (!isStaying)
+                {
+                    this.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetHomeBaseTilePosition());
+                    this.EnableMovement = true;
+                }
                 this.NextBase = BaseEnum.HOME_BASE;
                 this.HasReachedThirdBase = true;
-                EnableMovement = true;
                 break;
             default:
                 Debug.Log("DO NOT KNOW WHAT HAPPEN");
@@ -124,9 +138,15 @@ public class RunnerBehaviour : GenericPlayerBehaviour
         return this.HasReachedFirstBase && this.HasReachedSecondBase && this.HasReachedThirdBase;
     }
 
+    public void ToggleRunnerSafeStatus()
+    {
+        this.IsSafe = !this.IsSafe;
+    }
+
     public bool HasReachedFirstBase { get => hasReachedFirstBase; set => hasReachedFirstBase = value; }
     public bool HasReachedSecondBase { get => hasReachedSecondBase; set => hasReachedSecondBase = value; }
     public bool HasReachedThirdBase { get => hasReachedThirdBase; set => hasReachedThirdBase = value; }
     public bool HasReachedHomeBase { get => hasReachedHomeBase; set => hasReachedHomeBase = value; }
     public bool EnableMovement { get => enableMovement; set => enableMovement = value; }
+    public bool IsSafe { get => isSafe; set => isSafe = value; }
 }

@@ -46,7 +46,7 @@ public class BatterBehaviour : GenericPlayerBehaviour
 
     private void DoBattingAction(BallController ballControllerScript, PlayerStatus playerStatusScript, float pitchSuccesRate)
     {
-        if (/*!ActionCalculationUtils.HasActionSucceeded(pitchSuccesRate)*/true)
+        if (!ActionCalculationUtils.HasActionSucceeded(pitchSuccesRate))
         {
             Debug.Log("Pitch has not succeed");
             Debug.Log("Batter has hit the ball");
@@ -69,7 +69,9 @@ public class BatterBehaviour : GenericPlayerBehaviour
             PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(this.gameObject);
             playerAbilities.PlayerAbilityList.Clear();
             PlayerAbility runPlayerAbility = new PlayerAbility("Run to next base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.RunAction);
+            PlayerAbility StaySafePlayerAbility = new PlayerAbility("Stay on base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.StayAction);
             playerAbilities.AddAbility(runPlayerAbility);
+            playerAbilities.AddAbility(StaySafePlayerAbility);
             playerStatusScript.IsAllowedToMove = true;
             runnerBehaviour.EnableMovement = true;
         }

@@ -21,7 +21,7 @@ public class FielderBehaviour : GenericPlayerBehaviour
 
     public void Update()
     {
-        if (TargetPlayerToTagOut != null && (PlayerUtils.IsCurrentPlayerPosition(this.gameObject, PlayerFieldPositionEnum.FIRST_BASEMAN) || PlayerUtils.IsCurrentPlayerPosition(this.gameObject, PlayerFieldPositionEnum.THIRD_BASEMAN)))
+        if (TargetPlayerToTagOut != null && PlayerUtils.HasFielderPosition(this.gameObject))
         {
             Target = TargetPlayerToTagOut.transform.position;
         }
@@ -36,12 +36,12 @@ public class FielderBehaviour : GenericPlayerBehaviour
             PlayerStatus playerStatus = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
             if (playerStatus.IsAllowedToMove)
             {
-                this.InitiateFielderAction(playerStatus);
+                this.InitiateFielderAction();
             }
         }
     }
 
-    private void InitiateFielderAction(PlayerStatus playerStatus)
+    private void InitiateFielderAction()
     {
         Nullable<Vector3> targetPosition = new Nullable<Vector3>();
 
@@ -111,6 +111,7 @@ public class FielderBehaviour : GenericPlayerBehaviour
         ballControllerScript.IsHeld = false;
         ballControllerScript.IsThrown = false;
         ballControllerScript.IsMoving = false;
+        ballControllerScript.IsTargetedByFielder = false;
 
         //Update taged out runner and new batter informations
         tagedOutRunnerStatus.IsAllowedToMove = false;
@@ -154,6 +155,8 @@ public class FielderBehaviour : GenericPlayerBehaviour
 
     public void CalculateFielderTriggerInterraction(GameObject ballGameObject, GenericPlayerBehaviour genericPlayerBehaviourScript, PlayerStatus playerStatus)
     {
+        BallController ballControlerScript = BallUtils.FetchBallControllerScript(ballGameObject);
+        ballControlerScript.IsTargetedByFielder = true;
         genericPlayerBehaviourScript.HasSpottedBall = true;
         playerStatus.IsAllowedToMove = true;
         genericPlayerBehaviourScript.Target = ballGameObject.transform.position;

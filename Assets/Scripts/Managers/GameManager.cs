@@ -216,6 +216,11 @@ public class GameManager : MonoBehaviour
                     genericPlayerBehaviourScript.FieldBall = ball;
                 }
 
+                if (PlayerUtils.HasFielderPosition(player))
+                {
+                    TeamUtils.fielderList.Add(player);
+                }
+
 
                 TeamUtils.AddPlayerTeamMember(entry.Key, player, playerId);
             }

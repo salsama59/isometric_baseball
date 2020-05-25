@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using System;
 
 public class TeamUtils : MonoBehaviour
 {
@@ -19,6 +21,8 @@ public class TeamUtils : MonoBehaviour
     };
     private static Dictionary<int, GameObject> player1Team = new Dictionary<int, GameObject>();
     private static Dictionary<int, GameObject> player2Team = new Dictionary<int, GameObject>();
+
+    public static List<GameObject> fielderList = new List<GameObject>();
 
     public static void AddPlayerTeamMember(PlayerFieldPositionEnum playerTeamMemberPosition, GameObject teamMemberGameObject, PlayerEnum playerId)
     {
@@ -45,7 +49,7 @@ public class TeamUtils : MonoBehaviour
 
     public static GameObject GetPlayerTeamMember(PlayerFieldPositionEnum playerTeamMemberPosition, PlayerEnum playerId)
     {
-        GameObject playerTeamMember = null;
+        GameObject playerTeamMember;
         int positionId = (int)playerTeamMemberPosition;
         playerTeamMember = GetPlayerTeam(playerId)[positionId];
         return playerTeamMember;
@@ -87,5 +91,30 @@ public class TeamUtils : MonoBehaviour
     public static void ClearPlayerTeam(PlayerEnum playerId)
     {
         GetPlayerTeam(playerId).Clear();
+    }
+
+    public static GameObject GetNearestPlayerFromBall(GameObject ball)
+    {
+        Nullable<float> nearestDistance = null;
+        GameObject nearestFielder = null;
+
+        foreach (GameObject fielderGameObject in fielderList)
+        {
+            float distance = Vector3.Distance(ball.transform.position, fielderGameObject.transform.position);
+
+            if (!nearestDistance.HasValue)
+            {
+                nearestDistance = distance;
+                nearestFielder = fielderGameObject;
+            }
+
+            if(distance < nearestDistance)
+            {
+                nearestDistance = distance;
+                nearestFielder = fielderGameObject;
+            }
+        }
+
+        return nearestFielder;
     }
 }

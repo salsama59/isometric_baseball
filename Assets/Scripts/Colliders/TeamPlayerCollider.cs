@@ -22,7 +22,7 @@ public class TeamPlayerCollider : MonoBehaviour
                 playersTurnManager.turnState = TurnStateEnum.CATCHER_TURN;
                 PlayersTurnManager.IsCommandPhase = true;
             }
-            else if(PlayerUtils.IsCurrentPlayerPosition(this.gameObject, PlayerFieldPositionEnum.FIRST_BASEMAN) || PlayerUtils.IsCurrentPlayerPosition(this.gameObject, PlayerFieldPositionEnum.THIRD_BASEMAN))
+            else if(PlayerUtils.HasFielderPosition(this.gameObject))
             {
                 ((FielderBehaviour)genericPlayerBehaviourScript).CalculateFielderColliderInterraction(ballGameObject, ballControllerScript, genericPlayerBehaviourScript);
             }
@@ -104,11 +104,17 @@ public class TeamPlayerCollider : MonoBehaviour
         {
             GameObject ballGameObject = collision.gameObject;
             BallController ballControlerScript =  BallUtils.FetchBallControllerScript(ballGameObject);
-            PlayerStatus playerStatus = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
-            GenericPlayerBehaviour genericPlayerBehaviourScript = PlayerUtils.FetchCorrespondingPlayerBehaviourScript(this.gameObject, playerStatus);
-            if (!ballControlerScript.IsMoving && PlayerUtils.IsCurrentPlayerPosition(this.gameObject, PlayerFieldPositionEnum.FIRST_BASEMAN) || !ballControlerScript.IsMoving && PlayerUtils.IsCurrentPlayerPosition(this.gameObject, PlayerFieldPositionEnum.THIRD_BASEMAN))
+            PlayerStatus currentFielderStatus = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
+            GenericPlayerBehaviour genericPlayerBehaviourScript = PlayerUtils.FetchCorrespondingPlayerBehaviourScript(this.gameObject, currentFielderStatus);
+            if (!ballControlerScript.IsMoving && !ballControlerScript.IsTargetedByFielder && PlayerUtils.HasFielderPosition(this.gameObject))
             {
-                ((FielderBehaviour)genericPlayerBehaviourScript).CalculateFielderTriggerInterraction(ballGameObject, genericPlayerBehaviourScript, playerStatus);
+                GameObject nearestFielder = TeamUtils.GetNearestPlayerFromBall(ballGameObject);
+                PlayerStatus nearestFielderStatus = PlayerUtils.FetchPlayerStatusScript(nearestFielder);
+
+                if (nearestFielderStatus.PlayerFieldPosition == currentFielderStatus.PlayerFieldPosition)
+                {
+                    ((FielderBehaviour)genericPlayerBehaviourScript).CalculateFielderTriggerInterraction(ballGameObject, genericPlayerBehaviourScript, currentFielderStatus);
+                }
             }
         }
     }

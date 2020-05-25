@@ -10,6 +10,7 @@ public class BallController : GenericController
     private bool isHeld;
     private GameObject currentHolder;
     private Animator ballAnimator;
+    private bool isTargetedByFielder;
 
     // Start is called before the first frame update
     public void Start()
@@ -49,4 +50,5 @@ public class BallController : GenericController
     public bool IsHeld { get => isHeld; set => isHeld = value; }
     public GameObject CurrentHolder { get => currentHolder; set => currentHolder = value; }
     public Animator BallAnimator { get => ballAnimator; set => ballAnimator = value; }
+    public bool IsTargetedByFielder { get => isTargetedByFielder; set => isTargetedByFielder = value; }
 }

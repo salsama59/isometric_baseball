@@ -51,9 +51,9 @@ public class FielderBehaviour : GenericPlayerBehaviour
         }
         else if (!FieldBall.activeInHierarchy && IsHoldingBall)
         {
-            //TODO find the nearest runner on field
-            List<GameObject> runners = PlayerUtils.GetRunnersOnField();
-            TargetPlayerToTagOut = runners.First();
+            //Find the nearest runner on field
+            GameObject nearestRunner = TeamUtils.GetNearestRunerFromFielder(this.gameObject);
+            TargetPlayerToTagOut = nearestRunner;
             targetPosition = TargetPlayerToTagOut.transform.position;
         }
 

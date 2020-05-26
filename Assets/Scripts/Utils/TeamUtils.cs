@@ -93,7 +93,7 @@ public class TeamUtils : MonoBehaviour
         GetPlayerTeam(playerId).Clear();
     }
 
-    public static GameObject GetNearestPlayerFromBall(GameObject ball)
+    public static GameObject GetNearestFielderFromBall(GameObject ball)
     {
         Nullable<float> nearestDistance = null;
         GameObject nearestFielder = null;
@@ -116,5 +116,31 @@ public class TeamUtils : MonoBehaviour
         }
 
         return nearestFielder;
+    }
+
+    public static GameObject GetNearestRunerFromFielder(GameObject fielder)
+    {
+        Nullable<float> nearestDistance = null;
+        GameObject nearestRunner = null;
+
+        List<GameObject> runnerList = PlayerUtils.GetRunnersOnField();
+        foreach (GameObject runnerGameObject in runnerList)
+        {
+            float distance = Vector3.Distance(fielder.transform.position, runnerGameObject.transform.position);
+
+            if (!nearestDistance.HasValue)
+            {
+                nearestDistance = distance;
+                nearestRunner = runnerGameObject;
+            }
+
+            if (distance < nearestDistance)
+            {
+                nearestDistance = distance;
+                nearestRunner = runnerGameObject;
+            }
+        }
+
+        return nearestRunner;
     }
 }

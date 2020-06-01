@@ -15,7 +15,7 @@ public class CatcherBehaviour : GenericPlayerBehaviour
         Debug.Log("catchSuccesRate = " + catchSuccesRate);
         if (!ActionCalculationUtils.HasActionSucceeded(catchSuccesRate))
         {
-            ballControllerScript.IsThrown = true;
+            ballControllerScript.IsPitched = true;
             ballControllerScript.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetCathcherOutBallZonePosition());
         }
         else

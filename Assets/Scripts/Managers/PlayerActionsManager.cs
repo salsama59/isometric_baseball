@@ -15,7 +15,8 @@ public class PlayerActionsManager : MonoBehaviour
         //PITCHER TURN
         //literaly throw the ball!!!
         ballGameObject.SetActive(true);
-        BallControllerScript.IsThrown = true;
+        BallControllerScript.BallHeight = BallHeightEnum.LOW;
+        BallControllerScript.IsPitched = true;
     }
 
     public void CatchBallAction()

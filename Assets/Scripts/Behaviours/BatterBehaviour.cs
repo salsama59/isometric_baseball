@@ -80,7 +80,7 @@ public class BatterBehaviour : GenericPlayerBehaviour
             Debug.Log("Pitch has succeeded");
             Debug.Log("Batter has not hit the ball");
             Debug.Log("Go to the catcher");
-            ballControllerScript.IsThrown = true;
+            ballControllerScript.IsPitched = true;
             ballControllerScript.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetCatcherZonePosition());
         }
     }

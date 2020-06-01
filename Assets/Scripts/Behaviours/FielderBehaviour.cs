@@ -70,6 +70,7 @@ public class FielderBehaviour : GenericPlayerBehaviour
 
     public void CalculateFielderColliderInterraction(GameObject ballGameObject, BallController ballControllerScript, GenericPlayerBehaviour genericPlayerBehaviourScript)
     {
+        ballControllerScript.BallHeight = BallHeightEnum.NONE;
         ballGameObject.transform.SetParent(this.gameObject.transform);
         ballGameObject.SetActive(false);
         ballControllerScript.CurrentHolder = this.gameObject;
@@ -103,13 +104,14 @@ public class FielderBehaviour : GenericPlayerBehaviour
 
         //Update ball informations
         BallController ballControllerScript =  BallUtils.FetchBallControllerScript(FieldBall);
+        ballControllerScript.BallHeight = BallHeightEnum.NONE;
         FieldBall.transform.position = ballControllerScript.CurrentPitcher.transform.position;
         ballControllerScript.CurrentHolder = null;
         ballControllerScript.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetHomeBaseTilePosition());
         //No parent
         FieldBall.transform.SetParent(null);
         ballControllerScript.IsHeld = false;
-        ballControllerScript.IsThrown = false;
+        ballControllerScript.IsPitched = false;
         ballControllerScript.IsMoving = false;
         ballControllerScript.IsTargetedByFielder = false;
 

@@ -106,7 +106,7 @@ public class TeamPlayerCollider : MonoBehaviour
             BallController ballControlerScript =  BallUtils.FetchBallControllerScript(ballGameObject);
             PlayerStatus currentFielderStatus = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
             GenericPlayerBehaviour genericPlayerBehaviourScript = PlayerUtils.FetchCorrespondingPlayerBehaviourScript(this.gameObject, currentFielderStatus);
-            if (!ballControlerScript.IsMoving && !ballControlerScript.IsTargetedByFielder && PlayerUtils.HasFielderPosition(this.gameObject))
+            if (!ballControlerScript.IsMoving && !ballControlerScript.IsHit && !ballControlerScript.IsPitched && !ballControlerScript.IsTargetedByFielder && PlayerUtils.HasFielderPosition(this.gameObject))
             {
                 GameObject nearestFielder = TeamUtils.GetNearestFielderFromBall(ballGameObject);
                 PlayerStatus nearestFielderStatus = PlayerUtils.FetchPlayerStatusScript(nearestFielder);

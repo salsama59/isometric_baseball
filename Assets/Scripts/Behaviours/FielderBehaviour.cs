@@ -21,9 +21,14 @@ public class FielderBehaviour : GenericPlayerBehaviour
 
     public void Update()
     {
+        BallController ballControlerScript = BallUtils.FetchBallControllerScript(FieldBall);
         if (TargetPlayerToTagOut != null && PlayerUtils.HasFielderPosition(this.gameObject))
         {
             Target = TargetPlayerToTagOut.transform.position;
+        }
+        else if (HasSpottedBall && FieldBall.activeInHierarchy && !IsHoldingBall && ballControlerScript.IsTargetedByFielder)
+        {
+            Target = FieldBall.transform.position;
         }
 
         if (Target.HasValue && Target.Value != this.transform.position)
@@ -44,7 +49,7 @@ public class FielderBehaviour : GenericPlayerBehaviour
     private void InitiateFielderAction()
     {
         Nullable<Vector3> targetPosition = new Nullable<Vector3>();
-
+        BallController ballControlerScript = BallUtils.FetchBallControllerScript(FieldBall);
         if (FieldBall.activeInHierarchy && !HasSpottedBall)
         {
             GetAngleToLookAt();
@@ -55,6 +60,10 @@ public class FielderBehaviour : GenericPlayerBehaviour
             GameObject nearestRunner = TeamUtils.GetNearestRunerFromFielder(this.gameObject);
             TargetPlayerToTagOut = nearestRunner;
             targetPosition = TargetPlayerToTagOut.transform.position;
+        }
+        else if (HasSpottedBall && FieldBall.activeInHierarchy && !IsHoldingBall && ballControlerScript.IsTargetedByFielder)
+        {
+            targetPosition = FieldBall.transform.position;
         }
 
         Target = targetPosition;
@@ -114,6 +123,7 @@ public class FielderBehaviour : GenericPlayerBehaviour
         ballControllerScript.IsPitched = false;
         ballControllerScript.IsMoving = false;
         ballControllerScript.IsTargetedByFielder = false;
+        ballControllerScript.EnableMovement = true;
 
         //Update taged out runner and new batter informations
         tagedOutRunnerStatus.IsAllowedToMove = false;
@@ -137,7 +147,6 @@ public class FielderBehaviour : GenericPlayerBehaviour
         playerAbilities.AddAbility(hitBallPlayerAbility);
 
         //Update fielder informations
-        //FielderBehaviour FielderBehaviourScript = PlayerUtils.FetchFielderBehaviourScript(this.gameObject);
         fielderPlayerStatus.IsAllowedToMove = false;
         this.HasSpottedBall = false;
         this.Target = null;

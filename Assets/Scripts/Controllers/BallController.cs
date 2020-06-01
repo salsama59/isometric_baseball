@@ -7,7 +7,7 @@ public class BallController : MonoBehaviour
 {
     private bool isPitched;
     private GameObject currentPitcher;
-    private bool isBeingHitten;
+    private bool isHit;
     private bool isHeld;
     private GameObject currentHolder;
     private Animator ballAnimator;
@@ -22,6 +22,8 @@ public class BallController : MonoBehaviour
     private float gridSize = 1f;
     private bool isMoving = false;
     private Nullable<Vector3> target;
+    private bool enableMovement = true;
+    private Coroutine movementCoroutine;
 
     // Start is called before the first frame update
     public void Start()
@@ -35,16 +37,14 @@ public class BallController : MonoBehaviour
     // Update is called once per frame
     public void Update()
     {
-        if (!IsMoving && !PlayersTurnManager.IsCommandPhase && !GameData.isPaused)
+        if (EnableMovement && !IsMoving && !PlayersTurnManager.IsCommandPhase && !GameData.isPaused)
         {
             //Move inside first if statement to avoid graphical bugs
             BallAnimator.enabled = true;
-
-            if ((IsPitched && Target.HasValue && Target.Value != this.transform.position) || IsBeingHitten)
+            if (Target.HasValue && Target.Value != this.transform.position)
             {
-                StartCoroutine(Move(transform.position, Target.Value, IsBeingHitten));
-                IsPitched = false;
-                IsBeingHitten = false;
+                MovementCoroutine = StartCoroutine(Move(transform.position, Target.Value, IsHit));
+                EnableMovement = false;
             }
             else
             {
@@ -54,6 +54,11 @@ public class BallController : MonoBehaviour
         else if (IsMoving && PlayersTurnManager.IsCommandPhase || GameData.isPaused)
         {
             BallAnimator.enabled = false;
+        }
+
+        if(BallHeight == BallHeightEnum.GROUNDED)
+        {
+            IsHit = false;
         }
     }
 
@@ -89,7 +94,6 @@ public class BallController : MonoBehaviour
 
     private IEnumerator Move(Vector3 startPosition, Vector3 endPosition, bool enableHeightVariation)
     {
-        IsMoving = true;
         t = 0;
 
         if (allowDiagonals && correctDiagonalSpeed)
@@ -123,13 +127,14 @@ public class BallController : MonoBehaviour
 
     public bool IsMoving { get => isMoving; set => isMoving = value; }
     public Nullable<Vector3> Target { get => target; set => target = value; }
-
     public bool IsPitched { get => isPitched; set => isPitched = value; }
     public GameObject CurrentPitcher { get => currentPitcher; set => currentPitcher = value; }
-    public bool IsBeingHitten { get => isBeingHitten; set => isBeingHitten = value; }
+    public bool IsHit { get => isHit; set => isHit = value; }
     public bool IsHeld { get => isHeld; set => isHeld = value; }
     public GameObject CurrentHolder { get => currentHolder; set => currentHolder = value; }
     public Animator BallAnimator { get => ballAnimator; set => ballAnimator = value; }
     public bool IsTargetedByFielder { get => isTargetedByFielder; set => isTargetedByFielder = value; }
     public BallHeightEnum BallHeight { get => ballHeight; set => ballHeight = value; }
+    public bool EnableMovement { get => enableMovement; set => enableMovement = value; }
+    public Coroutine MovementCoroutine { get => movementCoroutine; set => movementCoroutine = value; }
 }

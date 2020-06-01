@@ -15,8 +15,10 @@ public class CatcherBehaviour : GenericPlayerBehaviour
         Debug.Log("catchSuccesRate = " + catchSuccesRate);
         if (!ActionCalculationUtils.HasActionSucceeded(catchSuccesRate))
         {
-            ballControllerScript.IsPitched = true;
+            StopCoroutine(ballControllerScript.MovementCoroutine);
+            ballControllerScript.IsPitched = false;
             ballControllerScript.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetCathcherOutBallZonePosition());
+            ballControllerScript.EnableMovement = true;
         }
         else
         {

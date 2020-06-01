@@ -31,7 +31,6 @@ public class BatterBehaviour : GenericPlayerBehaviour
             {
                 IsReadyToSwing = false;
                 IsSwingHasFinished = true;
-                //this.transform.rotation = Quaternion.identity;
             }
         }
     }
@@ -50,7 +49,8 @@ public class BatterBehaviour : GenericPlayerBehaviour
         {
             Debug.Log("Pitch has not succeed");
             Debug.Log("Batter has hit the ball");
-            ballControllerScript.IsBeingHitten = true;
+            ballControllerScript.IsPitched = false;
+            ballControllerScript.IsHit = true;
             List<Vector2Int> ballPositionList = ActionCalculationUtils.CalculateBallFallPositionList(this.gameObject, 0, 180, 10, true);
             int ballPositionIndex = Random.Range(0, ballPositionList.Count - 1);
             Vector2Int ballTilePosition = ballPositionList[ballPositionIndex];
@@ -72,6 +72,7 @@ public class BatterBehaviour : GenericPlayerBehaviour
             PlayerAbility StaySafePlayerAbility = new PlayerAbility("Stay on base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.StayAction);
             playerAbilities.AddAbility(runPlayerAbility);
             playerAbilities.AddAbility(StaySafePlayerAbility);
+            ballControllerScript.EnableMovement = true;
             playerStatusScript.IsAllowedToMove = true;
             runnerBehaviour.EnableMovement = true;
         }
@@ -80,8 +81,9 @@ public class BatterBehaviour : GenericPlayerBehaviour
             Debug.Log("Pitch has succeeded");
             Debug.Log("Batter has not hit the ball");
             Debug.Log("Go to the catcher");
-            ballControllerScript.IsThrown = true;
+            ballControllerScript.IsPitched = false;
             ballControllerScript.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetCatcherZonePosition());
+            ballControllerScript.EnableMovement = true;
         }
     }
 

@@ -149,6 +149,7 @@ public class GameManager : MonoBehaviour
                         playerAbilities.AddAbility(fireBallSpecialPlayerAbility);
                         playerAbilities.AddAbility(menuBackAction);
                         playerAbilities.HasSpecialAbilities = true;
+                        this.UpdatePlayerColliderSettings(player);
                         break;
                     case PlayerFieldPositionEnum.RUNNER:
                         playerStatus.Speed = 2f;
@@ -233,6 +234,12 @@ public class GameManager : MonoBehaviour
         BoxCollider2D boxCollider = player.AddComponent<BoxCollider2D>();
         boxCollider.isTrigger = true;
         boxCollider.size = new Vector2(2, 15);
+        if (PlayerUtils.HasPitcherPosition(player))
+        {
+            boxCollider.offset = new Vector2(0, -2);
+            boxCollider.size = new Vector2(2, 4);
+        }
+
     }
 
     // Update is called once per frame

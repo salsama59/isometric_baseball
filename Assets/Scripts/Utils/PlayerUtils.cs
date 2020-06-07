@@ -162,6 +162,14 @@ public class PlayerUtils : MonoBehaviour
             || playerPosition == PlayerFieldPositionEnum.FIRST_BASEMAN;
     }
 
+    public static bool HasPitcherPosition(GameObject player)
+    {
+        PlayerStatus currentPlayerStatusScript = FetchPlayerStatusScript(player);
+        PlayerFieldPositionEnum playerPosition = currentPlayerStatusScript.PlayerFieldPosition;
+
+        return playerPosition == PlayerFieldPositionEnum.PITCHER;
+    }
+
     public static List<GameObject> GetRunnersOnField()
     {
         return GameObject.FindGameObjectsWithTag(TagsConstants.BASEBALL_PLAYER_TAG)

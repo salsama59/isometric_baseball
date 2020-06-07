@@ -24,6 +24,7 @@ public class BallController : MonoBehaviour
     private Nullable<Vector3> target;
     private bool enableMovement = true;
     private Coroutine movementCoroutine;
+    private bool isTargetedByPitcher;
 
     // Start is called before the first frame update
     public void Start()
@@ -137,4 +138,5 @@ public class BallController : MonoBehaviour
     public BallHeightEnum BallHeight { get => ballHeight; set => ballHeight = value; }
     public bool EnableMovement { get => enableMovement; set => enableMovement = value; }
     public Coroutine MovementCoroutine { get => movementCoroutine; set => movementCoroutine = value; }
+    public bool IsTargetedByPitcher { get => isTargetedByPitcher; set => isTargetedByPitcher = value; }
 }

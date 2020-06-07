@@ -53,13 +53,19 @@ public class PlayerActionsManager : MonoBehaviour
         genericRunnerBehaviourScript.CalculateRunnerColliderInterraction(baseReachedEnum, false);
     }
 
-    private BaseEnum GetCurrentBaseReached(out RunnerBehaviour genericRunnerBehaviourScript)
+    public void PassAction()
     {
-        Debug.Log("Runner choice!!!!");
-        GameObject runner = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.RUNNER, TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum.RUNNER));
-        PlayerStatus runnerStatusScript = PlayerUtils.FetchPlayerStatusScript(runner);
-        genericRunnerBehaviourScript = ((RunnerBehaviour)PlayerUtils.FetchCorrespondingPlayerBehaviourScript(runner, runnerStatusScript));
-        return genericRunnerBehaviourScript.NextBase;
+        //PITCHER TURN
+        GameObject pitcher = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.PITCHER, TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum.PITCHER));
+        PitcherBehaviour pitcherBehaviourScript =  PlayerUtils.FetchPitcherBehaviourScript(pitcher);
+        GameObject nearestFielder = TeamUtils.GetNearestFielderFromGameObject(this.gameObject);
+        ballGameObject.SetActive(true);
+        BallControllerScript.BallHeight = BallHeightEnum.LOW;
+        BallControllerScript.IsPitched = true;
+        BallControllerScript.Target = nearestFielder.transform.position;
+        BallControllerScript.EnableMovement = true;
+        BallControllerScript.IsHeld = false;
+        pitcherBehaviourScript.IsHoldingBall = false;
     }
 
     public void StayAction()
@@ -68,6 +74,15 @@ public class PlayerActionsManager : MonoBehaviour
         RunnerBehaviour genericRunnerBehaviourScript;
         BaseEnum baseReachedEnum = this.GetCurrentBaseReached(out genericRunnerBehaviourScript);
         genericRunnerBehaviourScript.CalculateRunnerColliderInterraction(baseReachedEnum, true);
+    }
+
+    private BaseEnum GetCurrentBaseReached(out RunnerBehaviour genericRunnerBehaviourScript)
+    {
+        Debug.Log("Runner choice!!!!");
+        GameObject runner = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.RUNNER, TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum.RUNNER));
+        PlayerStatus runnerStatusScript = PlayerUtils.FetchPlayerStatusScript(runner);
+        genericRunnerBehaviourScript = ((RunnerBehaviour)PlayerUtils.FetchCorrespondingPlayerBehaviourScript(runner, runnerStatusScript));
+        return genericRunnerBehaviourScript.NextBase;
     }
 
     public GameObject BallGameObject { get => ballGameObject; set => ballGameObject = value; }

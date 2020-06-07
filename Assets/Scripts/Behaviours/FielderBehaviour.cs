@@ -111,8 +111,29 @@ public class FielderBehaviour : GenericPlayerBehaviour
             dialogBoxManagerScript.ToggleDialogTextBox();
         }
 
+        BallController ballControllerScript = BallUtils.FetchBallControllerScript(FieldBall);
+        PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
+
+        //Update Pitcher informations
+        PitcherBehaviour pitcherBehaviourScript = PlayerUtils.FetchPitcherBehaviourScript(ballControllerScript.CurrentPitcher);
+        PlayerAbilities pitcherPlayerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(ballControllerScript.CurrentPitcher);
+        PlayerStatus pitcherPlayerStatus = PlayerUtils.FetchPlayerStatusScript(ballControllerScript.CurrentPitcher);
+        PlayerAbility throwBallPlayerAbility = new PlayerAbility("Throw", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.ThrowBallAction);
+        PlayerAbility gyroBallSpecialPlayerAbility = new PlayerAbility("Gyro ball", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.NORMAL, playerActionsManager.ThrowBallAction);
+        PlayerAbility fireBallSpecialPlayerAbility = new PlayerAbility("Fire ball", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.NORMAL, playerActionsManager.ThrowBallAction);
+        PlayerAbility menuBackAction = new PlayerAbility("Back", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.UI, null);
+        pitcherPlayerAbilities.PlayerAbilityList.Clear();
+        pitcherPlayerAbilities.AddAbility(throwBallPlayerAbility);
+        pitcherPlayerAbilities.AddAbility(gyroBallSpecialPlayerAbility);
+        pitcherPlayerAbilities.AddAbility(fireBallSpecialPlayerAbility);
+        pitcherPlayerAbilities.AddAbility(menuBackAction);
+        pitcherPlayerAbilities.HasSpecialAbilities = true;
+        ballControllerScript.CurrentPitcher.transform.position = TeamUtils.playerTeamMenberPositionLocation[pitcherPlayerStatus.PlayerFieldPosition];
+        pitcherPlayerStatus.IsAllowedToMove = false;
+        pitcherBehaviourScript.Target = null;
+        pitcherBehaviourScript.HasSpottedBall = false;
+
         //Update ball informations
-        BallController ballControllerScript =  BallUtils.FetchBallControllerScript(FieldBall);
         ballControllerScript.BallHeight = BallHeightEnum.NONE;
         FieldBall.transform.position = ballControllerScript.CurrentPitcher.transform.position;
         ballControllerScript.CurrentHolder = null;
@@ -141,21 +162,24 @@ public class FielderBehaviour : GenericPlayerBehaviour
         batterBehaviourScript.IsoRenderer.LastDirection = 6;
         batterBehaviourScript.IsoRenderer.SetDirection(Vector2.zero);
         PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(tagedOutRunnerStatus.gameObject);
-        PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
         PlayerAbility hitBallPlayerAbility = new PlayerAbility("Hit ball", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.HitBallAction);
         playerAbilities.PlayerAbilityList.Clear();
         playerAbilities.AddAbility(hitBallPlayerAbility);
 
         //Update fielder informations
-        fielderPlayerStatus.IsAllowedToMove = false;
+        fielderPlayerStatus.IsAllowedToMove = true;
         this.HasSpottedBall = false;
+        this.IsPrepared = false;
         this.Target = null;
         this.IsHoldingBall = false;
         this.TargetPlayerToTagOut = null;
+        this.IsMoving = false;
         this.gameObject.transform.position = TeamUtils.playerTeamMenberPositionLocation[fielderPlayerStatus.PlayerFieldPosition];
         this.transform.rotation = Quaternion.identity;
         IsoRenderer.LastDirection = 4;
         IsoRenderer.SetDirection(Vector2.zero);
+
+        //Reinit turn
         PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
         PlayersTurnManager.IsCommandPhase = true;
         playersTurnManager.turnState = TurnStateEnum.PITCHER_TURN;

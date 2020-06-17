@@ -72,7 +72,6 @@ public class BatterBehaviour : GenericPlayerBehaviour
             PlayerAbility StaySafePlayerAbility = new PlayerAbility("Stay on base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.StayAction);
             playerAbilities.AddAbility(runPlayerAbility);
             playerAbilities.AddAbility(StaySafePlayerAbility);
-            ballControllerScript.EnableMovement = true;
             playerStatusScript.IsAllowedToMove = true;
             runnerBehaviour.EnableMovement = true;
         }
@@ -83,7 +82,6 @@ public class BatterBehaviour : GenericPlayerBehaviour
             Debug.Log("Go to the catcher");
             ballControllerScript.IsPitched = false;
             ballControllerScript.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetCatcherZonePosition());
-            ballControllerScript.EnableMovement = true;
         }
     }
 

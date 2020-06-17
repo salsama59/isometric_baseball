@@ -22,7 +22,6 @@ public class BallController : MonoBehaviour
     private float gridSize = 1f;
     private bool isMoving = false;
     private Nullable<Vector3> target;
-    private bool enableMovement = true;
     private Coroutine movementCoroutine;
     private bool isTargetedByPitcher;
 
@@ -38,14 +37,24 @@ public class BallController : MonoBehaviour
     // Update is called once per frame
     public void Update()
     {
-        if (EnableMovement && !IsMoving && !PlayersTurnManager.IsCommandPhase && !GameData.isPaused)
+
+        if (Target.HasValue && Target.Value == this.transform.position)
+        {
+            Target = null;
+
+            if (IsHit)
+            {
+                IsHit = false;
+            }
+        }
+
+        if (!IsMoving && !PlayersTurnManager.IsCommandPhase && !GameData.isPaused)
         {
             //Move inside first if statement to avoid graphical bugs
             BallAnimator.enabled = true;
             if (Target.HasValue && Target.Value != this.transform.position)
             {
                 MovementCoroutine = StartCoroutine(Move(transform.position, Target.Value, IsHit));
-                EnableMovement = false;
             }
             else
             {
@@ -57,10 +66,7 @@ public class BallController : MonoBehaviour
             BallAnimator.enabled = false;
         }
 
-        if(BallHeight == BallHeightEnum.GROUNDED)
-        {
-            IsHit = false;
-        }
+        IsMoving = (IsHit || IsPitched) && Target.HasValue;
     }
 
     private BallHeightEnum GetBallHeightState(Vector3 ballStartPosition, Vector3 ballEndposition, Vector3 ballCurrentPosition)
@@ -136,7 +142,6 @@ public class BallController : MonoBehaviour
     public Animator BallAnimator { get => ballAnimator; set => ballAnimator = value; }
     public bool IsTargetedByFielder { get => isTargetedByFielder; set => isTargetedByFielder = value; }
     public BallHeightEnum BallHeight { get => ballHeight; set => ballHeight = value; }
-    public bool EnableMovement { get => enableMovement; set => enableMovement = value; }
     public Coroutine MovementCoroutine { get => movementCoroutine; set => movementCoroutine = value; }
     public bool IsTargetedByPitcher { get => isTargetedByPitcher; set => isTargetedByPitcher = value; }
 }

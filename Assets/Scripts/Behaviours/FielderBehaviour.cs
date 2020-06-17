@@ -144,7 +144,6 @@ public class FielderBehaviour : GenericPlayerBehaviour
         ballControllerScript.IsPitched = false;
         ballControllerScript.IsMoving = false;
         ballControllerScript.IsTargetedByFielder = false;
-        ballControllerScript.EnableMovement = true;
 
         //Update taged out runner and new batter informations
         tagedOutRunnerStatus.IsAllowedToMove = false;

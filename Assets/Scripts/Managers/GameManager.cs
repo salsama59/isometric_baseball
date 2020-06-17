@@ -535,6 +535,92 @@ public class GameManager : MonoBehaviour
         return width;
     }
 
+
+    public IEnumerator WaitAndReinit(DialogBoxManager dialogBoxManagerScript, PlayerStatus tagedOutRunnerStatus, PlayerStatus fielderPlayerStatus, GameObject fieldBall)
+    {
+        yield return new WaitForSeconds(2f);
+        if (dialogBoxManagerScript.DialogTextBoxGameObject.activeSelf)
+        {
+            dialogBoxManagerScript.ToggleDialogTextBox();
+        }
+
+        BallController ballControllerScript = BallUtils.FetchBallControllerScript(fieldBall);
+        PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
+        FielderBehaviour fielderBehaviourScript = PlayerUtils.FetchFielderBehaviourScript(fielderPlayerStatus.gameObject);
+        //Update Pitcher informations
+        PitcherBehaviour pitcherBehaviourScript = PlayerUtils.FetchPitcherBehaviourScript(ballControllerScript.CurrentPitcher);
+        PlayerAbilities pitcherPlayerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(ballControllerScript.CurrentPitcher);
+        PlayerStatus pitcherPlayerStatus = PlayerUtils.FetchPlayerStatusScript(ballControllerScript.CurrentPitcher);
+        PlayerAbility throwBallPlayerAbility = new PlayerAbility("Throw", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.ThrowBallAction);
+        PlayerAbility gyroBallSpecialPlayerAbility = new PlayerAbility("Gyro ball", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.NORMAL, playerActionsManager.ThrowBallAction);
+        PlayerAbility fireBallSpecialPlayerAbility = new PlayerAbility("Fire ball", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.NORMAL, playerActionsManager.ThrowBallAction);
+        PlayerAbility menuBackAction = new PlayerAbility("Back", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.UI, null);
+        pitcherPlayerAbilities.PlayerAbilityList.Clear();
+        pitcherPlayerAbilities.AddAbility(throwBallPlayerAbility);
+        pitcherPlayerAbilities.AddAbility(gyroBallSpecialPlayerAbility);
+        pitcherPlayerAbilities.AddAbility(fireBallSpecialPlayerAbility);
+        pitcherPlayerAbilities.AddAbility(menuBackAction);
+        pitcherPlayerAbilities.HasSpecialAbilities = true;
+        ballControllerScript.CurrentPitcher.transform.position = TeamUtils.playerTeamMenberPositionLocation[pitcherPlayerStatus.PlayerFieldPosition];
+        pitcherPlayerStatus.IsAllowedToMove = false;
+        pitcherBehaviourScript.Target = null;
+        pitcherBehaviourScript.HasSpottedBall = false;
+
+        //Update ball informations
+        ballControllerScript.BallHeight = BallHeightEnum.NONE;
+        fieldBall.transform.position = ballControllerScript.CurrentPitcher.transform.position;
+        ballControllerScript.CurrentHolder = null;
+        ballControllerScript.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetHomeBaseTilePosition());
+        //No parent
+        fieldBall.transform.SetParent(null);
+        ballControllerScript.IsHeld = false;
+        ballControllerScript.IsPitched = false;
+        ballControllerScript.IsMoving = false;
+        ballControllerScript.IsTargetedByFielder = false;
+
+        //Update taged out runner and new batter informations
+        tagedOutRunnerStatus.IsAllowedToMove = false;
+        tagedOutRunnerStatus.PlayerFieldPosition = PlayerFieldPositionEnum.BATTER;
+        RunnerBehaviour runnerBehaviourScript = PlayerUtils.FetchRunnerBehaviourScript(tagedOutRunnerStatus.gameObject);
+        GameObject bat = runnerBehaviourScript.EquipedBat;
+        Destroy(tagedOutRunnerStatus.gameObject.GetComponent<RunnerBehaviour>());
+        tagedOutRunnerStatus.gameObject.AddComponent<BatterBehaviour>();
+        tagedOutRunnerStatus.gameObject.transform.position = TeamUtils.playerTeamMenberPositionLocation[PlayerFieldPositionEnum.BATTER];
+        BatterBehaviour batterBehaviourScript = PlayerUtils.FetchBatterBehaviourScript(tagedOutRunnerStatus.gameObject);
+        batterBehaviourScript.Start();
+        batterBehaviourScript.EquipedBat = bat;
+        batterBehaviourScript.EquipedBat.SetActive(true);
+        tagedOutRunnerStatus.gameObject.transform.rotation = Quaternion.identity;
+        batterBehaviourScript.IsoRenderer.LastDirection = 6;
+        batterBehaviourScript.IsoRenderer.SetDirection(Vector2.zero);
+        PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(tagedOutRunnerStatus.gameObject);
+        PlayerAbility hitBallPlayerAbility = new PlayerAbility("Hit ball", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.HitBallAction);
+        playerAbilities.PlayerAbilityList.Clear();
+        playerAbilities.AddAbility(hitBallPlayerAbility);
+
+        //Update fielder informations
+        fielderPlayerStatus.IsAllowedToMove = true;
+        fielderBehaviourScript.HasSpottedBall = false;
+        fielderBehaviourScript.IsPrepared = false;
+        fielderBehaviourScript.Target = null;
+        fielderBehaviourScript.IsHoldingBall = false;
+        fielderBehaviourScript.TargetPlayerToTagOut = null;
+        fielderBehaviourScript.IsMoving = false;
+        fielderBehaviourScript.gameObject.transform.position = TeamUtils.playerTeamMenberPositionLocation[fielderPlayerStatus.PlayerFieldPosition];
+        fielderBehaviourScript.transform.rotation = Quaternion.identity;
+        fielderBehaviourScript.IsoRenderer.LastDirection = 4;
+        fielderBehaviourScript.IsoRenderer.SetDirection(Vector2.zero);
+
+        //Reinit turn
+        PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
+        PlayersTurnManager.IsCommandPhase = true;
+        playersTurnManager.turnState = TurnStateEnum.PITCHER_TURN;
+
+        //Remove pause state
+        GameData.isPaused = false;
+    }
+
+
     public Dictionary<string, TileTypeEnum> HorizontalyPaintedDirtDictionary { get => horizontalyPaintedDirtDictionary; set => horizontalyPaintedDirtDictionary = value; }
     public Dictionary<string, TileTypeEnum> VerticalyPaintedDirtDictionary { get => verticalyPaintedDirtDictionary; set => verticalyPaintedDirtDictionary = value; }
     public static int ColumnMaximum { get => columnMaximum; set => columnMaximum = value; }

@@ -63,7 +63,6 @@ public class PlayerActionsManager : MonoBehaviour
         BallControllerScript.BallHeight = BallHeightEnum.LOW;
         BallControllerScript.IsPitched = true;
         BallControllerScript.Target = nearestFielder.transform.position;
-        BallControllerScript.EnableMovement = true;
         BallControllerScript.IsHeld = false;
         pitcherBehaviourScript.IsHoldingBall = false;
     }

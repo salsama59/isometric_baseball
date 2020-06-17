@@ -10,9 +10,6 @@ public class BatCollider : MonoBehaviour
         {
             Debug.Log("Ball has collide with the bat collider");
 
-            GameObject batter = this.gameObject.transform.parent.gameObject;
-            BatterBehaviour batterBehaviourScript = PlayerUtils.FetchBatterBehaviourScript(batter);
-
             PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
             playersTurnManager.turnState = TurnStateEnum.BATTER_TURN;
             PlayersTurnManager.IsCommandPhase = true;

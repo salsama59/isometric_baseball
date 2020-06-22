@@ -236,8 +236,8 @@ public class GameManager : MonoBehaviour
         boxCollider.size = new Vector2(2, 15);
         if (PlayerUtils.HasPitcherPosition(player))
         {
-            boxCollider.offset = new Vector2(0, -2);
-            boxCollider.size = new Vector2(2, 4);
+            boxCollider.offset = new Vector2(0, -1.5f);
+            boxCollider.size = new Vector2(2, 3);
         }
 
     }
@@ -546,7 +546,6 @@ public class GameManager : MonoBehaviour
 
         BallController ballControllerScript = BallUtils.FetchBallControllerScript(fieldBall);
         PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
-        FielderBehaviour fielderBehaviourScript = PlayerUtils.FetchFielderBehaviourScript(fielderPlayerStatus.gameObject);
         //Update Pitcher informations
         PitcherBehaviour pitcherBehaviourScript = PlayerUtils.FetchPitcherBehaviourScript(ballControllerScript.CurrentPitcher);
         PlayerAbilities pitcherPlayerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(ballControllerScript.CurrentPitcher);
@@ -561,22 +560,24 @@ public class GameManager : MonoBehaviour
         pitcherPlayerAbilities.AddAbility(fireBallSpecialPlayerAbility);
         pitcherPlayerAbilities.AddAbility(menuBackAction);
         pitcherPlayerAbilities.HasSpecialAbilities = true;
+        pitcherBehaviourScript.Target = null;
         ballControllerScript.CurrentPitcher.transform.position = TeamUtils.playerTeamMenberPositionLocation[pitcherPlayerStatus.PlayerFieldPosition];
         pitcherPlayerStatus.IsAllowedToMove = false;
-        pitcherBehaviourScript.Target = null;
         pitcherBehaviourScript.HasSpottedBall = false;
 
         //Update ball informations
         ballControllerScript.BallHeight = BallHeightEnum.NONE;
         fieldBall.transform.position = ballControllerScript.CurrentPitcher.transform.position;
         ballControllerScript.CurrentHolder = null;
-        ballControllerScript.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetHomeBaseTilePosition());
+        ballControllerScript.Target = null;
         //No parent
         fieldBall.transform.SetParent(null);
         ballControllerScript.IsHeld = false;
         ballControllerScript.IsPitched = false;
         ballControllerScript.IsMoving = false;
         ballControllerScript.IsTargetedByFielder = false;
+        ballControllerScript.IsTargetedByPitcher = false;
+        ballControllerScript.IsHit = false;
 
         //Update taged out runner and new batter informations
         tagedOutRunnerStatus.IsAllowedToMove = false;
@@ -599,17 +600,22 @@ public class GameManager : MonoBehaviour
         playerAbilities.AddAbility(hitBallPlayerAbility);
 
         //Update fielder informations
-        fielderPlayerStatus.IsAllowedToMove = true;
-        fielderBehaviourScript.HasSpottedBall = false;
-        fielderBehaviourScript.IsPrepared = false;
-        fielderBehaviourScript.Target = null;
-        fielderBehaviourScript.IsHoldingBall = false;
-        fielderBehaviourScript.TargetPlayerToTagOut = null;
-        fielderBehaviourScript.IsMoving = false;
-        fielderBehaviourScript.gameObject.transform.position = TeamUtils.playerTeamMenberPositionLocation[fielderPlayerStatus.PlayerFieldPosition];
-        fielderBehaviourScript.transform.rotation = Quaternion.identity;
-        fielderBehaviourScript.IsoRenderer.LastDirection = 4;
-        fielderBehaviourScript.IsoRenderer.SetDirection(Vector2.zero);
+
+        if(fielderPlayerStatus != null)
+        {
+            FielderBehaviour fielderBehaviourScript = PlayerUtils.FetchFielderBehaviourScript(fielderPlayerStatus.gameObject);
+            fielderPlayerStatus.IsAllowedToMove = true;
+            fielderBehaviourScript.HasSpottedBall = false;
+            fielderBehaviourScript.IsPrepared = false;
+            fielderBehaviourScript.Target = null;
+            fielderBehaviourScript.IsHoldingBall = false;
+            fielderBehaviourScript.TargetPlayerToTagOut = null;
+            fielderBehaviourScript.IsMoving = false;
+            fielderBehaviourScript.gameObject.transform.position = TeamUtils.playerTeamMenberPositionLocation[fielderPlayerStatus.PlayerFieldPosition];
+            fielderBehaviourScript.transform.rotation = Quaternion.identity;
+            fielderBehaviourScript.IsoRenderer.LastDirection = 4;
+            fielderBehaviourScript.IsoRenderer.SetDirection(Vector2.zero);
+        }
 
         //Reinit turn
         PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();

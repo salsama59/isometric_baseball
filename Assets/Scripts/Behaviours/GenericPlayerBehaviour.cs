@@ -84,7 +84,7 @@ public abstract class GenericPlayerBehaviour : MonoBehaviour
 
     protected void MovePlayer()
     {
-        if (!PlayersTurnManager.IsCommandPhase && !GameData.isPaused)
+        if (!PlayersTurnManager.IsCommandPhase && !GameData.isPaused && Target.HasValue)
         {
             IsoRenderer.Animator.enabled = true;
             transform.position = Vector3.MoveTowards(transform.position, Target.Value, this.MoveSpeed * Time.deltaTime);

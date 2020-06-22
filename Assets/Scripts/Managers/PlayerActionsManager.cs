@@ -17,6 +17,7 @@ public class PlayerActionsManager : MonoBehaviour
         ballGameObject.SetActive(true);
         BallControllerScript.BallHeight = BallHeightEnum.LOW;
         BallControllerScript.IsPitched = true;
+        BallControllerScript.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetHomeBaseTilePosition());
     }
 
     public void CatchBallAction()
@@ -58,10 +59,12 @@ public class PlayerActionsManager : MonoBehaviour
         //PITCHER TURN
         GameObject pitcher = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.PITCHER, TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum.PITCHER));
         PitcherBehaviour pitcherBehaviourScript =  PlayerUtils.FetchPitcherBehaviourScript(pitcher);
-        GameObject nearestFielder = TeamUtils.GetNearestFielderFromGameObject(this.gameObject);
+        GameObject nearestFielder = TeamUtils.GetNearestFielderFromGameObject(pitcher);
+        BallControllerScript.gameObject.transform.SetParent(null);
         ballGameObject.SetActive(true);
         BallControllerScript.BallHeight = BallHeightEnum.LOW;
-        BallControllerScript.IsPitched = true;
+        BallControllerScript.IsPassed = true;
+        BallControllerScript.IsHit = false;
         BallControllerScript.Target = nearestFielder.transform.position;
         BallControllerScript.IsHeld = false;
         pitcherBehaviourScript.IsHoldingBall = false;

@@ -13,6 +13,7 @@ public class BallController : MonoBehaviour
     private Animator ballAnimator;
     private bool isTargetedByFielder;
     private BallHeightEnum ballHeight;
+    private bool isPassed;
 
     private bool allowDiagonals = false;
     private bool correctDiagonalSpeed = false;
@@ -51,10 +52,10 @@ public class BallController : MonoBehaviour
         if (!IsMoving && !PlayersTurnManager.IsCommandPhase && !GameData.isPaused)
         {
             //Move inside first if statement to avoid graphical bugs
-            BallAnimator.enabled = true;
             if (Target.HasValue && Target.Value != this.transform.position)
             {
-                MovementCoroutine = StartCoroutine(Move(transform.position, Target.Value, IsHit));
+                BallAnimator.enabled = true;
+                MovementCoroutine = StartCoroutine(Move(transform.position, Target.Value, IsHit || IsPassed));
             }
             else
             {
@@ -66,7 +67,7 @@ public class BallController : MonoBehaviour
             BallAnimator.enabled = false;
         }
 
-        IsMoving = (IsHit || IsPitched) && Target.HasValue;
+        IsMoving = (IsHit || IsPitched || IsPassed) && Target.HasValue;
     }
 
     private BallHeightEnum GetBallHeightState(Vector3 ballStartPosition, Vector3 ballEndposition, Vector3 ballCurrentPosition)
@@ -144,4 +145,5 @@ public class BallController : MonoBehaviour
     public BallHeightEnum BallHeight { get => ballHeight; set => ballHeight = value; }
     public Coroutine MovementCoroutine { get => movementCoroutine; set => movementCoroutine = value; }
     public bool IsTargetedByPitcher { get => isTargetedByPitcher; set => isTargetedByPitcher = value; }
+    public bool IsPassed { get => isPassed; set => isPassed = value; }
 }

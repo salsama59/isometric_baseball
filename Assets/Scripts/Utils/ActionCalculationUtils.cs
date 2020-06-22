@@ -58,6 +58,34 @@ public class ActionCalculationUtils
         return AdjustResult(result);
     }
 
+    public static float CalculatePassSuccessRate(GameObject ballReceiverGameObject, GameObject ballPasserGameObject, BallHeightEnum ballHeight)
+    {
+        PlayerStatus receiverStatus = PlayerUtils.FetchPlayerStatusScript(ballReceiverGameObject);
+        PlayerStatus passerStatus = PlayerUtils.FetchPlayerStatusScript(ballPasserGameObject);
+
+        float passerCharacteristic = passerStatus.PassEfficiency;
+        float result;
+
+        switch (ballHeight)
+        {
+
+            case BallHeightEnum.GROUNDED:
+                result = 100f;
+                break;
+            case BallHeightEnum.LOW:
+                result = receiverStatus.CatchEfficiency + passerCharacteristic;
+                break;
+            case BallHeightEnum.HIGH:
+                result = 0f;
+                break;
+            default:
+                result = 100f;
+                break;
+        }
+
+        return AdjustResult(result);
+    }
+
     public static List<Vector2Int> CalculateBallFallPositionList(GameObject playerInvolved, int angleMinRange, int angleMaxRange, int angleStep, bool Iscritical)
     {
         List<Vector2Int> ballPositionList = new List<Vector2Int>();

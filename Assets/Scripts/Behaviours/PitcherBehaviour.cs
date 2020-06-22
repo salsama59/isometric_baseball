@@ -15,6 +15,7 @@ public class PitcherBehaviour : GenericPlayerBehaviour
     {
         base.Awake();
     }
+
     private void Update()
     {
         BallController ballControlerScript = BallUtils.FetchBallControllerScript(FieldBall);
@@ -30,38 +31,57 @@ public class PitcherBehaviour : GenericPlayerBehaviour
             this.IsPrepared = true;
         }
     }
+
     public void CalculatePitcherColliderInterraction(GameObject ballGameObject, BallController ballControllerScript, GenericPlayerBehaviour genericPlayerBehaviourScript)
     {
-        //FIXME Else is temporary (need to be sure the ball is caught without touching the ground)
-        if(ballControllerScript.BallHeight == BallHeightEnum.HIGH || ballControllerScript.BallHeight == BallHeightEnum.LOW)
+        int runnersOnFieldCount = -1;
+        List<GameObject> runners = PlayerUtils.GetRunnersOnField();
+        runnersOnFieldCount = runners.Count;
+        //Choose the runner who just hit the ball
+        GameObject runnerToGetOut = runners.First();
+
+        bool hasIntercepted = false;
+
+        if (ballControllerScript.BallHeight == BallHeightEnum.HIGH || ballControllerScript.BallHeight == BallHeightEnum.LOW)
         {
-            GameObject runnerToGetOut = PlayerUtils.GetRunnersOnField().First();
+            
             GameManager gameManager = GameUtils.FetchGameManager();
             DialogBoxManager dialogBoxManagerScript = GameUtils.FetchDialogBoxManager();
             dialogBoxManagerScript.SetDialogTextBox("TAG OUT !!!!!!!");
             dialogBoxManagerScript.ToggleDialogTextBox();
-            //FIXME Migrate the wait and reinit to render generic by itterrationg on all player of the field and réinit all
-            //StartCoroutine(gameManager.WaitAndReinit(dialogBoxManagerScript, PlayerUtils.FetchPlayerStatusScript(runnerToGetOut), PlayerUtils.FetchPlayerStatusScript(this.gameObject), FieldBall));
+
+            ballControllerScript.Target = null;
+            
+            GameData.isPaused = true;
+            this.InterceptBall(ballGameObject, ballControllerScript, genericPlayerBehaviourScript);
+            hasIntercepted = true;
+            StartCoroutine(gameManager.WaitAndReinit(dialogBoxManagerScript, PlayerUtils.FetchPlayerStatusScript(runnerToGetOut), null, FieldBall));
+
+            if(runnersOnFieldCount == 1)
+            {
+                return;
+            }
+            
         }
         
-        ballControllerScript.BallHeight = BallHeightEnum.NONE;
-        ballGameObject.transform.SetParent(this.gameObject.transform);
-        ballGameObject.SetActive(false);
-        ballControllerScript.CurrentHolder = this.gameObject;
-        ballControllerScript.IsHeld = true;
-        genericPlayerBehaviourScript.IsHoldingBall = true;
-        genericPlayerBehaviourScript.HasSpottedBall = false;
+        if(runnersOnFieldCount >= 1)
+        {
+            if (!hasIntercepted)
+            {
+                this.InterceptBall(ballGameObject, ballControllerScript, genericPlayerBehaviourScript);
+            }
+            
+            PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
+            PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(this.gameObject);
+            playerAbilities.PlayerAbilityList.Clear();
+            PlayerAbility passPlayerAbility = new PlayerAbility("Pass to fielder", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.PassAction);
+            playerAbilities.AddAbility(passPlayerAbility);
 
-        PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
-        PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(this.gameObject);
-        playerAbilities.PlayerAbilityList.Clear();
-        PlayerAbility passPlayerAbility = new PlayerAbility("Pass to fielder", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.PassAction);
-        playerAbilities.AddAbility(passPlayerAbility);
+            PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
+            playersTurnManager.turnState = TurnStateEnum.PITCHER_TURN;
+            PlayersTurnManager.IsCommandPhase = true;
+        }
 
-        PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
-        playersTurnManager.turnState = TurnStateEnum.PITCHER_TURN;
-        PlayersTurnManager.IsCommandPhase = true;
-        
     }
 
     public void CalculateFielderTriggerInterraction(GameObject ballGameObject, GenericPlayerBehaviour genericPlayerBehaviourScript, PlayerStatus playerStatus)
@@ -72,5 +92,22 @@ public class PitcherBehaviour : GenericPlayerBehaviour
         playerStatus.IsAllowedToMove = true;
         genericPlayerBehaviourScript.Target = ballGameObject.transform.position;
         this.transform.rotation = Quaternion.identity;
+    }
+
+    private void InterceptBall(GameObject ballGameObject, BallController ballControllerScript, GenericPlayerBehaviour genericPlayerBehaviourScript)
+    {
+        ballControllerScript.BallHeight = BallHeightEnum.NONE;
+        ballGameObject.transform.SetParent(this.gameObject.transform);
+        ballGameObject.SetActive(false);
+        ballControllerScript.CurrentHolder = this.gameObject;
+        ballControllerScript.IsHeld = true;
+        ballControllerScript.IsHit = false;
+        ballControllerScript.IsPassed = false;
+        ballControllerScript.Target = null;
+        ballControllerScript.IsMoving = false;
+        ballControllerScript.IsTargetedByPitcher = false;
+        genericPlayerBehaviourScript.IsHoldingBall = true;
+        genericPlayerBehaviourScript.HasSpottedBall = false;
+        genericPlayerBehaviourScript.Target = null;
     }
 }

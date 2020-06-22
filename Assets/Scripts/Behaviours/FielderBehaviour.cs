@@ -79,17 +79,34 @@ public class FielderBehaviour : GenericPlayerBehaviour
 
     public void CalculateFielderColliderInterraction(GameObject ballGameObject, BallController ballControllerScript, GenericPlayerBehaviour genericPlayerBehaviourScript)
     {
-        ballControllerScript.BallHeight = BallHeightEnum.NONE;
-        ballGameObject.transform.SetParent(this.gameObject.transform);
-        ballGameObject.SetActive(false);
-        ballControllerScript.CurrentHolder = this.gameObject;
-        ballControllerScript.IsHeld = true;
-        genericPlayerBehaviourScript.IsHoldingBall = true;
-        genericPlayerBehaviourScript.HasSpottedBall = false;
+
+        float passSuccessRate;
+
+        if (ballControllerScript.IsPassed)
+        {
+            passSuccessRate = ActionCalculationUtils.CalculatePassSuccessRate(this.gameObject, ballControllerScript.CurrentHolder, ballControllerScript.BallHeight);
+        }
+        else
+        {
+            passSuccessRate = 100f;
+        }
+
+        if (ActionCalculationUtils.HasActionSucceeded(passSuccessRate))
+        {
+            ballControllerScript.BallHeight = BallHeightEnum.NONE;
+            ballGameObject.transform.SetParent(this.gameObject.transform);
+            ballGameObject.SetActive(false);
+            ballControllerScript.CurrentHolder = this.gameObject;
+            ballControllerScript.IsHeld = true;
+            genericPlayerBehaviourScript.IsHoldingBall = true;
+            genericPlayerBehaviourScript.HasSpottedBall = false;
+        }
+
     }
 
     public void TagOutRunner(GameObject targetToTagOut)
     {
+        GameManager gameManager = GameUtils.FetchGameManager();
         PlayerStatus fielderPlayerStatus = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
         PlayerStatus runnerPlayerStatus = PlayerUtils.FetchPlayerStatusScript(targetToTagOut);
 
@@ -99,11 +116,11 @@ public class FielderBehaviour : GenericPlayerBehaviour
         dialogBoxManagerScript.SetDialogTextBox("TAG OUT !!!!!!!");
         dialogBoxManagerScript.ToggleDialogTextBox();
 
-        StartCoroutine(WaitAndReinit(dialogBoxManagerScript, runnerPlayerStatus, fielderPlayerStatus));
+        StartCoroutine(gameManager.WaitAndReinit(dialogBoxManagerScript, runnerPlayerStatus, fielderPlayerStatus, FieldBall));
 
     }
 
-    IEnumerator WaitAndReinit(DialogBoxManager dialogBoxManagerScript, PlayerStatus tagedOutRunnerStatus, PlayerStatus fielderPlayerStatus)
+    /*IEnumerator WaitAndReinit(DialogBoxManager dialogBoxManagerScript, PlayerStatus tagedOutRunnerStatus, PlayerStatus fielderPlayerStatus)
     {
         yield return new WaitForSeconds(2f);
         if (dialogBoxManagerScript.DialogTextBoxGameObject.activeSelf)
@@ -185,7 +202,7 @@ public class FielderBehaviour : GenericPlayerBehaviour
 
         //Remove pause state
         GameData.isPaused = false;
-    }
+    }*/
 
     public void CalculateFielderTriggerInterraction(GameObject ballGameObject, GenericPlayerBehaviour genericPlayerBehaviourScript, PlayerStatus playerStatus)
     {

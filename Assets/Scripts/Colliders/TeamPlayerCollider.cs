@@ -26,8 +26,9 @@ public class TeamPlayerCollider : MonoBehaviour
             {
                 ((FielderBehaviour)genericPlayerBehaviourScript).CalculateFielderColliderInterraction(ballGameObject, ballControllerScript, genericPlayerBehaviourScript);
             }
-            else if (PlayerUtils.HasPitcherPosition(this.gameObject) && !ballControllerScript.IsPitched)
+            else if (PlayerUtils.HasPitcherPosition(this.gameObject) && !ballControllerScript.IsPitched && !ballControllerScript.IsPassed)
             {
+                Debug.Log("test collision balle sur pitcher");
                 ((PitcherBehaviour)genericPlayerBehaviourScript).CalculatePitcherColliderInterraction(ballGameObject, ballControllerScript, genericPlayerBehaviourScript);
             }
         }
@@ -111,7 +112,7 @@ public class TeamPlayerCollider : MonoBehaviour
             PlayerStatus currentPlayerStatus = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
             GenericPlayerBehaviour genericPlayerBehaviourScript = PlayerUtils.FetchCorrespondingPlayerBehaviourScript(this.gameObject, currentPlayerStatus);
 
-            if (!ballControlerScript.IsMoving && !ballControlerScript.IsHit && !ballControlerScript.IsPitched)
+            if (ballControlerScript.IsMoving && ballControlerScript.IsHit && !ballControlerScript.IsPitched)
             {
 
                 if (PlayerUtils.HasPitcherPosition(this.gameObject) && !ballControlerScript.IsTargetedByFielder)

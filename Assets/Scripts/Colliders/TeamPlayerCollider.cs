@@ -26,6 +26,11 @@ public class TeamPlayerCollider : MonoBehaviour
             {
                 ((FielderBehaviour)genericPlayerBehaviourScript).CalculateFielderColliderInterraction(ballGameObject, ballControllerScript, genericPlayerBehaviourScript);
             }
+            else if (PlayerUtils.HasPitcherPosition(this.gameObject) && !ballControllerScript.IsPitched && !ballControllerScript.IsPassed)
+            {
+                Debug.Log("test collision balle sur pitcher");
+                ((PitcherBehaviour)genericPlayerBehaviourScript).CalculatePitcherColliderInterraction(ballGameObject, ballControllerScript, genericPlayerBehaviourScript);
+            }
         }
         else if (this.HasPlayerCollided(collision))
         {
@@ -104,16 +109,45 @@ public class TeamPlayerCollider : MonoBehaviour
         {
             GameObject ballGameObject = collision.gameObject;
             BallController ballControlerScript =  BallUtils.FetchBallControllerScript(ballGameObject);
-            PlayerStatus currentFielderStatus = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
-            GenericPlayerBehaviour genericPlayerBehaviourScript = PlayerUtils.FetchCorrespondingPlayerBehaviourScript(this.gameObject, currentFielderStatus);
-            if (!ballControlerScript.IsMoving && !ballControlerScript.IsHit && !ballControlerScript.IsPitched && !ballControlerScript.IsTargetedByFielder && PlayerUtils.HasFielderPosition(this.gameObject))
-            {
-                GameObject nearestFielder = TeamUtils.GetNearestFielderFromBall(ballGameObject);
-                PlayerStatus nearestFielderStatus = PlayerUtils.FetchPlayerStatusScript(nearestFielder);
+            PlayerStatus currentPlayerStatus = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
+            GenericPlayerBehaviour genericPlayerBehaviourScript = PlayerUtils.FetchCorrespondingPlayerBehaviourScript(this.gameObject, currentPlayerStatus);
 
-                if (nearestFielderStatus.PlayerFieldPosition == currentFielderStatus.PlayerFieldPosition)
+            if (ballControlerScript.IsMoving && ballControlerScript.IsHit && !ballControlerScript.IsPitched)
+            {
+
+                if (PlayerUtils.HasPitcherPosition(this.gameObject) && !ballControlerScript.IsTargetedByFielder)
                 {
-                    ((FielderBehaviour)genericPlayerBehaviourScript).CalculateFielderTriggerInterraction(ballGameObject, genericPlayerBehaviourScript, currentFielderStatus);
+                    ballControlerScript.IsTargetedByPitcher = true;
+                    ((PitcherBehaviour)genericPlayerBehaviourScript).CalculateFielderTriggerInterraction(ballGameObject, genericPlayerBehaviourScript, currentPlayerStatus);
+                }
+
+                if (PlayerUtils.HasFielderPosition(this.gameObject) && !ballControlerScript.IsTargetedByFielder && !ballControlerScript.IsTargetedByPitcher)
+                {
+                    GameObject nearestFielder = TeamUtils.GetNearestFielderFromGameObject(ballGameObject);
+                    PlayerStatus nearestFielderStatus = PlayerUtils.FetchPlayerStatusScript(nearestFielder);
+
+                    if (nearestFielderStatus.PlayerFieldPosition == currentPlayerStatus.PlayerFieldPosition)
+                    {
+                        ((FielderBehaviour)genericPlayerBehaviourScript).CalculateFielderTriggerInterraction(ballGameObject, genericPlayerBehaviourScript, currentPlayerStatus);
+                    }
+                }
+            }
+                
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (this.HasBallCollided(collision))
+        {
+            GameObject ballGameObject = collision.gameObject;
+            BallController ballControlerScript = BallUtils.FetchBallControllerScript(ballGameObject);
+
+            if (!ballControlerScript.IsMoving && !ballControlerScript.IsHit && !ballControlerScript.IsPitched)
+            {
+                if (PlayerUtils.HasPitcherPosition(this.gameObject))
+                {
+                    ballControlerScript.IsTargetedByPitcher = false;
                 }
             }
         }

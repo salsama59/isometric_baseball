@@ -18,7 +18,6 @@ public class CatcherBehaviour : GenericPlayerBehaviour
             StopCoroutine(ballControllerScript.MovementCoroutine);
             ballControllerScript.IsPitched = false;
             ballControllerScript.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetCathcherOutBallZonePosition());
-            ballControllerScript.EnableMovement = true;
         }
         else
         {

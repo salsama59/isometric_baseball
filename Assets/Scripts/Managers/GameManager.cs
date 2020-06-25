@@ -20,6 +20,7 @@ public class GameManager : MonoBehaviour
 
     private Dictionary<string, TileTypeEnum> horizontalyPaintedDirtDictionary = new Dictionary<string, TileTypeEnum>();
     private Dictionary<string, TileTypeEnum> verticalyPaintedDirtDictionary = new Dictionary<string, TileTypeEnum>();
+    private List<GameObject> attackTeamBatterList = new List<GameObject>();
 
     void Start()
     {
@@ -32,23 +33,26 @@ public class GameManager : MonoBehaviour
 
         PlayerEnum playerEnum;
         TeamIdEnum teamIdEnum;
+        TeamSideEnum teamSideEnum;
 
         for (int i = 0; i < GameData.playerNumber; i++)
         {
             
-
             if(i == (int)PlayerEnum.PLAYER_1)
             {
                 playerEnum = PlayerEnum.PLAYER_1;
                 teamIdEnum = TeamIdEnum.TEAM_1;
+                teamSideEnum = TeamSideEnum.ATTACK;
             }
             else
             {
                 playerEnum = PlayerEnum.PLAYER_2;
                 teamIdEnum = TeamIdEnum.TEAM_2;
+                teamSideEnum = TeamSideEnum.DEFENSE;
             }
 
-            GameData.playerEnumTeamMap.Add(playerEnum, teamIdEnum);
+            GameData.teamIdEnumMap.Add(playerEnum, teamIdEnum);
+            GameData.teamSideEnumMap.Add(teamIdEnum, teamSideEnum);
 
             this.SetPlayersCharacteristics(playerEnum, ball);
         }
@@ -104,7 +108,7 @@ public class GameManager : MonoBehaviour
 
         List<PlayerFieldPositionEnum> eligibilityList = this.GetEligiblePlayerFieldPositionList(playerId);
 
-        GameData.playerEligibilityMap.Add(playerId, eligibilityList);
+        GameData.playerFieldPositionEnumListMap.Add(playerId, eligibilityList);
 
         foreach (KeyValuePair<PlayerFieldPositionEnum, Vector3> entry in TeamUtils.playerTeamMenberPositionLocation)
         {
@@ -633,4 +637,5 @@ public class GameManager : MonoBehaviour
     public static int ColumnMinimum { get => columnMinimum; set => columnMinimum = value; }
     public static int RowMinimum { get => rowMinimum; set => rowMinimum = value; }
     public static int RowMaximum { get => rowMaximum; set => rowMaximum = value; }
+    public List<GameObject> AttackTeamBatterList { get => attackTeamBatterList; set => attackTeamBatterList = value; }
 }

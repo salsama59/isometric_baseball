@@ -58,7 +58,7 @@ public class TeamUtils : MonoBehaviour
 
     public static PlayerEnum GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum playerFieldPositionEnum)
     {
-        foreach (KeyValuePair<PlayerEnum, List<PlayerFieldPositionEnum>> entry in GameData.playerEligibilityMap)
+        foreach (KeyValuePair<PlayerEnum, List<PlayerFieldPositionEnum>> entry in GameData.playerFieldPositionEnumListMap)
         {
             if(entry.Value.Contains(playerFieldPositionEnum))
             {

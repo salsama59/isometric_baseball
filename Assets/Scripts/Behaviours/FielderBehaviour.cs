@@ -108,7 +108,7 @@ public class FielderBehaviour : GenericPlayerBehaviour
     {
         GameManager gameManager = GameUtils.FetchGameManager();
         PlayerStatus fielderPlayerStatus = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
-        PlayerStatus runnerPlayerStatus = PlayerUtils.FetchPlayerStatusScript(targetToTagOut);
+        PlayerStatus runnerPlayerStatus = PlayerUtils.FetchPlayerStatusScript(gameManager.AttackTeamBatterList.First());
 
         GameData.isPaused = true;
         DialogBoxManager dialogBoxManagerScript =  GameUtils.FetchDialogBoxManager();
@@ -116,8 +116,16 @@ public class FielderBehaviour : GenericPlayerBehaviour
         dialogBoxManagerScript.SetDialogTextBox("TAG OUT !!!!!!!");
         dialogBoxManagerScript.ToggleDialogTextBox();
 
+        gameManager.AttackTeamRunnerList.Remove(targetToTagOut);
+        targetToTagOut.SetActive(false);
+        gameManager.AttackTeamBatterList.First().SetActive(true);
+        RunnerBehaviour runnerBehaviourScript = PlayerUtils.FetchRunnerBehaviourScript(targetToTagOut);
+        BatterBehaviour batterBehaviourScript = PlayerUtils.FetchBatterBehaviourScript(gameManager.AttackTeamBatterList.First());
+        batterBehaviourScript.EquipedBat = runnerBehaviourScript.EquipedBat;
+        runnerBehaviourScript.EquipedBat = null;
         StartCoroutine(gameManager.WaitAndReinit(dialogBoxManagerScript, runnerPlayerStatus, fielderPlayerStatus, FieldBall));
 
+        
     }
 
     public void CalculateFielderTriggerInterraction(GameObject ballGameObject, GenericPlayerBehaviour genericPlayerBehaviourScript, PlayerStatus playerStatus)

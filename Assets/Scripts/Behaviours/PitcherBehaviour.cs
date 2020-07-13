@@ -55,11 +55,29 @@ public class PitcherBehaviour : GenericPlayerBehaviour
             GameData.isPaused = true;
             this.InterceptBall(ballGameObject, ballControllerScript, genericPlayerBehaviourScript);
             hasIntercepted = true;
-            StartCoroutine(gameManager.WaitAndReinit(dialogBoxManagerScript, PlayerUtils.FetchPlayerStatusScript(runnerToGetOut), null, FieldBall));
 
-            if(runnersOnFieldCount == 1)
+            gameManager.AttackTeamRunnerList.Remove(runnerToGetOut);
+            runnerToGetOut.SetActive(false);
+            gameManager.AttackTeamBatterList.First().SetActive(true);
+            RunnerBehaviour runnerBehaviourScript = PlayerUtils.FetchRunnerBehaviourScript(runnerToGetOut);
+            BatterBehaviour batterBehaviourScript = PlayerUtils.FetchBatterBehaviourScript(gameManager.AttackTeamBatterList.First());
+            batterBehaviourScript.EquipedBat = runnerBehaviourScript.EquipedBat;
+            runnerBehaviourScript.EquipedBat = null;
+
+            if (runnersOnFieldCount == 1)
             {
+                StartCoroutine(gameManager.WaitAndReinit(dialogBoxManagerScript, PlayerUtils.FetchPlayerStatusScript(gameManager.AttackTeamBatterList.First()), null, FieldBall));
                 return;
+            }
+            else
+            {
+                GameObject bat = batterBehaviourScript.EquipedBat;
+                bat.transform.SetParent(null);
+                bat.transform.position = FieldUtils.GetBatCorrectPosition(batterBehaviourScript.transform.position);
+                bat.transform.rotation = Quaternion.Euler(0f, 0f, -70f);
+                bat.transform.SetParent(gameManager.AttackTeamBatterList.First().transform);
+                batterBehaviourScript.EquipedBat.SetActive(true);
+                TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.BATTER, batterBehaviourScript.gameObject, TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum.BATTER));
             }
             
         }

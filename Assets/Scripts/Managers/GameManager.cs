@@ -22,6 +22,7 @@ public class GameManager : MonoBehaviour
     private Dictionary<string, TileTypeEnum> horizontalyPaintedDirtDictionary = new Dictionary<string, TileTypeEnum>();
     private Dictionary<string, TileTypeEnum> verticalyPaintedDirtDictionary = new Dictionary<string, TileTypeEnum>();
     private List<GameObject> attackTeamBatterList = new List<GameObject>();
+    private List<GameObject> attackTeamRunnerList = new List<GameObject>();
 
     void Start()
     {
@@ -125,10 +126,14 @@ public class GameManager : MonoBehaviour
             KeyValuePair<PlayerFieldPositionEnum, Vector3> batterKeyValuePair = new KeyValuePair<PlayerFieldPositionEnum, Vector3>(PlayerFieldPositionEnum.BATTER, TeamUtils.playerTeamMenberPositionLocation[PlayerFieldPositionEnum.BATTER]);
             for (int i = 0; i < TeamUtils.playerTeamMenberPositionLocation.Count; i++)
             {
-                AttackTeamBatterList.Add(this.ProcessPlayer(playerId, ball, batterKeyValuePair, side));
+                GameObject batter = this.ProcessPlayer(playerId, ball, batterKeyValuePair, side);
+                batter.name += "_" + i;
+                AttackTeamBatterList.Add(batter);
             }
 
             GameObject firstBatter = AttackTeamBatterList.First();
+            GameObject bat = Instantiate(batModel, FieldUtils.GetBatCorrectPosition(batterKeyValuePair.Value), Quaternion.Euler(0f, 0f, -70f));
+            bat.transform.parent = firstBatter.transform;
             firstBatter.SetActive(true);
             TeamUtils.AddPlayerTeamMember(batterKeyValuePair.Key, firstBatter, playerId);
         }
@@ -163,8 +168,6 @@ public class GameManager : MonoBehaviour
                 playerStatus.BattingEfficiency = 10f;
                 playerStatus.BattingPower = 5;
                 player.AddComponent<BatterBehaviour>();
-                GameObject bat = Instantiate(batModel, FieldUtils.GetBatCorrectPosition(entry.Value), Quaternion.Euler(0f, 0f, -70f));
-                bat.transform.parent = player.transform;
                 PlayerAbility hitBallPlayerAbility = new PlayerAbility("Hit ball", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.HitBallAction);
                 playerAbilities.AddAbility(hitBallPlayerAbility);
                 player.SetActive(false);
@@ -568,7 +571,7 @@ public class GameManager : MonoBehaviour
     }
 
 
-    public IEnumerator WaitAndReinit(DialogBoxManager dialogBoxManagerScript, PlayerStatus tagedOutRunnerStatus, PlayerStatus fielderPlayerStatus, GameObject fieldBall)
+    public IEnumerator WaitAndReinit(DialogBoxManager dialogBoxManagerScript, PlayerStatus newBatterStatus, PlayerStatus fielderPlayerStatus, GameObject fieldBall)
     {
         yield return new WaitForSeconds(2f);
         if (dialogBoxManagerScript.DialogTextBoxGameObject.activeSelf)
@@ -612,28 +615,34 @@ public class GameManager : MonoBehaviour
         ballControllerScript.IsHit = false;
 
         //Update taged out runner and new batter informations
-        tagedOutRunnerStatus.IsAllowedToMove = false;
-        tagedOutRunnerStatus.PlayerFieldPosition = PlayerFieldPositionEnum.BATTER;
-        RunnerBehaviour runnerBehaviourScript = PlayerUtils.FetchRunnerBehaviourScript(tagedOutRunnerStatus.gameObject);
-        GameObject bat = runnerBehaviourScript.EquipedBat;
-        Destroy(tagedOutRunnerStatus.gameObject.GetComponent<RunnerBehaviour>());
-        tagedOutRunnerStatus.gameObject.AddComponent<BatterBehaviour>();
-        tagedOutRunnerStatus.gameObject.transform.position = TeamUtils.playerTeamMenberPositionLocation[PlayerFieldPositionEnum.BATTER];
-        BatterBehaviour batterBehaviourScript = PlayerUtils.FetchBatterBehaviourScript(tagedOutRunnerStatus.gameObject);
-        batterBehaviourScript.Start();
-        batterBehaviourScript.EquipedBat = bat;
+        //tagedOutRunnerStatus.IsAllowedToMove = false;
+        //tagedOutRunnerStatus.PlayerFieldPosition = PlayerFieldPositionEnum.BATTER;
+        //RunnerBehaviour runnerBehaviourScript = PlayerUtils.FetchRunnerBehaviourScript(tagedOutRunnerStatus.gameObject);
+        BatterBehaviour batterBehaviourScript = PlayerUtils.FetchBatterBehaviourScript(newBatterStatus.gameObject);
+        GameObject bat = batterBehaviourScript.EquipedBat;
+        //Destroy(tagedOutRunnerStatus.gameObject.GetComponent<RunnerBehaviour>());
+        //tagedOutRunnerStatus.gameObject.AddComponent<BatterBehaviour>();
+        //tagedOutRunnerStatus.gameObject.transform.position = TeamUtils.playerTeamMenberPositionLocation[PlayerFieldPositionEnum.BATTER];
+        bat.transform.SetParent(null);
+        bat.transform.position = FieldUtils.GetBatCorrectPosition(batterBehaviourScript.transform.position);
+        bat.transform.rotation = Quaternion.Euler(0f, 0f, -70f);
+        bat.transform.SetParent(newBatterStatus.gameObject.transform);
+        //batterBehaviourScript.Start();
+        //batterBehaviourScript.EquipedBat = bat;
         batterBehaviourScript.EquipedBat.SetActive(true);
-        tagedOutRunnerStatus.gameObject.transform.rotation = Quaternion.identity;
-        batterBehaviourScript.IsoRenderer.LastDirection = 6;
-        batterBehaviourScript.IsoRenderer.SetDirection(Vector2.zero);
-        PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(tagedOutRunnerStatus.gameObject);
-        PlayerAbility hitBallPlayerAbility = new PlayerAbility("Hit ball", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.HitBallAction);
-        playerAbilities.PlayerAbilityList.Clear();
-        playerAbilities.AddAbility(hitBallPlayerAbility);
+        //tagedOutRunnerStatus.gameObject.transform.rotation = Quaternion.identity;
+        //batterBehaviourScript.IsoRenderer.LastDirection = 6;
+        //batterBehaviourScript.IsoRenderer.SetDirection(Vector2.zero);
+        //PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(tagedOutRunnerStatus.gameObject);
+        //PlayerAbility hitBallPlayerAbility = new PlayerAbility("Hit ball", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.HitBallAction);
+        //playerAbilities.PlayerAbilityList.Clear();
+        //playerAbilities.AddAbility(hitBallPlayerAbility);
+
+        TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.BATTER, batterBehaviourScript.gameObject, TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum.BATTER));
 
         //Update fielder informations
 
-        if(fielderPlayerStatus != null)
+        if (fielderPlayerStatus != null)
         {
             FielderBehaviour fielderBehaviourScript = PlayerUtils.FetchFielderBehaviourScript(fielderPlayerStatus.gameObject);
             fielderPlayerStatus.IsAllowedToMove = true;
@@ -666,4 +675,5 @@ public class GameManager : MonoBehaviour
     public static int RowMinimum { get => rowMinimum; set => rowMinimum = value; }
     public static int RowMaximum { get => rowMaximum; set => rowMaximum = value; }
     public List<GameObject> AttackTeamBatterList { get => attackTeamBatterList; set => attackTeamBatterList = value; }
+    public List<GameObject> AttackTeamRunnerList { get => attackTeamRunnerList; set => attackTeamRunnerList = value; }
 }

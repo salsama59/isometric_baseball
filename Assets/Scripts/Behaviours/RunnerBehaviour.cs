@@ -88,7 +88,7 @@ public class RunnerBehaviour : GenericPlayerBehaviour
 
                     PlayerEnum playerEnum = TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum.RUNNER);
                     TeamsScoreManager teamsScoreManagerScript = GameUtils.FetchTeamsScoreManager();
-                    teamsScoreManagerScript.IncrementTeamScore(GameData.playerEnumTeamMap[playerEnum]);
+                    teamsScoreManagerScript.IncrementTeamScore(GameData.teamIdEnumMap[playerEnum]);
 
                 }
                 

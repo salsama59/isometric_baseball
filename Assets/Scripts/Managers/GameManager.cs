@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -20,6 +21,8 @@ public class GameManager : MonoBehaviour
 
     private Dictionary<string, TileTypeEnum> horizontalyPaintedDirtDictionary = new Dictionary<string, TileTypeEnum>();
     private Dictionary<string, TileTypeEnum> verticalyPaintedDirtDictionary = new Dictionary<string, TileTypeEnum>();
+    private List<GameObject> attackTeamBatterList = new List<GameObject>();
+    private List<GameObject> attackTeamRunnerList = new List<GameObject>();
 
     void Start()
     {
@@ -32,23 +35,26 @@ public class GameManager : MonoBehaviour
 
         PlayerEnum playerEnum;
         TeamIdEnum teamIdEnum;
+        TeamSideEnum teamSideEnum;
 
         for (int i = 0; i < GameData.playerNumber; i++)
         {
             
-
             if(i == (int)PlayerEnum.PLAYER_1)
             {
                 playerEnum = PlayerEnum.PLAYER_1;
                 teamIdEnum = TeamIdEnum.TEAM_1;
+                teamSideEnum = TeamSideEnum.ATTACK;
             }
             else
             {
                 playerEnum = PlayerEnum.PLAYER_2;
                 teamIdEnum = TeamIdEnum.TEAM_2;
+                teamSideEnum = TeamSideEnum.DEFENSE;
             }
 
-            GameData.playerEnumTeamMap.Add(playerEnum, teamIdEnum);
+            GameData.teamIdEnumMap.Add(playerEnum, teamIdEnum);
+            GameData.teamSideEnumMap.Add(teamIdEnum, teamSideEnum);
 
             this.SetPlayersCharacteristics(playerEnum, ball);
         }
@@ -65,6 +71,11 @@ public class GameManager : MonoBehaviour
         TeamsScoreManager teamsScoreManager = GameUtils.FetchTeamsScoreManager();
         teamsScoreManager.UpdateTeamName(TeamIdEnum.TEAM_1, "FC.TOUTOU");
         teamsScoreManager.UpdateTeamName(TeamIdEnum.TEAM_2, "AS.DETERMINE");
+
+    }
+
+    void Update()
+    {
 
     }
 
@@ -104,129 +115,159 @@ public class GameManager : MonoBehaviour
 
         List<PlayerFieldPositionEnum> eligibilityList = this.GetEligiblePlayerFieldPositionList(playerId);
 
-        GameData.playerEligibilityMap.Add(playerId, eligibilityList);
+        GameData.playerFieldPositionEnumListMap.Add(playerId, eligibilityList);
 
-        foreach (KeyValuePair<PlayerFieldPositionEnum, Vector3> entry in TeamUtils.playerTeamMenberPositionLocation)
+        TeamSideEnum side = GameData.teamSideEnumMap[GameData.teamIdEnumMap[playerId]];
+
+        //according to the side if DEFENSE do like down there else if attack populate batterlist and place the first element on the field
+
+        if(side == TeamSideEnum.ATTACK)
         {
-
-            if (eligibilityList.Contains(entry.Key))
+            KeyValuePair<PlayerFieldPositionEnum, Vector3> batterKeyValuePair = new KeyValuePair<PlayerFieldPositionEnum, Vector3>(PlayerFieldPositionEnum.BATTER, TeamUtils.playerTeamMenberPositionLocation[PlayerFieldPositionEnum.BATTER]);
+            for (int i = 0; i < TeamUtils.playerTeamMenberPositionLocation.Count; i++)
             {
-                GameObject player = Instantiate(playerModel, entry.Value, Quaternion.identity);
-                PlayerStatus playerStatus = PlayerUtils.FetchPlayerStatusScript(player);
-                playerStatus.PlayerFieldPosition = entry.Key;
-                playerStatus.IsAllowedToMove = PlayerUtils.IsPlayerAllowedToMove(player);
-                playerStatus.PlayerOwner = playerId;
-
-                PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(player);
-
-                PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
-
-                switch (playerStatus.PlayerFieldPosition)
-                {
-                    case PlayerFieldPositionEnum.BATTER:
-                        playerStatus.BattingEfficiency = 10f;
-                        playerStatus.BattingPower = 5;
-                        player.AddComponent<BatterBehaviour>();
-                        GameObject bat = Instantiate(batModel, FieldUtils.GetBatCorrectPosition(entry.Value), Quaternion.Euler(0f, 0f, -70f));
-                        bat.transform.parent = player.transform;
-                        PlayerAbility hitBallPlayerAbility = new PlayerAbility("Hit ball", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.HitBallAction);
-                        playerAbilities.AddAbility(hitBallPlayerAbility);
-                        break;
-                    case PlayerFieldPositionEnum.PITCHER:
-                        //ball.SetActive(true);
-                        playerStatus.PitchEfficiency = 50f;
-                        playerStatus.PitchingPower = 2;
-                        playerStatus.PitchingEffect = 10f;
-                        BallController ballControllerScript = BallUtils.FetchBallControllerScript(ball);
-                        ballControllerScript.CurrentPitcher = player;
-                        player.AddComponent<PitcherBehaviour>();
-                        PlayerAbility throwBallPlayerAbility = new PlayerAbility("Throw", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.ThrowBallAction);
-                        PlayerAbility gyroBallSpecialPlayerAbility = new PlayerAbility("Gyro ball", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.NORMAL, playerActionsManager.ThrowBallAction);
-                        PlayerAbility fireBallSpecialPlayerAbility = new PlayerAbility("Fire ball", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.NORMAL, playerActionsManager.ThrowBallAction);
-                        PlayerAbility menuBackAction = new PlayerAbility("Back", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.UI, null);
-                        playerAbilities.AddAbility(throwBallPlayerAbility);
-                        playerAbilities.AddAbility(gyroBallSpecialPlayerAbility);
-                        playerAbilities.AddAbility(fireBallSpecialPlayerAbility);
-                        playerAbilities.AddAbility(menuBackAction);
-                        playerAbilities.HasSpecialAbilities = true;
-                        this.UpdatePlayerColliderSettings(player);
-                        break;
-                    case PlayerFieldPositionEnum.RUNNER:
-                        playerStatus.Speed = 2f;
-                        player.AddComponent<RunnerBehaviour>();
-                        PlayerAbility runPlayerAbility = new PlayerAbility("Run to next base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.RunAction);
-                        PlayerAbility staySafePlayerAbility = new PlayerAbility("Stay on base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.StayAction);
-                        playerAbilities.AddAbility(runPlayerAbility);
-                        playerAbilities.AddAbility(staySafePlayerAbility);
-                        break;
-                    case PlayerFieldPositionEnum.CATCHER:
-                        playerStatus.CatchEfficiency = 100f;
-                        player.AddComponent<CatcherBehaviour>();
-                        PlayerAbility catchPlayerAbility = new PlayerAbility("Catch ball", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.CatchBallAction);
-                        playerAbilities.AddAbility(catchPlayerAbility);
-                        break;
-                    case PlayerFieldPositionEnum.FIRST_BASEMAN:
-                        playerStatus.CatchEfficiency = 80f;
-                        playerStatus.Speed = 2f;
-                        UpdatePlayerColliderSettings(player);
-                        player.AddComponent<FielderBehaviour>();
-                        break;
-                    case PlayerFieldPositionEnum.THIRD_BASEMAN:
-                        playerStatus.CatchEfficiency = 80f;
-                        playerStatus.Speed = 2f;
-                        UpdatePlayerColliderSettings(player);
-                        player.AddComponent<FielderBehaviour>();
-                        break;
-                    case PlayerFieldPositionEnum.SECOND_BASEMAN:
-                        playerStatus.CatchEfficiency = 80f;
-                        playerStatus.Speed = 2f;
-                        UpdatePlayerColliderSettings(player);
-                        player.AddComponent<FielderBehaviour>();
-                        break;
-                    case PlayerFieldPositionEnum.SHORT_STOP:
-                        playerStatus.CatchEfficiency = 80f;
-                        playerStatus.Speed = 2f;
-                        UpdatePlayerColliderSettings(player);
-                        player.AddComponent<FielderBehaviour>();
-                        break;
-                    case PlayerFieldPositionEnum.LEFT_FIELDER:
-                        playerStatus.CatchEfficiency = 80f;
-                        playerStatus.Speed = 2f;
-                        UpdatePlayerColliderSettings(player);
-                        player.AddComponent<FielderBehaviour>();
-                        break;
-                    case PlayerFieldPositionEnum.RIGHT_FIELDER:
-                        playerStatus.CatchEfficiency = 80f;
-                        playerStatus.Speed = 2f;
-                        UpdatePlayerColliderSettings(player);
-                        player.AddComponent<FielderBehaviour>();
-                        break;
-                    case PlayerFieldPositionEnum.CENTER_FIELDER:
-                        playerStatus.CatchEfficiency = 80f;
-                        playerStatus.Speed = 2f;
-                        UpdatePlayerColliderSettings(player);
-                        player.AddComponent<FielderBehaviour>();
-                        break;
-                }
-
-                player.name = playerStatus.PlayerFieldPosition.ToString();
-
-                GenericPlayerBehaviour genericPlayerBehaviourScript = PlayerUtils.FetchCorrespondingPlayerBehaviourScript(player, playerStatus);
-                if (genericPlayerBehaviourScript != null)
-                {
-                    genericPlayerBehaviourScript.FieldBall = ball;
-                }
-
-                if (PlayerUtils.HasFielderPosition(player))
-                {
-                    TeamUtils.fielderList.Add(player);
-                }
-
-
-                TeamUtils.AddPlayerTeamMember(entry.Key, player, playerId);
+                GameObject batter = this.ProcessPlayer(playerId, ball, batterKeyValuePair, side);
+                batter.name += "_" + i;
+                AttackTeamBatterList.Add(batter);
             }
-            
+
+            GameObject firstBatter = AttackTeamBatterList.First();
+            GameObject bat = Instantiate(batModel, FieldUtils.GetBatCorrectPosition(batterKeyValuePair.Value), Quaternion.Euler(0f, 0f, -70f));
+            bat.transform.parent = firstBatter.transform;
+            firstBatter.SetActive(true);
+            TeamUtils.AddPlayerTeamMember(batterKeyValuePair.Key, firstBatter, playerId);
         }
+        else if (side == TeamSideEnum.DEFENSE)
+        {
+            foreach (KeyValuePair<PlayerFieldPositionEnum, Vector3> entry in TeamUtils.playerTeamMenberPositionLocation)
+            {
+                if (eligibilityList.Contains(entry.Key))
+                {
+                    this.ProcessPlayer(playerId, ball, entry, side);
+                }
+            }
+        }
+        
+    }
+
+    private GameObject ProcessPlayer(PlayerEnum playerId, GameObject ball, KeyValuePair<PlayerFieldPositionEnum, Vector3> entry, TeamSideEnum teamSide)
+    {
+        GameObject player = Instantiate(playerModel, entry.Value, Quaternion.identity);
+        PlayerStatus playerStatus = PlayerUtils.FetchPlayerStatusScript(player);
+        playerStatus.PlayerFieldPosition = entry.Key;
+        playerStatus.IsAllowedToMove = PlayerUtils.IsPlayerAllowedToMove(player);
+        playerStatus.PlayerOwner = playerId;
+
+        PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(player);
+
+        PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
+
+        switch (playerStatus.PlayerFieldPosition)
+        {
+            case PlayerFieldPositionEnum.BATTER:
+                playerStatus.BattingEfficiency = 10f;
+                playerStatus.BattingPower = 5;
+                player.AddComponent<BatterBehaviour>();
+                PlayerAbility hitBallPlayerAbility = new PlayerAbility("Hit ball", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.HitBallAction);
+                playerAbilities.AddAbility(hitBallPlayerAbility);
+                player.SetActive(false);
+                break;
+            case PlayerFieldPositionEnum.PITCHER:
+                //ball.SetActive(true);
+                playerStatus.PitchEfficiency = 50f;
+                playerStatus.PitchingPower = 2;
+                playerStatus.PitchingEffect = 10f;
+                BallController ballControllerScript = BallUtils.FetchBallControllerScript(ball);
+                ballControllerScript.CurrentPitcher = player;
+                player.AddComponent<PitcherBehaviour>();
+                PlayerAbility throwBallPlayerAbility = new PlayerAbility("Throw", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.ThrowBallAction);
+                PlayerAbility gyroBallSpecialPlayerAbility = new PlayerAbility("Gyro ball", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.NORMAL, playerActionsManager.ThrowBallAction);
+                PlayerAbility fireBallSpecialPlayerAbility = new PlayerAbility("Fire ball", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.NORMAL, playerActionsManager.ThrowBallAction);
+                PlayerAbility menuBackAction = new PlayerAbility("Back", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.UI, null);
+                playerAbilities.AddAbility(throwBallPlayerAbility);
+                playerAbilities.AddAbility(gyroBallSpecialPlayerAbility);
+                playerAbilities.AddAbility(fireBallSpecialPlayerAbility);
+                playerAbilities.AddAbility(menuBackAction);
+                playerAbilities.HasSpecialAbilities = true;
+                this.UpdatePlayerColliderSettings(player);
+                break;
+            case PlayerFieldPositionEnum.RUNNER:
+                playerStatus.Speed = 2f;
+                player.AddComponent<RunnerBehaviour>();
+                PlayerAbility runPlayerAbility = new PlayerAbility("Run to next base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.RunAction);
+                PlayerAbility staySafePlayerAbility = new PlayerAbility("Stay on base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.StayAction);
+                playerAbilities.AddAbility(runPlayerAbility);
+                playerAbilities.AddAbility(staySafePlayerAbility);
+                break;
+            case PlayerFieldPositionEnum.CATCHER:
+                playerStatus.CatchEfficiency = 100f;
+                player.AddComponent<CatcherBehaviour>();
+                PlayerAbility catchPlayerAbility = new PlayerAbility("Catch ball", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.CatchBallAction);
+                playerAbilities.AddAbility(catchPlayerAbility);
+                break;
+            case PlayerFieldPositionEnum.FIRST_BASEMAN:
+                playerStatus.CatchEfficiency = 80f;
+                playerStatus.Speed = 2f;
+                UpdatePlayerColliderSettings(player);
+                player.AddComponent<FielderBehaviour>();
+                break;
+            case PlayerFieldPositionEnum.THIRD_BASEMAN:
+                playerStatus.CatchEfficiency = 80f;
+                playerStatus.Speed = 2f;
+                UpdatePlayerColliderSettings(player);
+                player.AddComponent<FielderBehaviour>();
+                break;
+            case PlayerFieldPositionEnum.SECOND_BASEMAN:
+                playerStatus.CatchEfficiency = 80f;
+                playerStatus.Speed = 2f;
+                UpdatePlayerColliderSettings(player);
+                player.AddComponent<FielderBehaviour>();
+                break;
+            case PlayerFieldPositionEnum.SHORT_STOP:
+                playerStatus.CatchEfficiency = 80f;
+                playerStatus.Speed = 2f;
+                UpdatePlayerColliderSettings(player);
+                player.AddComponent<FielderBehaviour>();
+                break;
+            case PlayerFieldPositionEnum.LEFT_FIELDER:
+                playerStatus.CatchEfficiency = 80f;
+                playerStatus.Speed = 2f;
+                UpdatePlayerColliderSettings(player);
+                player.AddComponent<FielderBehaviour>();
+                break;
+            case PlayerFieldPositionEnum.RIGHT_FIELDER:
+                playerStatus.CatchEfficiency = 80f;
+                playerStatus.Speed = 2f;
+                UpdatePlayerColliderSettings(player);
+                player.AddComponent<FielderBehaviour>();
+                break;
+            case PlayerFieldPositionEnum.CENTER_FIELDER:
+                playerStatus.CatchEfficiency = 80f;
+                playerStatus.Speed = 2f;
+                UpdatePlayerColliderSettings(player);
+                player.AddComponent<FielderBehaviour>();
+                break;
+        }
+
+        player.name = playerStatus.PlayerFieldPosition.ToString();
+
+        GenericPlayerBehaviour genericPlayerBehaviourScript = PlayerUtils.FetchCorrespondingPlayerBehaviourScript(player, playerStatus);
+        if (genericPlayerBehaviourScript != null)
+        {
+            genericPlayerBehaviourScript.FieldBall = ball;
+        }
+
+        if (PlayerUtils.HasFielderPosition(player))
+        {
+            TeamUtils.fielderList.Add(player);
+        }
+
+        if (teamSide == TeamSideEnum.DEFENSE)
+        {
+            TeamUtils.AddPlayerTeamMember(entry.Key, player, playerId);
+        }
+
+        return player;
     }
 
     private void UpdatePlayerColliderSettings(GameObject player)
@@ -239,12 +280,6 @@ public class GameManager : MonoBehaviour
             boxCollider.offset = new Vector2(0, -1.5f);
             boxCollider.size = new Vector2(2, 3);
         }
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
 
     }
 
@@ -536,7 +571,7 @@ public class GameManager : MonoBehaviour
     }
 
 
-    public IEnumerator WaitAndReinit(DialogBoxManager dialogBoxManagerScript, PlayerStatus tagedOutRunnerStatus, PlayerStatus fielderPlayerStatus, GameObject fieldBall)
+    public IEnumerator WaitAndReinit(DialogBoxManager dialogBoxManagerScript, PlayerStatus newBatterStatus, PlayerStatus fielderPlayerStatus, GameObject fieldBall)
     {
         yield return new WaitForSeconds(2f);
         if (dialogBoxManagerScript.DialogTextBoxGameObject.activeSelf)
@@ -580,28 +615,34 @@ public class GameManager : MonoBehaviour
         ballControllerScript.IsHit = false;
 
         //Update taged out runner and new batter informations
-        tagedOutRunnerStatus.IsAllowedToMove = false;
-        tagedOutRunnerStatus.PlayerFieldPosition = PlayerFieldPositionEnum.BATTER;
-        RunnerBehaviour runnerBehaviourScript = PlayerUtils.FetchRunnerBehaviourScript(tagedOutRunnerStatus.gameObject);
-        GameObject bat = runnerBehaviourScript.EquipedBat;
-        Destroy(tagedOutRunnerStatus.gameObject.GetComponent<RunnerBehaviour>());
-        tagedOutRunnerStatus.gameObject.AddComponent<BatterBehaviour>();
-        tagedOutRunnerStatus.gameObject.transform.position = TeamUtils.playerTeamMenberPositionLocation[PlayerFieldPositionEnum.BATTER];
-        BatterBehaviour batterBehaviourScript = PlayerUtils.FetchBatterBehaviourScript(tagedOutRunnerStatus.gameObject);
-        batterBehaviourScript.Start();
-        batterBehaviourScript.EquipedBat = bat;
+        //tagedOutRunnerStatus.IsAllowedToMove = false;
+        //tagedOutRunnerStatus.PlayerFieldPosition = PlayerFieldPositionEnum.BATTER;
+        //RunnerBehaviour runnerBehaviourScript = PlayerUtils.FetchRunnerBehaviourScript(tagedOutRunnerStatus.gameObject);
+        BatterBehaviour batterBehaviourScript = PlayerUtils.FetchBatterBehaviourScript(newBatterStatus.gameObject);
+        GameObject bat = batterBehaviourScript.EquipedBat;
+        //Destroy(tagedOutRunnerStatus.gameObject.GetComponent<RunnerBehaviour>());
+        //tagedOutRunnerStatus.gameObject.AddComponent<BatterBehaviour>();
+        //tagedOutRunnerStatus.gameObject.transform.position = TeamUtils.playerTeamMenberPositionLocation[PlayerFieldPositionEnum.BATTER];
+        bat.transform.SetParent(null);
+        bat.transform.position = FieldUtils.GetBatCorrectPosition(batterBehaviourScript.transform.position);
+        bat.transform.rotation = Quaternion.Euler(0f, 0f, -70f);
+        bat.transform.SetParent(newBatterStatus.gameObject.transform);
+        //batterBehaviourScript.Start();
+        //batterBehaviourScript.EquipedBat = bat;
         batterBehaviourScript.EquipedBat.SetActive(true);
-        tagedOutRunnerStatus.gameObject.transform.rotation = Quaternion.identity;
-        batterBehaviourScript.IsoRenderer.LastDirection = 6;
-        batterBehaviourScript.IsoRenderer.SetDirection(Vector2.zero);
-        PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(tagedOutRunnerStatus.gameObject);
-        PlayerAbility hitBallPlayerAbility = new PlayerAbility("Hit ball", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.HitBallAction);
-        playerAbilities.PlayerAbilityList.Clear();
-        playerAbilities.AddAbility(hitBallPlayerAbility);
+        //tagedOutRunnerStatus.gameObject.transform.rotation = Quaternion.identity;
+        //batterBehaviourScript.IsoRenderer.LastDirection = 6;
+        //batterBehaviourScript.IsoRenderer.SetDirection(Vector2.zero);
+        //PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(tagedOutRunnerStatus.gameObject);
+        //PlayerAbility hitBallPlayerAbility = new PlayerAbility("Hit ball", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.HitBallAction);
+        //playerAbilities.PlayerAbilityList.Clear();
+        //playerAbilities.AddAbility(hitBallPlayerAbility);
+
+        TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.BATTER, batterBehaviourScript.gameObject, TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum.BATTER));
 
         //Update fielder informations
 
-        if(fielderPlayerStatus != null)
+        if (fielderPlayerStatus != null)
         {
             FielderBehaviour fielderBehaviourScript = PlayerUtils.FetchFielderBehaviourScript(fielderPlayerStatus.gameObject);
             fielderPlayerStatus.IsAllowedToMove = true;
@@ -633,4 +674,6 @@ public class GameManager : MonoBehaviour
     public static int ColumnMinimum { get => columnMinimum; set => columnMinimum = value; }
     public static int RowMinimum { get => rowMinimum; set => rowMinimum = value; }
     public static int RowMaximum { get => rowMaximum; set => rowMaximum = value; }
+    public List<GameObject> AttackTeamBatterList { get => attackTeamBatterList; set => attackTeamBatterList = value; }
+    public List<GameObject> AttackTeamRunnerList { get => attackTeamRunnerList; set => attackTeamRunnerList = value; }
 }

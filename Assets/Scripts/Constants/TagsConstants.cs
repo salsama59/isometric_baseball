@@ -25,4 +25,5 @@ public class TagsConstants
     public static string TEAM_1_SCORE = "TeamOneScore";
     public static string TEAM_2_SCORE = "TeamTwoScore";
     public static string DIALOG_BOX_MANAGER = "DialogBoxManager";
+    public static string TARGET_SELECTION_MANAGER = "TargetSelectionManager";
 }

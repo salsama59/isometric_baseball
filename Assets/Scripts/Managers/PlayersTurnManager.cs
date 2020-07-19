@@ -5,13 +5,16 @@ using UnityEngine;
 public class PlayersTurnManager : MonoBehaviour
 {
 
-    public TurnStateEnum turnState;
+    private TurnStateEnum turnState;
     public static bool IsCommandPhase;
     private CommandMenuManager commandMenuManager;
     private CameraController cameraController;
+    private PlayerFieldPositionEnum currentFielderTypeTurn;
+    private TargetSelectionManager targetSelectionManager;
 
     private void Start()
     {
+        TargetSelectionManager = GameUtils.FetchTargetSelectionManager();
         CameraController = CameraUtils.FetchCameraController();
         CommandMenuManager = GameUtils.FetchCommandMenuManager();
     }
@@ -19,12 +22,12 @@ public class PlayersTurnManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (CommandMenuManager.isMenuDisplayEnabled)
+        if (CommandMenuManager.isMenuDisplayEnabled && !TargetSelectionManager.IsActivated)
         {
 
             PlayerAbilities playerAbilitiesScript = null;
 
-            switch (this.turnState)
+            switch (this.TurnState)
             {
                 case TurnStateEnum.STANDBY:
                     break;
@@ -44,6 +47,10 @@ public class PlayersTurnManager : MonoBehaviour
                     GameObject catcher = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.CATCHER, TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum.CATCHER));
                     playerAbilitiesScript = PlayerUtils.FetchPlayerAbilitiesScript(catcher);
                     break;
+                case TurnStateEnum.FIELDER_TURN:
+                    GameObject fielder = TeamUtils.GetPlayerTeamMember(currentFielderTypeTurn, TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(currentFielderTypeTurn));
+                    playerAbilitiesScript = PlayerUtils.FetchPlayerAbilitiesScript(fielder);
+                    break;
                 default:
                     break;
             }
@@ -59,4 +66,7 @@ public class PlayersTurnManager : MonoBehaviour
 
     public CommandMenuManager CommandMenuManager { get => commandMenuManager; set => commandMenuManager = value; }
     public CameraController CameraController { get => cameraController; set => cameraController = value; }
+    public PlayerFieldPositionEnum CurrentFielderTypeTurn { get => currentFielderTypeTurn; set => currentFielderTypeTurn = value; }
+    public TurnStateEnum TurnState { get => turnState; set => turnState = value; }
+    public TargetSelectionManager TargetSelectionManager { get => targetSelectionManager; set => targetSelectionManager = value; }
 }

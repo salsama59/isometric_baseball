@@ -62,16 +62,21 @@ public class BatterBehaviour : GenericPlayerBehaviour
             playerStatusScript.PlayerFieldPosition = PlayerFieldPositionEnum.RUNNER;
             TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.RUNNER, this.gameObject, PlayerEnum.PLAYER_1);
             PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
-            playersTurnManager.turnState = TurnStateEnum.STANDBY;
+            playersTurnManager.TurnState = TurnStateEnum.STANDBY;
             RunnerBehaviour runnerBehaviour = this.gameObject.AddComponent<RunnerBehaviour>();
             runnerBehaviour.EquipedBat = bat;
             PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
             PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(this.gameObject);
             playerAbilities.PlayerAbilityList.Clear();
-            PlayerAbility runPlayerAbility = new PlayerAbility("Run to next base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.RunAction);
-            PlayerAbility StaySafePlayerAbility = new PlayerAbility("Stay on base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.StayAction);
+            PlayerAbility runPlayerAbility = new PlayerAbility("Run to next base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.RunAction, this.gameObject);
+            PlayerAbility StaySafePlayerAbility = new PlayerAbility("Stay on base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.StayAction, this.gameObject);
             playerAbilities.AddAbility(runPlayerAbility);
             playerAbilities.AddAbility(StaySafePlayerAbility);
+
+            GameManager gameManager = GameUtils.FetchGameManager();
+            gameManager.AttackTeamRunnerList.Add(this.gameObject);
+            gameManager.AttackTeamBatterList.Remove(this.gameObject);
+
             playerStatusScript.IsAllowedToMove = true;
             runnerBehaviour.EnableMovement = true;
         }

@@ -192,7 +192,7 @@ SortingGroup:
   m_Enabled: 1
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 2
+  m_SortingOrder: 3
 --- !u!114 &4384822787812315474
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -233,6 +233,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4125eb8c42ccf4e4dbf4fca06ad01aa6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerOwner: 0
 --- !u!50 &-1111018434349834734
 Rigidbody2D:
   serializedVersion: 4

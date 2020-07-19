@@ -45,4 +45,11 @@ public class GameUtils : MonoBehaviour
         DialogBoxManager dialogBoxManager = dialogBoxManagerObject.GetComponent<DialogBoxManager>();
         return dialogBoxManager;
     }
+
+    public static TargetSelectionManager FetchTargetSelectionManager()
+    {
+        GameObject targetSelectionManagerObject = GameObject.FindGameObjectWithTag(TagsConstants.TARGET_SELECTION_MANAGER);
+        TargetSelectionManager targetSelectionManager = targetSelectionManagerObject.GetComponent<TargetSelectionManager>();
+        return targetSelectionManager;
+    }
 }

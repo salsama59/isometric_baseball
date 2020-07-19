@@ -18,15 +18,16 @@ public class GameManager : MonoBehaviour
     public GameObject ballModel = null;
     public GameObject batModel = null;
     public GameObject baseModel = null;
-
     private Dictionary<string, TileTypeEnum> horizontalyPaintedDirtDictionary = new Dictionary<string, TileTypeEnum>();
     private Dictionary<string, TileTypeEnum> verticalyPaintedDirtDictionary = new Dictionary<string, TileTypeEnum>();
     private List<GameObject> attackTeamBatterList = new List<GameObject>();
     private List<GameObject> attackTeamRunnerList = new List<GameObject>();
+    
 
     void Start()
     {
         this.BuildGameField();
+
         GameObject ball = Instantiate(ballModel, this.transform.position, this.transform.rotation);
         ball.SetActive(false);
 
@@ -66,7 +67,7 @@ public class GameManager : MonoBehaviour
 
         PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
         PlayersTurnManager.IsCommandPhase = true;
-        playersTurnManager.turnState = TurnStateEnum.PITCHER_TURN;
+        playersTurnManager.TurnState = TurnStateEnum.PITCHER_TURN;
 
         TeamsScoreManager teamsScoreManager = GameUtils.FetchTeamsScoreManager();
         teamsScoreManager.UpdateTeamName(TeamIdEnum.TEAM_1, "FC.TOUTOU");
@@ -168,7 +169,7 @@ public class GameManager : MonoBehaviour
                 playerStatus.BattingEfficiency = 10f;
                 playerStatus.BattingPower = 5;
                 player.AddComponent<BatterBehaviour>();
-                PlayerAbility hitBallPlayerAbility = new PlayerAbility("Hit ball", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.HitBallAction);
+                PlayerAbility hitBallPlayerAbility = new PlayerAbility("Hit ball", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.HitBallAction, player);
                 playerAbilities.AddAbility(hitBallPlayerAbility);
                 player.SetActive(false);
                 break;
@@ -180,10 +181,10 @@ public class GameManager : MonoBehaviour
                 BallController ballControllerScript = BallUtils.FetchBallControllerScript(ball);
                 ballControllerScript.CurrentPitcher = player;
                 player.AddComponent<PitcherBehaviour>();
-                PlayerAbility throwBallPlayerAbility = new PlayerAbility("Throw", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.ThrowBallAction);
-                PlayerAbility gyroBallSpecialPlayerAbility = new PlayerAbility("Gyro ball", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.NORMAL, playerActionsManager.ThrowBallAction);
-                PlayerAbility fireBallSpecialPlayerAbility = new PlayerAbility("Fire ball", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.NORMAL, playerActionsManager.ThrowBallAction);
-                PlayerAbility menuBackAction = new PlayerAbility("Back", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.UI, null);
+                PlayerAbility throwBallPlayerAbility = new PlayerAbility("Throw", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.ThrowBallAction, player);
+                PlayerAbility gyroBallSpecialPlayerAbility = new PlayerAbility("Gyro ball", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.NORMAL, playerActionsManager.ThrowBallAction, player);
+                PlayerAbility fireBallSpecialPlayerAbility = new PlayerAbility("Fire ball", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.NORMAL, playerActionsManager.ThrowBallAction, player);
+                PlayerAbility menuBackAction = new PlayerAbility("Back", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.UI, null, null);
                 playerAbilities.AddAbility(throwBallPlayerAbility);
                 playerAbilities.AddAbility(gyroBallSpecialPlayerAbility);
                 playerAbilities.AddAbility(fireBallSpecialPlayerAbility);
@@ -194,15 +195,15 @@ public class GameManager : MonoBehaviour
             case PlayerFieldPositionEnum.RUNNER:
                 playerStatus.Speed = 2f;
                 player.AddComponent<RunnerBehaviour>();
-                PlayerAbility runPlayerAbility = new PlayerAbility("Run to next base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.RunAction);
-                PlayerAbility staySafePlayerAbility = new PlayerAbility("Stay on base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.StayAction);
+                PlayerAbility runPlayerAbility = new PlayerAbility("Run to next base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.RunAction, player);
+                PlayerAbility staySafePlayerAbility = new PlayerAbility("Stay on base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.StayAction, player);
                 playerAbilities.AddAbility(runPlayerAbility);
                 playerAbilities.AddAbility(staySafePlayerAbility);
                 break;
             case PlayerFieldPositionEnum.CATCHER:
                 playerStatus.CatchEfficiency = 100f;
                 player.AddComponent<CatcherBehaviour>();
-                PlayerAbility catchPlayerAbility = new PlayerAbility("Catch ball", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.CatchBallAction);
+                PlayerAbility catchPlayerAbility = new PlayerAbility("Catch ball", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.CatchBallAction, player);
                 playerAbilities.AddAbility(catchPlayerAbility);
                 break;
             case PlayerFieldPositionEnum.FIRST_BASEMAN:
@@ -247,6 +248,14 @@ public class GameManager : MonoBehaviour
                 UpdatePlayerColliderSettings(player);
                 player.AddComponent<FielderBehaviour>();
                 break;
+        }
+
+        if (PlayerUtils.HasFielderPosition(player))
+        {
+            PlayerAbility passPlayerAbility = new PlayerAbility("Pass to fielder", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.GenericPassAction, player, true);
+            PlayerAbility tagOutPlayerAbility = new PlayerAbility("Go for tagout", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.GenericTagOutAimAction, player);
+            playerAbilities.AddAbility(passPlayerAbility);
+            playerAbilities.AddAbility(tagOutPlayerAbility);
         }
 
         player.name = playerStatus.PlayerFieldPosition.ToString();
@@ -585,10 +594,10 @@ public class GameManager : MonoBehaviour
         PitcherBehaviour pitcherBehaviourScript = PlayerUtils.FetchPitcherBehaviourScript(ballControllerScript.CurrentPitcher);
         PlayerAbilities pitcherPlayerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(ballControllerScript.CurrentPitcher);
         PlayerStatus pitcherPlayerStatus = PlayerUtils.FetchPlayerStatusScript(ballControllerScript.CurrentPitcher);
-        PlayerAbility throwBallPlayerAbility = new PlayerAbility("Throw", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.ThrowBallAction);
-        PlayerAbility gyroBallSpecialPlayerAbility = new PlayerAbility("Gyro ball", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.NORMAL, playerActionsManager.ThrowBallAction);
-        PlayerAbility fireBallSpecialPlayerAbility = new PlayerAbility("Fire ball", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.NORMAL, playerActionsManager.ThrowBallAction);
-        PlayerAbility menuBackAction = new PlayerAbility("Back", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.UI, null);
+        PlayerAbility throwBallPlayerAbility = new PlayerAbility("Throw", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.ThrowBallAction, ballControllerScript.CurrentPitcher);
+        PlayerAbility gyroBallSpecialPlayerAbility = new PlayerAbility("Gyro ball", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.NORMAL, playerActionsManager.ThrowBallAction, ballControllerScript.CurrentPitcher);
+        PlayerAbility fireBallSpecialPlayerAbility = new PlayerAbility("Fire ball", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.NORMAL, playerActionsManager.ThrowBallAction, ballControllerScript.CurrentPitcher);
+        PlayerAbility menuBackAction = new PlayerAbility("Back", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.UI, null, null);
         pitcherPlayerAbilities.PlayerAbilityList.Clear();
         pitcherPlayerAbilities.AddAbility(throwBallPlayerAbility);
         pitcherPlayerAbilities.AddAbility(gyroBallSpecialPlayerAbility);
@@ -615,29 +624,13 @@ public class GameManager : MonoBehaviour
         ballControllerScript.IsHit = false;
 
         //Update taged out runner and new batter informations
-        //tagedOutRunnerStatus.IsAllowedToMove = false;
-        //tagedOutRunnerStatus.PlayerFieldPosition = PlayerFieldPositionEnum.BATTER;
-        //RunnerBehaviour runnerBehaviourScript = PlayerUtils.FetchRunnerBehaviourScript(tagedOutRunnerStatus.gameObject);
         BatterBehaviour batterBehaviourScript = PlayerUtils.FetchBatterBehaviourScript(newBatterStatus.gameObject);
         GameObject bat = batterBehaviourScript.EquipedBat;
-        //Destroy(tagedOutRunnerStatus.gameObject.GetComponent<RunnerBehaviour>());
-        //tagedOutRunnerStatus.gameObject.AddComponent<BatterBehaviour>();
-        //tagedOutRunnerStatus.gameObject.transform.position = TeamUtils.playerTeamMenberPositionLocation[PlayerFieldPositionEnum.BATTER];
         bat.transform.SetParent(null);
         bat.transform.position = FieldUtils.GetBatCorrectPosition(batterBehaviourScript.transform.position);
         bat.transform.rotation = Quaternion.Euler(0f, 0f, -70f);
         bat.transform.SetParent(newBatterStatus.gameObject.transform);
-        //batterBehaviourScript.Start();
-        //batterBehaviourScript.EquipedBat = bat;
         batterBehaviourScript.EquipedBat.SetActive(true);
-        //tagedOutRunnerStatus.gameObject.transform.rotation = Quaternion.identity;
-        //batterBehaviourScript.IsoRenderer.LastDirection = 6;
-        //batterBehaviourScript.IsoRenderer.SetDirection(Vector2.zero);
-        //PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(tagedOutRunnerStatus.gameObject);
-        //PlayerAbility hitBallPlayerAbility = new PlayerAbility("Hit ball", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.HitBallAction);
-        //playerAbilities.PlayerAbilityList.Clear();
-        //playerAbilities.AddAbility(hitBallPlayerAbility);
-
         TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.BATTER, batterBehaviourScript.gameObject, TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum.BATTER));
 
         //Update fielder informations
@@ -661,7 +654,7 @@ public class GameManager : MonoBehaviour
         //Reinit turn
         PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
         PlayersTurnManager.IsCommandPhase = true;
-        playersTurnManager.turnState = TurnStateEnum.PITCHER_TURN;
+        playersTurnManager.TurnState = TurnStateEnum.PITCHER_TURN;
 
         //Remove pause state
         GameData.isPaused = false;

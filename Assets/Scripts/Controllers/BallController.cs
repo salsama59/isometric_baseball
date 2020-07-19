@@ -14,6 +14,7 @@ public class BallController : MonoBehaviour
     private bool isTargetedByFielder;
     private BallHeightEnum ballHeight;
     private bool isPassed;
+    private GameObject currentPasser;
 
     private bool allowDiagonals = false;
     private bool correctDiagonalSpeed = false;
@@ -146,4 +147,5 @@ public class BallController : MonoBehaviour
     public Coroutine MovementCoroutine { get => movementCoroutine; set => movementCoroutine = value; }
     public bool IsTargetedByPitcher { get => isTargetedByPitcher; set => isTargetedByPitcher = value; }
     public bool IsPassed { get => isPassed; set => isPassed = value; }
+    public GameObject CurrentPasser { get => currentPasser; set => currentPasser = value; }
 }

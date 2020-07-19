@@ -19,16 +19,15 @@ public class TeamPlayerCollider : MonoBehaviour
             if (PlayerUtils.IsCurrentPlayerPosition(this.gameObject, PlayerFieldPositionEnum.CATCHER))
             {
                 PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
-                playersTurnManager.turnState = TurnStateEnum.CATCHER_TURN;
+                playersTurnManager.TurnState = TurnStateEnum.CATCHER_TURN;
                 PlayersTurnManager.IsCommandPhase = true;
             }
-            else if(PlayerUtils.HasFielderPosition(this.gameObject))
+            else if(PlayerUtils.HasFielderPosition(this.gameObject) && !ballControllerScript.IsPitched && ballControllerScript.CurrentPasser != this.gameObject)
             {
                 ((FielderBehaviour)genericPlayerBehaviourScript).CalculateFielderColliderInterraction(ballGameObject, ballControllerScript, genericPlayerBehaviourScript);
             }
-            else if (PlayerUtils.HasPitcherPosition(this.gameObject) && !ballControllerScript.IsPitched && !ballControllerScript.IsPassed)
+            else if (PlayerUtils.HasPitcherPosition(this.gameObject) && !ballControllerScript.IsPitched && !ballControllerScript.IsPassed && ballControllerScript.CurrentPasser != this.gameObject)
             {
-                Debug.Log("test collision balle sur pitcher");
                 ((PitcherBehaviour)genericPlayerBehaviourScript).CalculatePitcherColliderInterraction(ballGameObject, ballControllerScript, genericPlayerBehaviourScript);
             }
         }
@@ -76,7 +75,7 @@ public class TeamPlayerCollider : MonoBehaviour
                 else
                 {
                     PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
-                    playersTurnManager.turnState = TurnStateEnum.RUNNER_TURN;
+                    playersTurnManager.TurnState = TurnStateEnum.RUNNER_TURN;
                     PlayersTurnManager.IsCommandPhase = true;
                 }
             }

@@ -129,7 +129,7 @@ public class RunnerBehaviour : GenericPlayerBehaviour
         }
 
         PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
-        playersTurnManager.turnState = TurnStateEnum.STANDBY;
+        playersTurnManager.TurnState = TurnStateEnum.STANDBY;
         PlayersTurnManager.IsCommandPhase = false;
     }
 

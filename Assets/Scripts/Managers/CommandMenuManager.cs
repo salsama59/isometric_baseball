@@ -24,7 +24,7 @@ public class CommandMenuManager : MonoBehaviour
     private void Update()
     {
         isMenuDisplayEnabled =  (MenuGameObject != null && !MenuGameObject.activeInHierarchy || isFirstDisplay)
-            && PlayersTurnManager.IsCommandPhase && playersTurnManager.turnState != TurnStateEnum.STANDBY;
+            && PlayersTurnManager.IsCommandPhase && playersTurnManager.TurnState != TurnStateEnum.STANDBY;
     }
 
     public void GenerateCommandMenu(PlayerAbilities playerAbilities)
@@ -76,8 +76,8 @@ public class CommandMenuManager : MonoBehaviour
             {
                 case AbilityTypeEnum.BASIC:
                     playerActions = ability.AbilityAction;
-                    playerActions += DisableMenu;
-                    buttonComponent.onClick.AddListener(() => playerActions());
+                    playerActions = ChooseDisableBehaviour(ability, playerActions);
+                    buttonComponent.onClick.AddListener(() => playerActions(ability.PlayerReference));
                     MenuButtons.Add(buttonComponent.gameObject);
                     break;
                 case AbilityTypeEnum.SPECIAL:
@@ -96,9 +96,9 @@ public class CommandMenuManager : MonoBehaviour
                         }
 
                         playerActions = ability.AbilityAction;
-                        playerActions += DisableMenu;
+                        playerActions = ChooseDisableBehaviour(ability, playerActions);
 
-                        buttonComponent.onClick.AddListener(() => playerActions());
+                        buttonComponent.onClick.AddListener(() => playerActions(ability.PlayerReference));
 
                         buttonGameObject.SetActive(false);
                         SubMenuButtons.Add(buttonGameObject);
@@ -106,7 +106,7 @@ public class CommandMenuManager : MonoBehaviour
                     else if(ability.AbilityCategory == AbilityCategoryEnum.UI)
                     {
                         playerActions = HideSubMenu;
-                        buttonComponent.onClick.AddListener(() => playerActions());
+                        buttonComponent.onClick.AddListener(() => playerActions(ability.PlayerReference));
                         buttonComponent.gameObject.SetActive(false);
                         SubMenuButtons.Add(buttonComponent.gameObject);
                     }
@@ -123,6 +123,19 @@ public class CommandMenuManager : MonoBehaviour
         isFirstDisplay = false;
     }
 
+    private PlayerAbility.AbilityDelegate ChooseDisableBehaviour(PlayerAbility ability, PlayerAbility.AbilityDelegate playerActions)
+    {
+        if (ability.IsCommandPhaseMandatory)
+        {
+            playerActions += DisableMenuLight;
+        }
+        else
+        {
+            playerActions += DisableMenu;
+        }
+
+        return playerActions;
+    }
 
     private void DisplaySubMenu()
     {
@@ -137,7 +150,7 @@ public class CommandMenuManager : MonoBehaviour
         }
     }
 
-    private void HideSubMenu()
+    private void HideSubMenu(GameObject actionUser)
     {
         foreach (GameObject subMenuButtonGameObject in SubMenuButtons)
         {
@@ -165,11 +178,16 @@ public class CommandMenuManager : MonoBehaviour
         return panelGameObject;
     }
 
-    public void DisableMenu()
+    public void DisableMenu(GameObject actionUser = null)
+    {
+        DisableMenuLight();
+        PlayersTurnManager.IsCommandPhase = false;
+    }
+
+    public void DisableMenuLight(GameObject actionUser = null)
     {
         GameObject menu = GameObject.FindGameObjectWithTag(TagsConstants.COMMAND_MENU_TAG);
         menu.SetActive(false);
-        PlayersTurnManager.IsCommandPhase = false;
     }
 
     public GameObject MenuGameObject { get => menuGameObject; set => menuGameObject = value; }

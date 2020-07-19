@@ -53,7 +53,7 @@ public class PitcherBehaviour : GenericPlayerBehaviour
             ballControllerScript.Target = null;
             
             GameData.isPaused = true;
-            this.InterceptBall(ballGameObject, ballControllerScript, genericPlayerBehaviourScript);
+            PlayerActionsManager.InterceptBall(ballGameObject, ballControllerScript, genericPlayerBehaviourScript);
             hasIntercepted = true;
 
             gameManager.AttackTeamRunnerList.Remove(runnerToGetOut);
@@ -86,17 +86,17 @@ public class PitcherBehaviour : GenericPlayerBehaviour
         {
             if (!hasIntercepted)
             {
-                this.InterceptBall(ballGameObject, ballControllerScript, genericPlayerBehaviourScript);
+                PlayerActionsManager.InterceptBall(ballGameObject, ballControllerScript, genericPlayerBehaviourScript);
             }
             
             PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
             PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(this.gameObject);
             playerAbilities.PlayerAbilityList.Clear();
-            PlayerAbility passPlayerAbility = new PlayerAbility("Pass to fielder", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.PassAction);
+            PlayerAbility passPlayerAbility = new PlayerAbility("Pass to fielder", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.GenericPassAction, this.gameObject, true);
             playerAbilities.AddAbility(passPlayerAbility);
 
             PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
-            playersTurnManager.turnState = TurnStateEnum.PITCHER_TURN;
+            playersTurnManager.TurnState = TurnStateEnum.PITCHER_TURN;
             PlayersTurnManager.IsCommandPhase = true;
         }
 
@@ -110,22 +110,5 @@ public class PitcherBehaviour : GenericPlayerBehaviour
         playerStatus.IsAllowedToMove = true;
         genericPlayerBehaviourScript.Target = ballGameObject.transform.position;
         this.transform.rotation = Quaternion.identity;
-    }
-
-    private void InterceptBall(GameObject ballGameObject, BallController ballControllerScript, GenericPlayerBehaviour genericPlayerBehaviourScript)
-    {
-        ballControllerScript.BallHeight = BallHeightEnum.NONE;
-        ballGameObject.transform.SetParent(this.gameObject.transform);
-        ballGameObject.SetActive(false);
-        ballControllerScript.CurrentHolder = this.gameObject;
-        ballControllerScript.IsHeld = true;
-        ballControllerScript.IsHit = false;
-        ballControllerScript.IsPassed = false;
-        ballControllerScript.Target = null;
-        ballControllerScript.IsMoving = false;
-        ballControllerScript.IsTargetedByPitcher = false;
-        genericPlayerBehaviourScript.IsHoldingBall = true;
-        genericPlayerBehaviourScript.HasSpottedBall = false;
-        genericPlayerBehaviourScript.Target = null;
     }
 }

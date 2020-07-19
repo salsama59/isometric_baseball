@@ -48,25 +48,15 @@ public class FielderBehaviour : GenericPlayerBehaviour
 
     private void InitiateFielderAction()
     {
-        Nullable<Vector3> targetPosition = new Nullable<Vector3>();
         BallController ballControlerScript = BallUtils.FetchBallControllerScript(FieldBall);
         if (FieldBall.activeInHierarchy && !HasSpottedBall)
         {
             GetAngleToLookAt();
         }
-        else if (!FieldBall.activeInHierarchy && IsHoldingBall)
-        {
-            //Find the nearest runner on field
-            GameObject nearestRunner = TeamUtils.GetNearestRunerFromFielder(this.gameObject);
-            TargetPlayerToTagOut = nearestRunner;
-            targetPosition = TargetPlayerToTagOut.transform.position;
-        }
         else if (HasSpottedBall && FieldBall.activeInHierarchy && !IsHoldingBall && ballControlerScript.IsTargetedByFielder)
         {
-            targetPosition = FieldBall.transform.position;
+            Target = FieldBall.transform.position;
         }
-
-        Target = targetPosition;
     }
 
     private void GetAngleToLookAt()
@@ -93,13 +83,12 @@ public class FielderBehaviour : GenericPlayerBehaviour
 
         if (ActionCalculationUtils.HasActionSucceeded(passSuccessRate))
         {
-            ballControllerScript.BallHeight = BallHeightEnum.NONE;
-            ballGameObject.transform.SetParent(this.gameObject.transform);
-            ballGameObject.SetActive(false);
-            ballControllerScript.CurrentHolder = this.gameObject;
-            ballControllerScript.IsHeld = true;
-            genericPlayerBehaviourScript.IsHoldingBall = true;
-            genericPlayerBehaviourScript.HasSpottedBall = false;
+            PlayerActionsManager.InterceptBall(ballGameObject, ballControllerScript, genericPlayerBehaviourScript);
+            PlayerStatus fielderStatus = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
+            PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
+            playersTurnManager.TurnState = TurnStateEnum.FIELDER_TURN;
+            playersTurnManager.CurrentFielderTypeTurn = fielderStatus.PlayerFieldPosition;
+            PlayersTurnManager.IsCommandPhase = true;
         }
 
     }
@@ -107,8 +96,9 @@ public class FielderBehaviour : GenericPlayerBehaviour
     public void TagOutRunner(GameObject targetToTagOut)
     {
         GameManager gameManager = GameUtils.FetchGameManager();
+        GameObject newBatter = gameManager.AttackTeamBatterList.First();
         PlayerStatus fielderPlayerStatus = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
-        PlayerStatus runnerPlayerStatus = PlayerUtils.FetchPlayerStatusScript(gameManager.AttackTeamBatterList.First());
+        PlayerStatus newBatterStatus = PlayerUtils.FetchPlayerStatusScript(newBatter);
 
         GameData.isPaused = true;
         DialogBoxManager dialogBoxManagerScript =  GameUtils.FetchDialogBoxManager();
@@ -118,14 +108,12 @@ public class FielderBehaviour : GenericPlayerBehaviour
 
         gameManager.AttackTeamRunnerList.Remove(targetToTagOut);
         targetToTagOut.SetActive(false);
-        gameManager.AttackTeamBatterList.First().SetActive(true);
-        RunnerBehaviour runnerBehaviourScript = PlayerUtils.FetchRunnerBehaviourScript(targetToTagOut);
-        BatterBehaviour batterBehaviourScript = PlayerUtils.FetchBatterBehaviourScript(gameManager.AttackTeamBatterList.First());
-        batterBehaviourScript.EquipedBat = runnerBehaviourScript.EquipedBat;
-        runnerBehaviourScript.EquipedBat = null;
-        StartCoroutine(gameManager.WaitAndReinit(dialogBoxManagerScript, runnerPlayerStatus, fielderPlayerStatus, FieldBall));
-
-        
+        newBatter.SetActive(true);
+        RunnerBehaviour tagOutRunnerBehaviourScript = PlayerUtils.FetchRunnerBehaviourScript(targetToTagOut);
+        BatterBehaviour newbatterBehaviourScript = PlayerUtils.FetchBatterBehaviourScript(newBatter);
+        newbatterBehaviourScript.EquipedBat = tagOutRunnerBehaviourScript.EquipedBat;
+        tagOutRunnerBehaviourScript.EquipedBat = null;
+        StartCoroutine(gameManager.WaitAndReinit(dialogBoxManagerScript, newBatterStatus, fielderPlayerStatus, FieldBall));
     }
 
     public void CalculateFielderTriggerInterraction(GameObject ballGameObject, GenericPlayerBehaviour genericPlayerBehaviourScript, PlayerStatus playerStatus)

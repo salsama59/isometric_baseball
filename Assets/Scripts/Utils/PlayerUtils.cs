@@ -177,6 +177,13 @@ public class PlayerUtils : MonoBehaviour
             .ToList();
     }
 
+    public static List<GameObject> GetFieldersOnField()
+    {
+        return GameObject.FindGameObjectsWithTag(TagsConstants.BASEBALL_PLAYER_TAG)
+            .Where(baseBallPlayer => HasFielderPosition(baseBallPlayer))
+            .ToList();
+    }
+
     public static GameObject GetPlayerBatGameObject(GameObject player)
     {
         return GameObject.FindGameObjectsWithTag(TagsConstants.BASEBALL_BAT_TAG)

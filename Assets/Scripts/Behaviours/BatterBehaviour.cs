@@ -55,16 +55,7 @@ public class BatterBehaviour : GenericPlayerBehaviour
             int ballPositionIndex = Random.Range(0, ballPositionList.Count - 1);
             Vector2Int ballTilePosition = ballPositionList[ballPositionIndex];
             ballControllerScript.Target = FieldUtils.GetTileCenterPositionInGameWorld(ballTilePosition);
-            GameObject bat = PlayerUtils.GetPlayerBatGameObject(this.gameObject);
-            bat.SetActive(false);
-            Destroy(this.gameObject.GetComponent<BatterBehaviour>());
-            
-            playerStatusScript.PlayerFieldPosition = PlayerFieldPositionEnum.RUNNER;
-            TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.RUNNER, this.gameObject, PlayerEnum.PLAYER_1);
-            PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
-            playersTurnManager.TurnState = TurnStateEnum.STANDBY;
-            RunnerBehaviour runnerBehaviour = this.gameObject.AddComponent<RunnerBehaviour>();
-            runnerBehaviour.EquipedBat = bat;
+            RunnerBehaviour runnerBehaviour = ConvertBatterToRunner(playerStatusScript);
             PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
             PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(this.gameObject);
             playerAbilities.PlayerAbilityList.Clear();
@@ -73,7 +64,6 @@ public class BatterBehaviour : GenericPlayerBehaviour
             playerAbilities.AddAbility(runPlayerAbility);
             playerAbilities.AddAbility(StaySafePlayerAbility);
 
-            
             gameManager.AttackTeamRunnerList.Add(this.gameObject);
             gameManager.AttackTeamBatterList.Remove(this.gameObject);
 
@@ -82,10 +72,43 @@ public class BatterBehaviour : GenericPlayerBehaviour
         }
         else
         {
+
+            float ballOutcomeRate = ActionCalculationUtils.CalculateBallOutcomeProbability(ballControllerScript.CurrentPitcher);
+            bool isBallOutcome = ActionCalculationUtils.HasActionSucceeded(ballOutcomeRate);
+            DialogBoxManager dialogBoxManagerScript = GameUtils.FetchDialogBoxManager();
+            string outcomeMessage = null;
+
+            if (!isBallOutcome)
+            {
+                StrikeOutcomeCount++;
+                outcomeMessage = "STRIKE!!!";
+                
+            }
+            else
+            {
+                BallOutcomeCount++;
+                outcomeMessage = "BALL!!!";
+            }
+
             ballControllerScript.IsPitched = false;
-            StrikeOutcomeCount++;
             ballControllerScript.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetCatcherZonePosition());
+            dialogBoxManagerScript.DisplayDialogAndTextForGivenAmountOfTime(2f, true, outcomeMessage);
         }
+    }
+
+    public RunnerBehaviour ConvertBatterToRunner(PlayerStatus playerStatusScript)
+    {
+        GameObject bat = PlayerUtils.GetPlayerBatGameObject(playerStatusScript.gameObject);
+        bat.SetActive(false);
+        Destroy(playerStatusScript.gameObject.GetComponent<BatterBehaviour>());
+
+        playerStatusScript.PlayerFieldPosition = PlayerFieldPositionEnum.RUNNER;
+        TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.RUNNER, this.gameObject, PlayerEnum.PLAYER_1);
+        PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
+        playersTurnManager.TurnState = TurnStateEnum.STANDBY;
+        RunnerBehaviour runnerBehaviour = playerStatusScript.gameObject.AddComponent<RunnerBehaviour>();
+        runnerBehaviour.EquipedBat = bat;
+        return runnerBehaviour;
     }
 
     private IEnumerator RotatePlayer(GameObject player)

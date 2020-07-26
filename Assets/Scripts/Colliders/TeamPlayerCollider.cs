@@ -67,13 +67,27 @@ public class TeamPlayerCollider : MonoBehaviour
                 RunnerBehaviour runnerBehaviour = ((RunnerBehaviour)genericPlayerBehaviourScript);
                 BaseEnum baseReached = runnerBehaviour.NextBase;
 
-                //win a point automaticaly without issuing commands if arrived at home base after a complete turn
+                
                 if (baseReached == BaseEnum.HOME_BASE && runnerBehaviour.HasPassedThroughThreeFirstBases())
                 {
+                    //win a point automaticaly without issuing commands if arrived at home base after a complete turn
                     runnerBehaviour.CalculateRunnerColliderInterraction(FieldUtils.GetTileEnumFromName(collision.gameObject.name), true);
+                }
+                else if(baseReached == BaseEnum.FIRST_BASE && runnerBehaviour.IsInWalkState)
+                {
+                    //Walk done after 4 ball from pitcher
+                    PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
+                    playersTurnManager.TurnState = TurnStateEnum.PITCHER_TURN;
+                    PlayersTurnManager.IsCommandPhase = true;
+                }
+                else if(baseReached == BaseEnum.HOME_BASE)
+                {
+                    //automaticaly run to next base, no need for command input
+                    runnerBehaviour.CalculateRunnerColliderInterraction(FieldUtils.GetTileEnumFromName(collision.gameObject.name), false);
                 }
                 else
                 {
+                    //Runner next turn
                     PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
                     playersTurnManager.TurnState = TurnStateEnum.RUNNER_TURN;
                     PlayersTurnManager.IsCommandPhase = true;

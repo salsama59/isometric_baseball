@@ -86,6 +86,13 @@ public class ActionCalculationUtils
         return AdjustResult(result);
     }
 
+    public static float CalculateBallOutcomeProbability(GameObject pitcherGameObject)
+    {
+        PlayerStatus pitcherStatus = PlayerUtils.FetchPlayerStatusScript(pitcherGameObject);
+        float result = 100f - pitcherStatus.PitchEfficiency;
+        return result;
+    }
+
     public static List<Vector2Int> CalculateBallFallPositionList(GameObject playerInvolved, int angleMinRange, int angleMaxRange, int angleStep, bool Iscritical)
     {
         List<Vector2Int> ballPositionList = new List<Vector2Int>();

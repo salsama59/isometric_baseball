@@ -26,20 +26,39 @@ public class CatcherBehaviour : GenericPlayerBehaviour
             GameObject currentBatter = gameManager.AttackTeamBatterList.First();
             BatterBehaviour currentBatterBehaviour = PlayerUtils.FetchBatterBehaviourScript(currentBatter);
             GameObject bat = currentBatterBehaviour.EquipedBat;
+            bool isInWalkState = false;
 
             ballGameObject.SetActive(false);
             ballControllerScript.CurrentHolder = this.gameObject;
 
             if (currentBatterBehaviour.StrikeOutcomeCount == 3)
             {
-                gameManager.AttackTeamBatterList.Remove(currentBatter);
                 currentBatter.SetActive(false);
-                GameObject newBatter = gameManager.AttackTeamBatterList.First();
-                TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.BATTER, newBatter, TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum.BATTER));
-                newBatter.SetActive(true);
-                gameManager.EquipBatToPlayer(newBatter, bat);
+                gameManager.AttackTeamBatterList.Remove(currentBatter);
+                this.SetUpNewBatter(gameManager, bat);
                 currentBatterBehaviour.StrikeOutcomeCount = 0;
+            }
+            else if(currentBatterBehaviour.BallOutcomeCount == 4)
+            {
+                isInWalkState = true;
+                PlayerStatus currentBatterStatus = PlayerUtils.FetchPlayerStatusScript(currentBatter);
+                RunnerBehaviour newRunnerBehaviour = currentBatterBehaviour.ConvertBatterToRunner(currentBatterStatus);
+
+                PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
+                PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(currentBatter);
+                playerAbilities.PlayerAbilityList.Clear();
+                PlayerAbility runPlayerAbility = new PlayerAbility("Run to next base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.RunAction, currentBatter);
+                PlayerAbility StaySafePlayerAbility = new PlayerAbility("Stay on base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.StayOnBaseAction, currentBatter);
+                playerAbilities.AddAbility(runPlayerAbility);
+                playerAbilities.AddAbility(StaySafePlayerAbility);
+
+                gameManager.AttackTeamRunnerList.Add(newRunnerBehaviour.gameObject);
+                gameManager.AttackTeamBatterList.Remove(currentBatter);
+                newRunnerBehaviour.IsInWalkState = isInWalkState;
+                currentBatterStatus.IsAllowedToMove = true;
+                newRunnerBehaviour.EnableMovement = true;
                 currentBatterBehaviour.BallOutcomeCount = 0;
+                this.SetUpNewBatter(gameManager, bat);
             }
             else
             {
@@ -49,10 +68,21 @@ public class CatcherBehaviour : GenericPlayerBehaviour
             }
 
             gameManager.ReturnBallToPitcher(ballControllerScript.gameObject);
-            
-            PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
-            playersTurnManager.TurnState = TurnStateEnum.PITCHER_TURN;
-            PlayersTurnManager.IsCommandPhase = true;
+
+            if (!isInWalkState)
+            {
+                PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
+                playersTurnManager.TurnState = TurnStateEnum.PITCHER_TURN;
+                PlayersTurnManager.IsCommandPhase = true;
+            }
         }
+    }
+
+    private void SetUpNewBatter(GameManager gameManager, GameObject bat)
+    {
+        GameObject newBatter = gameManager.AttackTeamBatterList.First();
+        TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.BATTER, newBatter, TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum.BATTER));
+        newBatter.SetActive(true);
+        gameManager.EquipBatToPlayer(newBatter, bat);
     }
 }

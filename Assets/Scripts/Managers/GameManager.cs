@@ -133,9 +133,11 @@ public class GameManager : MonoBehaviour
             }
 
             GameObject firstBatter = AttackTeamBatterList.First();
+            BatterBehaviour firstBatterBehaviour = PlayerUtils.FetchBatterBehaviourScript(firstBatter);
             GameObject bat = Instantiate(batModel, FieldUtils.GetBatCorrectPosition(batterKeyValuePair.Value), Quaternion.Euler(0f, 0f, -70f));
             bat.transform.parent = firstBatter.transform;
             firstBatter.SetActive(true);
+            firstBatterBehaviour.EquipedBat = bat;
             TeamUtils.AddPlayerTeamMember(batterKeyValuePair.Key, firstBatter, playerId);
         }
         else if (side == TeamSideEnum.DEFENSE)
@@ -181,9 +183,9 @@ public class GameManager : MonoBehaviour
                 BallController ballControllerScript = BallUtils.FetchBallControllerScript(ball);
                 ballControllerScript.CurrentPitcher = player;
                 player.AddComponent<PitcherBehaviour>();
-                PlayerAbility throwBallPlayerAbility = new PlayerAbility("Throw", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.ThrowBallAction, player);
-                PlayerAbility gyroBallSpecialPlayerAbility = new PlayerAbility("Gyro ball", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.NORMAL, playerActionsManager.ThrowBallAction, player);
-                PlayerAbility fireBallSpecialPlayerAbility = new PlayerAbility("Fire ball", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.NORMAL, playerActionsManager.ThrowBallAction, player);
+                PlayerAbility throwBallPlayerAbility = new PlayerAbility("Throw", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.PitchBallAction, player);
+                PlayerAbility gyroBallSpecialPlayerAbility = new PlayerAbility("Gyro ball", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.NORMAL, playerActionsManager.PitchBallAction, player);
+                PlayerAbility fireBallSpecialPlayerAbility = new PlayerAbility("Fire ball", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.NORMAL, playerActionsManager.PitchBallAction, player);
                 PlayerAbility menuBackAction = new PlayerAbility("Back", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.UI, null, null);
                 playerAbilities.AddAbility(throwBallPlayerAbility);
                 playerAbilities.AddAbility(gyroBallSpecialPlayerAbility);
@@ -196,7 +198,7 @@ public class GameManager : MonoBehaviour
                 playerStatus.Speed = 2f;
                 player.AddComponent<RunnerBehaviour>();
                 PlayerAbility runPlayerAbility = new PlayerAbility("Run to next base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.RunAction, player);
-                PlayerAbility staySafePlayerAbility = new PlayerAbility("Stay on base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.StayAction, player);
+                PlayerAbility staySafePlayerAbility = new PlayerAbility("Stay on base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.StayOnBaseAction, player);
                 playerAbilities.AddAbility(runPlayerAbility);
                 playerAbilities.AddAbility(staySafePlayerAbility);
                 break;
@@ -594,9 +596,9 @@ public class GameManager : MonoBehaviour
         PitcherBehaviour pitcherBehaviourScript = PlayerUtils.FetchPitcherBehaviourScript(ballControllerScript.CurrentPitcher);
         PlayerAbilities pitcherPlayerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(ballControllerScript.CurrentPitcher);
         PlayerStatus pitcherPlayerStatus = PlayerUtils.FetchPlayerStatusScript(ballControllerScript.CurrentPitcher);
-        PlayerAbility throwBallPlayerAbility = new PlayerAbility("Throw", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.ThrowBallAction, ballControllerScript.CurrentPitcher);
-        PlayerAbility gyroBallSpecialPlayerAbility = new PlayerAbility("Gyro ball", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.NORMAL, playerActionsManager.ThrowBallAction, ballControllerScript.CurrentPitcher);
-        PlayerAbility fireBallSpecialPlayerAbility = new PlayerAbility("Fire ball", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.NORMAL, playerActionsManager.ThrowBallAction, ballControllerScript.CurrentPitcher);
+        PlayerAbility throwBallPlayerAbility = new PlayerAbility("Throw", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.PitchBallAction, ballControllerScript.CurrentPitcher);
+        PlayerAbility gyroBallSpecialPlayerAbility = new PlayerAbility("Gyro ball", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.NORMAL, playerActionsManager.PitchBallAction, ballControllerScript.CurrentPitcher);
+        PlayerAbility fireBallSpecialPlayerAbility = new PlayerAbility("Fire ball", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.NORMAL, playerActionsManager.PitchBallAction, ballControllerScript.CurrentPitcher);
         PlayerAbility menuBackAction = new PlayerAbility("Back", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.UI, null, null);
         pitcherPlayerAbilities.PlayerAbilityList.Clear();
         pitcherPlayerAbilities.AddAbility(throwBallPlayerAbility);
@@ -610,27 +612,12 @@ public class GameManager : MonoBehaviour
         pitcherBehaviourScript.HasSpottedBall = false;
 
         //Update ball informations
-        ballControllerScript.BallHeight = BallHeightEnum.NONE;
-        fieldBall.transform.position = ballControllerScript.CurrentPitcher.transform.position;
-        ballControllerScript.CurrentHolder = null;
-        ballControllerScript.Target = null;
-        //No parent
-        fieldBall.transform.SetParent(null);
-        ballControllerScript.IsHeld = false;
-        ballControllerScript.IsPitched = false;
-        ballControllerScript.IsMoving = false;
-        ballControllerScript.IsTargetedByFielder = false;
-        ballControllerScript.IsTargetedByPitcher = false;
-        ballControllerScript.IsHit = false;
+        this.ReturnBallToPitcher(fieldBall);
 
         //Update taged out runner and new batter informations
         BatterBehaviour batterBehaviourScript = PlayerUtils.FetchBatterBehaviourScript(newBatterStatus.gameObject);
         GameObject bat = batterBehaviourScript.EquipedBat;
-        bat.transform.SetParent(null);
-        bat.transform.position = FieldUtils.GetBatCorrectPosition(batterBehaviourScript.transform.position);
-        bat.transform.rotation = Quaternion.Euler(0f, 0f, -70f);
-        bat.transform.SetParent(newBatterStatus.gameObject.transform);
-        batterBehaviourScript.EquipedBat.SetActive(true);
+        this.EquipBatToPlayer(newBatterStatus.gameObject, bat);
         TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.BATTER, batterBehaviourScript.gameObject, TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum.BATTER));
 
         //Update fielder informations
@@ -658,6 +645,36 @@ public class GameManager : MonoBehaviour
 
         //Remove pause state
         GameData.isPaused = false;
+    }
+
+
+    public void EquipBatToPlayer(GameObject player, GameObject bat)
+    {
+        bat.transform.SetParent(null);
+        bat.transform.position = FieldUtils.GetBatCorrectPosition(player.transform.position);
+        bat.transform.rotation = Quaternion.Euler(0f, 0f, -70f);
+        bat.transform.SetParent(player.transform);
+        bat.SetActive(true);
+        BatterBehaviour currentBatterBehaviour = PlayerUtils.FetchBatterBehaviourScript(player);
+        currentBatterBehaviour.EquipedBat = bat;
+    }
+
+    public void ReturnBallToPitcher(GameObject ball)
+    {
+        BallController ballControllerScript = BallUtils.FetchBallControllerScript(ball);
+        GameObject pitcher = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.PITCHER, TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum.PITCHER));
+        ballControllerScript.BallHeight = BallHeightEnum.NONE;
+        ball.transform.position = pitcher.transform.position;
+        ballControllerScript.CurrentHolder = null;
+        ballControllerScript.Target = null;
+        //No parent
+        ball.transform.SetParent(null);
+        ballControllerScript.IsHeld = false;
+        ballControllerScript.IsPitched = false;
+        ballControllerScript.IsMoving = false;
+        ballControllerScript.IsTargetedByFielder = false;
+        ballControllerScript.IsTargetedByPitcher = false;
+        ballControllerScript.IsHit = false;
     }
 
 

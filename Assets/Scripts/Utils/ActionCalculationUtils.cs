@@ -126,8 +126,6 @@ public class ActionCalculationUtils
     public static bool HasActionSucceeded(float sucessRate)
     {
         float randomValue = Random.value;
-        Debug.Log("randomValue = " + randomValue);
-        Debug.Log("Action has succeeded ?? => " + (randomValue <= (sucessRate / 100)));
         return randomValue <= (sucessRate / 100);
     }
 

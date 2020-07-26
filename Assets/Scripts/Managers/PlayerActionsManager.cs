@@ -16,9 +16,8 @@ public class PlayerActionsManager : MonoBehaviour
         TargetSelectionManager = GameUtils.FetchTargetSelectionManager();
     }
 
-    public void ThrowBallAction(GameObject actionUser)
+    public void PitchBallAction(GameObject actionUser)
     {
-        Debug.Log("Activate pitcher action");
         //PITCHER TURN
         //literaly throw the ball!!!
         ballGameObject.SetActive(true);
@@ -41,7 +40,6 @@ public class PlayerActionsManager : MonoBehaviour
         //BATTER TURN
         GameObject batter = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.BATTER, TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum.BATTER));
         BatterBehaviour batterBehaviourScript = PlayerUtils.FetchBatterBehaviourScript(batter);
-        Debug.Log("Activate batter action");
 
         batterBehaviourScript.IsReadyToSwing = true;
         batterBehaviourScript.IsSwingHasFinished = false;
@@ -61,7 +59,7 @@ public class PlayerActionsManager : MonoBehaviour
         genericRunnerBehaviourScript.CalculateRunnerColliderInterraction(baseReachedEnum, false);
     }
 
-    public void PassAction(GameObject actionUser, GameObject actionTarget)
+    public void PassBallAction(GameObject actionUser, GameObject actionTarget)
     {
         PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
         playersTurnManager.TurnState = TurnStateEnum.STANDBY;
@@ -85,10 +83,10 @@ public class PlayerActionsManager : MonoBehaviour
             .Where(fielder => !fielder.Equals(actionUser))
             .OrderBy(fielder => Vector3.Distance(actionUser.transform.position, fielder.transform.position))
             .ToList();
-        TargetSelectionManager.EnableSelection(fielders.First().transform.position, fielders, PassAction, actionUser);
+        TargetSelectionManager.EnableSelection(fielders.First().transform.position, fielders, PassBallAction, actionUser);
     }
 
-    public void StayAction(GameObject actionUser)
+    public void StayOnBaseAction(GameObject actionUser)
     {
         //RUNNER TURN
         RunnerBehaviour runnerBehaviourScript;

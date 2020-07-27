@@ -37,6 +37,8 @@ public class CatcherBehaviour : GenericPlayerBehaviour
                 gameManager.AttackTeamBatterList.Remove(currentBatter);
                 this.SetUpNewBatter(gameManager, bat);
                 currentBatterBehaviour.StrikeOutcomeCount = 0;
+                currentBatterBehaviour.BallOutcomeCount = 0;
+                gameManager.BatterOutCount++;
             }
             else if(currentBatterBehaviour.BallOutcomeCount == 4)
             {
@@ -57,6 +59,7 @@ public class CatcherBehaviour : GenericPlayerBehaviour
                 newRunnerBehaviour.IsInWalkState = isInWalkState;
                 currentBatterStatus.IsAllowedToMove = true;
                 newRunnerBehaviour.EnableMovement = true;
+                currentBatterBehaviour.StrikeOutcomeCount = 0;
                 currentBatterBehaviour.BallOutcomeCount = 0;
                 this.SetUpNewBatter(gameManager, bat);
             }
@@ -69,7 +72,15 @@ public class CatcherBehaviour : GenericPlayerBehaviour
 
             gameManager.ReturnBallToPitcher(ballControllerScript.gameObject);
 
-            if (!isInWalkState)
+            bool isInningHalfEnd = gameManager.BatterOutCount == 3;
+
+            if (isInningHalfEnd)
+            {
+                //TODO
+                //team switch attack/defense
+            }
+
+            if (!isInWalkState && !isInningHalfEnd)
             {
                 PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
                 playersTurnManager.TurnState = TurnStateEnum.PITCHER_TURN;

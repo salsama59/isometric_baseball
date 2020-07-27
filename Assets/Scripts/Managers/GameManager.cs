@@ -22,6 +22,7 @@ public class GameManager : MonoBehaviour
     private Dictionary<string, TileTypeEnum> verticalyPaintedDirtDictionary = new Dictionary<string, TileTypeEnum>();
     private List<GameObject> attackTeamBatterList = new List<GameObject>();
     private List<GameObject> attackTeamRunnerList = new List<GameObject>();
+    private int batterOutCount = 0;
     
 
     void Start()
@@ -686,4 +687,5 @@ public class GameManager : MonoBehaviour
     public static int RowMaximum { get => rowMaximum; set => rowMaximum = value; }
     public List<GameObject> AttackTeamBatterList { get => attackTeamBatterList; set => attackTeamBatterList = value; }
     public List<GameObject> AttackTeamRunnerList { get => attackTeamRunnerList; set => attackTeamRunnerList = value; }
+    public int BatterOutCount { get => batterOutCount; set => batterOutCount = value; }
 }

@@ -55,14 +55,8 @@ public class BatterBehaviour : GenericPlayerBehaviour
             int ballPositionIndex = Random.Range(0, ballPositionList.Count - 1);
             Vector2Int ballTilePosition = ballPositionList[ballPositionIndex];
             ballControllerScript.Target = FieldUtils.GetTileCenterPositionInGameWorld(ballTilePosition);
-            RunnerBehaviour runnerBehaviour = ConvertBatterToRunner(playerStatusScript);
-            PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
-            PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(this.gameObject);
-            playerAbilities.PlayerAbilityList.Clear();
-            PlayerAbility runPlayerAbility = new PlayerAbility("Run to next base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.RunAction, this.gameObject);
-            PlayerAbility StaySafePlayerAbility = new PlayerAbility("Stay on base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.StayOnBaseAction, this.gameObject);
-            playerAbilities.AddAbility(runPlayerAbility);
-            playerAbilities.AddAbility(StaySafePlayerAbility);
+            RunnerBehaviour runnerBehaviour = this.ConvertBatterToRunner(playerStatusScript);
+            this.AddRunnerAbilitiesToBatter(this.gameObject);
 
             gameManager.AttackTeamRunnerList.Add(this.gameObject);
             gameManager.AttackTeamBatterList.Remove(this.gameObject);
@@ -76,7 +70,7 @@ public class BatterBehaviour : GenericPlayerBehaviour
             float ballOutcomeRate = ActionCalculationUtils.CalculateBallOutcomeProbability(ballControllerScript.CurrentPitcher);
             bool isBallOutcome = ActionCalculationUtils.HasActionSucceeded(ballOutcomeRate);
             DialogBoxManager dialogBoxManagerScript = GameUtils.FetchDialogBoxManager();
-            string outcomeMessage = null;
+            string outcomeMessage;
 
             if (!isBallOutcome)
             {
@@ -94,6 +88,17 @@ public class BatterBehaviour : GenericPlayerBehaviour
             ballControllerScript.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetCatcherZonePosition());
             dialogBoxManagerScript.DisplayDialogAndTextForGivenAmountOfTime(2f, true, outcomeMessage);
         }
+    }
+
+    public void AddRunnerAbilitiesToBatter(GameObject player)
+    {
+        PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
+        PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(player);
+        playerAbilities.PlayerAbilityList.Clear();
+        PlayerAbility runPlayerAbility = new PlayerAbility("Run to next base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.RunAction, player);
+        PlayerAbility StaySafePlayerAbility = new PlayerAbility("Stay on base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.StayOnBaseAction, player);
+        playerAbilities.AddAbility(runPlayerAbility);
+        playerAbilities.AddAbility(StaySafePlayerAbility);
     }
 
     public RunnerBehaviour ConvertBatterToRunner(PlayerStatus playerStatusScript)

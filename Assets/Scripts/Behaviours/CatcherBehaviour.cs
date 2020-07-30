@@ -13,19 +13,38 @@ public class CatcherBehaviour : GenericPlayerBehaviour
     public void CalculateCatcherColliderInterraction(GameObject pitcherGameObject, GameObject ballGameObject, BallController ballControllerScript)
     {
         GameManager gameManager = GameUtils.FetchGameManager();
+        GameObject currentBatter = gameManager.AttackTeamBatterList.First();
+        BatterBehaviour currentBatterBehaviour = PlayerUtils.FetchBatterBehaviourScript(currentBatter);
+        GameObject bat = currentBatterBehaviour.EquipedBat;
+        PlayerStatus currentBatterStatus = PlayerUtils.FetchPlayerStatusScript(currentBatter);
+
         float catchSuccesRate = ActionCalculationUtils.CalculateCatchSuccessRate(this.gameObject, pitcherGameObject);
         if (!ActionCalculationUtils.HasActionSucceeded(catchSuccesRate))
         {
             StopCoroutine(ballControllerScript.MovementCoroutine);
             ballControllerScript.IsPitched = false;
             ballControllerScript.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetCathcherOutBallZonePosition());
+
+            if(currentBatterBehaviour.StrikeOutcomeCount == 3)
+            {
+                RunnerBehaviour runnerBehaviour = currentBatterBehaviour.ConvertBatterToRunner(currentBatterStatus);
+                currentBatterBehaviour.AddRunnerAbilitiesToBatter(currentBatter);
+
+                gameManager.AttackTeamRunnerList.Add(currentBatter);
+                gameManager.AttackTeamBatterList.Remove(currentBatter);
+
+                //Not realy hit but rather not catch properly!!!!!
+                ballControllerScript.IsHit = true;
+                currentBatterStatus.IsAllowedToMove = true;
+                runnerBehaviour.EnableMovement = true;
+                this.SetUpNewBatter(gameManager, bat);
+
+                //Catcher must go look for the ball 
+            }
         }
         else
         {
             StopCoroutine(ballControllerScript.MovementCoroutine);
-            GameObject currentBatter = gameManager.AttackTeamBatterList.First();
-            BatterBehaviour currentBatterBehaviour = PlayerUtils.FetchBatterBehaviourScript(currentBatter);
-            GameObject bat = currentBatterBehaviour.EquipedBat;
             bool isInWalkState = false;
 
             ballGameObject.SetActive(false);
@@ -43,16 +62,9 @@ public class CatcherBehaviour : GenericPlayerBehaviour
             else if(currentBatterBehaviour.BallOutcomeCount == 4)
             {
                 isInWalkState = true;
-                PlayerStatus currentBatterStatus = PlayerUtils.FetchPlayerStatusScript(currentBatter);
+                
                 RunnerBehaviour newRunnerBehaviour = currentBatterBehaviour.ConvertBatterToRunner(currentBatterStatus);
-
-                PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
-                PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(currentBatter);
-                playerAbilities.PlayerAbilityList.Clear();
-                PlayerAbility runPlayerAbility = new PlayerAbility("Run to next base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.RunAction, currentBatter);
-                PlayerAbility StaySafePlayerAbility = new PlayerAbility("Stay on base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.StayOnBaseAction, currentBatter);
-                playerAbilities.AddAbility(runPlayerAbility);
-                playerAbilities.AddAbility(StaySafePlayerAbility);
+                currentBatterBehaviour.AddRunnerAbilitiesToBatter(currentBatter);
 
                 gameManager.AttackTeamRunnerList.Add(newRunnerBehaviour.gameObject);
                 gameManager.AttackTeamBatterList.Remove(currentBatter);

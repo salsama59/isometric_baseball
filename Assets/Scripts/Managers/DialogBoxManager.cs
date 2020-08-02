@@ -31,10 +31,38 @@ public class DialogBoxManager : MonoBehaviour
         textMeshProUGUI.text = newText;
     }
 
-
     public void ToggleDialogTextBox()
     {
-        DialogTextBoxGameObject.SetActive(!DialogTextBoxGameObject.activeSelf);
+        DialogTextBoxGameObject.SetActive(!DialogTextBoxGameObject.activeInHierarchy);
+    }
+
+    public void DisplayDialogAndTextForGivenAmountOfTime(float waitTimeInSeconds, bool isGameMustBePaused, string textToDisplay)
+    {
+        SetDialogTextBox(textToDisplay);
+        ToggleDialogTextBox();
+        this.WaitForGivenAmountOfTime(waitTimeInSeconds, isGameMustBePaused, DialogTextBoxGameObject.activeInHierarchy);
+        
+    }
+
+    public void WaitForGivenAmountOfTime(float waitTimeInSeconds, bool isGameMustBePaused, bool isDialogDisplayToBeShutdown = false)
+    {
+        StartCoroutine(GenericWaitBehavior(waitTimeInSeconds, isGameMustBePaused, isDialogDisplayToBeShutdown));
+    }
+
+    private IEnumerator GenericWaitBehavior(float waitTimeInSeconds, bool isGameMustBePaused = false, bool isDialogDisplayToBeShutdown = false)
+    {
+        GameData.isPaused = isGameMustBePaused;
+        yield return new WaitForSeconds(waitTimeInSeconds);
+
+        if (isGameMustBePaused)
+        {
+            GameData.isPaused = !GameData.isPaused;
+        }
+
+        if (isDialogDisplayToBeShutdown)
+        {
+            ToggleDialogTextBox();
+        }
     }
 
     public GameObject DialogTextBoxGameObject { get => dialogTextBoxGameObject; set => dialogTextBoxGameObject = value; }

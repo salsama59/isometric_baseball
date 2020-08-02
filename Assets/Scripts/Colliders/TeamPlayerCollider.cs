@@ -16,8 +16,15 @@ public class TeamPlayerCollider : MonoBehaviour
             GameObject ballGameObject = collision.collider.gameObject;
             BallController ballControllerScript = BallUtils.FetchBallControllerScript(ballGameObject);
 
-            if (PlayerUtils.IsCurrentPlayerPosition(this.gameObject, PlayerFieldPositionEnum.CATCHER))
+            if (PlayerUtils.HasCatcherPosition(this.gameObject) && ballControllerScript.CurrentPasser != this.gameObject)
             {
+                CatcherBehaviour catcherBehaviour = (CatcherBehaviour)genericPlayerBehaviourScript;
+                if (catcherBehaviour.CatcherMode == ModeConstants.CATCHER_FIELDER_MODE)
+                {
+                    PlayerActionsManager.InterceptBall(ballGameObject, ballControllerScript, genericPlayerBehaviourScript);
+                    catcherBehaviour.CatcherMode = ModeConstants.CATCHER_NORMAL_MODE;
+                }
+
                 PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
                 playersTurnManager.TurnState = TurnStateEnum.CATCHER_TURN;
                 PlayersTurnManager.IsCommandPhase = true;
@@ -67,13 +74,27 @@ public class TeamPlayerCollider : MonoBehaviour
                 RunnerBehaviour runnerBehaviour = ((RunnerBehaviour)genericPlayerBehaviourScript);
                 BaseEnum baseReached = runnerBehaviour.NextBase;
 
-                //win a point automaticaly without issuing commands if arrived at home base after a complete turn
+                
                 if (baseReached == BaseEnum.HOME_BASE && runnerBehaviour.HasPassedThroughThreeFirstBases())
                 {
+                    //win a point automaticaly without issuing commands if arrived at home base after a complete turn
                     runnerBehaviour.CalculateRunnerColliderInterraction(FieldUtils.GetTileEnumFromName(collision.gameObject.name), true);
+                }
+                else if(baseReached == BaseEnum.FIRST_BASE && runnerBehaviour.IsInWalkState)
+                {
+                    //Walk done after 4 ball from pitcher
+                    PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
+                    playersTurnManager.TurnState = TurnStateEnum.PITCHER_TURN;
+                    PlayersTurnManager.IsCommandPhase = true;
+                }
+                else if(baseReached == BaseEnum.HOME_BASE)
+                {
+                    //automaticaly run to next base, no need for command input
+                    runnerBehaviour.CalculateRunnerColliderInterraction(FieldUtils.GetTileEnumFromName(collision.gameObject.name), false);
                 }
                 else
                 {
+                    //Runner next turn
                     PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
                     playersTurnManager.TurnState = TurnStateEnum.RUNNER_TURN;
                     PlayersTurnManager.IsCommandPhase = true;
@@ -88,7 +109,7 @@ public class TeamPlayerCollider : MonoBehaviour
         {
             PlayerStatus playerStatusScript = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
             RunnerBehaviour runnerBehaviourScript = ((RunnerBehaviour)PlayerUtils.FetchCorrespondingPlayerBehaviourScript(this.gameObject, playerStatusScript));
-            runnerBehaviourScript.ToggleRunnerSafeStatus();
+            runnerBehaviourScript.IsSafe = true;
         }
     }
 
@@ -127,7 +148,7 @@ public class TeamPlayerCollider : MonoBehaviour
 
                     if (nearestFielderStatus.PlayerFieldPosition == currentPlayerStatus.PlayerFieldPosition)
                     {
-                        ((FielderBehaviour)genericPlayerBehaviourScript).CalculateFielderTriggerInterraction(ballGameObject, genericPlayerBehaviourScript, currentPlayerStatus);
+                        ((FielderBehaviour)genericPlayerBehaviourScript).CalculateFielderTriggerInterraction(genericPlayerBehaviourScript);
                     }
                 }
             }

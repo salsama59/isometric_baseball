@@ -12,6 +12,7 @@ public class RunnerBehaviour : GenericPlayerBehaviour
     private bool hasReachedHomeBase = false;
     private bool enableMovement = false;
     private bool isSafe = false;
+    private bool isInWalkState = false;
 
     public override void Start()
     {
@@ -102,6 +103,10 @@ public class RunnerBehaviour : GenericPlayerBehaviour
                 }
                 this.NextBase = BaseEnum.SECOND_BASE;
                 this.HasReachedFirstBase = true;
+                if (this.IsInWalkState)
+                {
+                    this.IsInWalkState = false;
+                }
                 break;
             case BaseEnum.SECOND_BASE:
                 Debug.Log("Get on SECOND BASE");
@@ -149,4 +154,5 @@ public class RunnerBehaviour : GenericPlayerBehaviour
     public bool HasReachedHomeBase { get => hasReachedHomeBase; set => hasReachedHomeBase = value; }
     public bool EnableMovement { get => enableMovement; set => enableMovement = value; }
     public bool IsSafe { get => isSafe; set => isSafe = value; }
+    public bool IsInWalkState { get => isInWalkState; set => isInWalkState = value; }
 }

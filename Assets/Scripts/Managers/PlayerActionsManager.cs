@@ -1,7 +1,8 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using System;
 
 public class PlayerActionsManager : MonoBehaviour
 {
@@ -16,9 +17,20 @@ public class PlayerActionsManager : MonoBehaviour
         TargetSelectionManager = GameUtils.FetchTargetSelectionManager();
     }
 
-    public void ThrowBallAction(GameObject actionUser)
+    public void AimForTheBall(GenericPlayerBehaviour playerBehaviour)
     {
-        Debug.Log("Activate pitcher action");
+        GameObject player = playerBehaviour.gameObject;
+        PlayerStatus playerStatus = PlayerUtils.FetchPlayerStatusScript(player);
+        BallController ballControlerScript = BallUtils.FetchBallControllerScript(BallGameObject);
+        ballControlerScript.IsTargetedByFielder = true;
+        playerBehaviour.HasSpottedBall = true;
+        playerStatus.IsAllowedToMove = true;
+        playerBehaviour.Target = ballGameObject.transform.position;
+        player.transform.rotation = Quaternion.identity;
+    }
+
+    public void PitchBallAction(GameObject actionUser)
+    {
         //PITCHER TURN
         //literaly throw the ball!!!
         ballGameObject.SetActive(true);
@@ -41,7 +53,6 @@ public class PlayerActionsManager : MonoBehaviour
         //BATTER TURN
         GameObject batter = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.BATTER, TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum.BATTER));
         BatterBehaviour batterBehaviourScript = PlayerUtils.FetchBatterBehaviourScript(batter);
-        Debug.Log("Activate batter action");
 
         batterBehaviourScript.IsReadyToSwing = true;
         batterBehaviourScript.IsSwingHasFinished = false;
@@ -61,7 +72,7 @@ public class PlayerActionsManager : MonoBehaviour
         genericRunnerBehaviourScript.CalculateRunnerColliderInterraction(baseReachedEnum, false);
     }
 
-    public void PassAction(GameObject actionUser, GameObject actionTarget)
+    public void PassBallAction(GameObject actionUser, GameObject actionTarget)
     {
         PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
         playersTurnManager.TurnState = TurnStateEnum.STANDBY;
@@ -85,10 +96,20 @@ public class PlayerActionsManager : MonoBehaviour
             .Where(fielder => !fielder.Equals(actionUser))
             .OrderBy(fielder => Vector3.Distance(actionUser.transform.position, fielder.transform.position))
             .ToList();
-        TargetSelectionManager.EnableSelection(fielders.First().transform.position, fielders, PassAction, actionUser);
+
+        Action<GameObject, GameObject> finalActionsToPerform = PassBallAction;
+
+        //Add an additionnal action for the pass. => go back to initial placement for the catcher.
+        if (PlayerUtils.HasCatcherPosition(actionUser))
+        {
+            CatcherBehaviour catcherBehaviour = PlayerUtils.FetchCatcherBehaviourScript(actionUser);
+            finalActionsToPerform += catcherBehaviour.ReturnToInitialPosition;
+        }
+
+        TargetSelectionManager.EnableSelection(fielders.First().transform.position, fielders, finalActionsToPerform, actionUser);
     }
 
-    public void StayAction(GameObject actionUser)
+    public void StayOnBaseAction(GameObject actionUser)
     {
         //RUNNER TURN
         RunnerBehaviour runnerBehaviourScript;

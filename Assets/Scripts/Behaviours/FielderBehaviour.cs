@@ -116,13 +116,9 @@ public class FielderBehaviour : GenericPlayerBehaviour
         StartCoroutine(gameManager.WaitAndReinit(dialogBoxManagerScript, newBatterStatus, fielderPlayerStatus, FieldBall));
     }
 
-    public void CalculateFielderTriggerInterraction(GameObject ballGameObject, GenericPlayerBehaviour genericPlayerBehaviourScript, PlayerStatus playerStatus)
+    public void CalculateFielderTriggerInterraction(GenericPlayerBehaviour genericPlayerBehaviourScript)
     {
-        BallController ballControlerScript = BallUtils.FetchBallControllerScript(ballGameObject);
-        ballControlerScript.IsTargetedByFielder = true;
-        genericPlayerBehaviourScript.HasSpottedBall = true;
-        playerStatus.IsAllowedToMove = true;
-        genericPlayerBehaviourScript.Target = ballGameObject.transform.position;
-        this.transform.rotation = Quaternion.identity;
+        PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
+        playerActionsManager.AimForTheBall(genericPlayerBehaviourScript);
     }
 }

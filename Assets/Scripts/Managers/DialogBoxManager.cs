@@ -49,7 +49,7 @@ public class DialogBoxManager : MonoBehaviour
         StartCoroutine(GenericWaitBehavior(waitTimeInSeconds, isGameMustBePaused, isDialogDisplayToBeShutdown));
     }
 
-    private IEnumerator GenericWaitBehavior(float waitTimeInSeconds, bool isGameMustBePaused, bool isDialogDisplayToBeShutdown = false)
+    private IEnumerator GenericWaitBehavior(float waitTimeInSeconds, bool isGameMustBePaused = false, bool isDialogDisplayToBeShutdown = false)
     {
         GameData.isPaused = isGameMustBePaused;
         yield return new WaitForSeconds(waitTimeInSeconds);

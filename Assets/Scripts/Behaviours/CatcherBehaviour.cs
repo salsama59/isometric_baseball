@@ -5,9 +5,27 @@ using UnityEngine;
 
 public class CatcherBehaviour : GenericPlayerBehaviour
 {
+    private string catcherMode = ModeConstants.CATCHER_NORMAL_MODE;
+
     public override void Awake()
     {
         base.Awake();
+    }
+
+    private void Update()
+    {
+        BallController ballControlerScript = BallUtils.FetchBallControllerScript(FieldBall);
+
+        if (HasSpottedBall && FieldBall.activeInHierarchy && !IsHoldingBall && ballControlerScript.IsTargetedByFielder)
+        {
+            Target = FieldBall.transform.position;
+        }
+
+        if (Target.HasValue && Target.Value != this.transform.position)
+        {
+            MovePlayer();
+            this.IsPrepared = true;
+        }
     }
 
     public void CalculateCatcherColliderInterraction(GameObject pitcherGameObject, GameObject ballGameObject, BallController ballControllerScript)
@@ -39,7 +57,8 @@ public class CatcherBehaviour : GenericPlayerBehaviour
                 runnerBehaviour.EnableMovement = true;
                 this.SetUpNewBatter(gameManager, bat);
 
-                //Catcher must go look for the ball 
+                //TODO : wait half a second before continue
+                StartCoroutine(this.WaitForAction(4f));
             }
         }
         else
@@ -108,4 +127,44 @@ public class CatcherBehaviour : GenericPlayerBehaviour
         newBatter.SetActive(true);
         gameManager.EquipBatToPlayer(newBatter, bat);
     }
+
+    public void AddFielderAbilitiesToCatcher(GameObject player)
+    {
+        PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
+        PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(player);
+        playerAbilities.PlayerAbilityList.Clear();
+        PlayerAbility passPlayerAbility = new PlayerAbility("Pass to fielder", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.GenericPassAction, player, true);
+        playerAbilities.AddAbility(passPlayerAbility);
+    }
+
+    private IEnumerator WaitForAction(float secondsToWait)
+    {
+        yield return new WaitForSeconds(secondsToWait);
+        //Catcher must go look for the ball 
+        PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
+        CatcherBehaviour catcherBehaviour = PlayerUtils.FetchCatcherBehaviourScript(this.gameObject);
+        playerActionsManager.AimForTheBall(catcherBehaviour);
+
+        //switch the catcher mode (mode normal, mode fielder)
+        this.CatcherMode = ModeConstants.CATCHER_FIELDER_MODE;
+
+        //Add the relevant abilities
+        this.AddFielderAbilitiesToCatcher(this.gameObject);
+        
+    }
+
+    public void ReturnToInitialPosition(GameObject actionUser = null, GameObject targetPlayer = null)
+    {
+        PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
+        PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(actionUser);
+        playerAbilities.PlayerAbilityList.Clear();
+        PlayerAbility catchPlayerAbility = new PlayerAbility("Catch ball", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.CatchBallAction, actionUser);
+        playerAbilities.AddAbility(catchPlayerAbility);
+        PlayerStatus playerStatus = PlayerUtils.FetchPlayerStatusScript(actionUser);
+        playerStatus.IsAllowedToMove = true;
+        this.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetCatcherZonePosition());
+    }
+
+    public string CatcherMode { get => catcherMode; set => catcherMode = value; }
+
 }

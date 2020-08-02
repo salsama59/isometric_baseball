@@ -668,6 +668,7 @@ public class GameManager : MonoBehaviour
         ball.transform.position = pitcher.transform.position;
         ballControllerScript.CurrentHolder = null;
         ballControllerScript.Target = null;
+        ballControllerScript.CurrentPasser = null;
         //No parent
         ball.transform.SetParent(null);
         ballControllerScript.IsHeld = false;

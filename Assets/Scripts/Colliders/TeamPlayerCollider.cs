@@ -40,7 +40,7 @@ public class TeamPlayerCollider : MonoBehaviour
         }
         else if (this.HasPlayerCollided(collision))
         {
-            if (PlayerUtils.HasFielderPosition(this.gameObject) && genericPlayerBehaviourScript.IsHoldingBall && PlayerUtils.IsCurrentPlayerPosition(collision.gameObject, PlayerFieldPositionEnum.RUNNER))
+            if (PlayerUtils.HasFielderPosition(this.gameObject) && genericPlayerBehaviourScript.IsHoldingBall && PlayerUtils.HasRunnerPosition(collision.gameObject))
             {
                 PlayerStatus runnerToTagOutStatus = PlayerUtils.FetchPlayerStatusScript(collision.transform.gameObject);
                 RunnerBehaviour runnerBehaviourScript = ((RunnerBehaviour)PlayerUtils.FetchCorrespondingPlayerBehaviourScript(collision.transform.gameObject, runnerToTagOutStatus));
@@ -53,7 +53,7 @@ public class TeamPlayerCollider : MonoBehaviour
         }
         else
         {
-            if (PlayerUtils.IsCurrentPlayerPosition(this.gameObject, PlayerFieldPositionEnum.RUNNER))
+            if (PlayerUtils.HasRunnerPosition(this.gameObject))
             {
                 
                 if (!IsBaseTile(collision.gameObject.name))
@@ -90,14 +90,17 @@ public class TeamPlayerCollider : MonoBehaviour
                 else if(baseReached == BaseEnum.HOME_BASE)
                 {
                     //automaticaly run to next base, no need for command input
-                    runnerBehaviour.CalculateRunnerColliderInterraction(FieldUtils.GetTileEnumFromName(collision.gameObject.name), false);
+                    runnerBehaviour.CalculateRunnerColliderInterraction(FieldUtils.GetTileEnumFromName(collision.gameObject.name));
+                    runnerBehaviour.GoToNextBase(baseReached, true);
                 }
                 else
                 {
                     //Runner next turn
-                    PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
-                    playersTurnManager.TurnState = TurnStateEnum.RUNNER_TURN;
-                    PlayersTurnManager.IsCommandPhase = true;
+                    //PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
+                    //playersTurnManager.TurnState = TurnStateEnum.RUNNER_TURN;
+                    //PlayersTurnManager.IsCommandPhase = true;
+                    //playersTurnManager.UpdatePlayerTurnAvailability(name, TurnAvailabilityEnum.READY);
+                    runnerBehaviour.CalculateRunnerColliderInterraction(FieldUtils.GetTileEnumFromName(collision.gameObject.name), true);
                 }
             }
         }
@@ -105,7 +108,7 @@ public class TeamPlayerCollider : MonoBehaviour
 
     private void OnCollisionStay2D(Collision2D collision)
     {
-        if (PlayerUtils.IsCurrentPlayerPosition(this.gameObject, PlayerFieldPositionEnum.RUNNER) && IsBaseTile(collision.gameObject.name))
+        if (PlayerUtils.HasRunnerPosition(this.gameObject) && IsBaseTile(collision.gameObject.name))
         {
             PlayerStatus playerStatusScript = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
             RunnerBehaviour runnerBehaviourScript = ((RunnerBehaviour)PlayerUtils.FetchCorrespondingPlayerBehaviourScript(this.gameObject, playerStatusScript));
@@ -115,7 +118,7 @@ public class TeamPlayerCollider : MonoBehaviour
 
     private void OnCollisionExit2D(Collision2D collision)
     {
-        if (PlayerUtils.IsCurrentPlayerPosition(this.gameObject, PlayerFieldPositionEnum.RUNNER) && IsBaseTile(collision.gameObject.name))
+        if (PlayerUtils.HasRunnerPosition(this.gameObject) && IsBaseTile(collision.gameObject.name))
         {
             PlayerStatus playerStatusScript = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
             RunnerBehaviour runnerBehaviourScript = ((RunnerBehaviour)PlayerUtils.FetchCorrespondingPlayerBehaviourScript(this.gameObject, playerStatusScript));

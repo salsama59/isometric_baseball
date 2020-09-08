@@ -42,7 +42,7 @@ public class PlayerActionsManager : MonoBehaviour
     public void CatchBallAction(GameObject actionUser)
     {
         //CATCHER TURN
-        GameObject catcher = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.CATCHER, TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum.CATCHER));
+        GameObject catcher = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.CATCHER, TeamUtils.GetPlayerIdFromPlayerFieldPosition(PlayerFieldPositionEnum.CATCHER));
         PlayerStatus catcherStatusScript = PlayerUtils.FetchPlayerStatusScript(catcher);
         CatcherBehaviour genericCatcherBehaviourScript = ((CatcherBehaviour)PlayerUtils.FetchCorrespondingPlayerBehaviourScript(catcher, catcherStatusScript));
         genericCatcherBehaviourScript.CalculateCatcherColliderInterraction(PitcherGameObject, ballGameObject, ballControllerScript);
@@ -51,26 +51,20 @@ public class PlayerActionsManager : MonoBehaviour
     public void HitBallAction(GameObject actionUser)
     {
         //BATTER TURN
-        GameObject batter = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.BATTER, TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum.BATTER));
+        GameObject batter = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.BATTER, TeamUtils.GetPlayerIdFromPlayerFieldPosition(PlayerFieldPositionEnum.BATTER));
         BatterBehaviour batterBehaviourScript = PlayerUtils.FetchBatterBehaviourScript(batter);
 
         batterBehaviourScript.IsReadyToSwing = true;
         batterBehaviourScript.IsSwingHasFinished = false;
         
-        if (PlayerUtils.IsCurrentPlayerPosition(batter, PlayerFieldPositionEnum.BATTER))
+        if (PlayerUtils.HasBatterPosition(batter))
         {
             PlayerStatus playerStatusScript = PlayerUtils.FetchPlayerStatusScript(batter);
             batterBehaviourScript.CalculateBatterColliderInterraction(PitcherGameObject, BallControllerScript, playerStatusScript);
         }
     }
 
-    public void RunAction(GameObject actionUser)
-    {
-        //RUNNER TURN
-        RunnerBehaviour genericRunnerBehaviourScript;
-        BaseEnum baseReachedEnum = this.GetCurrentBaseReached(out genericRunnerBehaviourScript);
-        genericRunnerBehaviourScript.CalculateRunnerColliderInterraction(baseReachedEnum, false);
-    }
+    
 
     public void PassBallAction(GameObject actionUser, GameObject actionTarget)
     {
@@ -109,12 +103,18 @@ public class PlayerActionsManager : MonoBehaviour
         TargetSelectionManager.EnableSelection(fielders.First().transform.position, fielders, finalActionsToPerform, actionUser);
     }
 
+    public void RunAction(GameObject actionUser)
+    {
+        //RUNNER TURN
+        RunnerBehaviour runnerBehaviourScript = PlayerUtils.FetchRunnerBehaviourScript(actionUser);
+        runnerBehaviourScript.GoToNextBase(runnerBehaviourScript.CurrentBase);
+    }
+
     public void StayOnBaseAction(GameObject actionUser)
     {
         //RUNNER TURN
-        RunnerBehaviour runnerBehaviourScript;
-        BaseEnum baseReachedEnum = this.GetCurrentBaseReached(out runnerBehaviourScript);
-        runnerBehaviourScript.CalculateRunnerColliderInterraction(baseReachedEnum, true);
+        RunnerBehaviour runnerBehaviourScript = PlayerUtils.FetchRunnerBehaviourScript(actionUser);
+        runnerBehaviourScript.StayOnCurrentBase();
     }
 
 
@@ -127,6 +127,7 @@ public class PlayerActionsManager : MonoBehaviour
         if(runners.Count > 1)
         {
             TargetSelectionManager.EnableSelection(runners.First().transform.position, runners, TagOutAimAction, actionUser);
+            PlayersTurnManager.IsCommandPhase = true;
         }
         else
         {
@@ -141,6 +142,7 @@ public class PlayerActionsManager : MonoBehaviour
         PlayerStatus actionUserStatusScript = PlayerUtils.FetchPlayerStatusScript(actionUser);
         GenericPlayerBehaviour genericPlayerBehaviourScript = PlayerUtils.FetchCorrespondingPlayerBehaviourScript(actionUser, actionUserStatusScript);
         genericPlayerBehaviourScript.TargetPlayerToTagOut = actionTarget;
+        PlayersTurnManager.IsCommandPhase = false;
     }
 
     public static void InterceptBall(GameObject ballGameObject, BallController ballControllerScript, GenericPlayerBehaviour genericPlayerBehaviourScript)
@@ -158,15 +160,6 @@ public class PlayerActionsManager : MonoBehaviour
         genericPlayerBehaviourScript.IsHoldingBall = true;
         genericPlayerBehaviourScript.HasSpottedBall = false;
         genericPlayerBehaviourScript.Target = null;
-    }
-
-    private BaseEnum GetCurrentBaseReached(out RunnerBehaviour genericRunnerBehaviourScript)
-    {
-        Debug.Log("Runner choice!!!!");
-        GameObject runner = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.RUNNER, TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum.RUNNER));
-        PlayerStatus runnerStatusScript = PlayerUtils.FetchPlayerStatusScript(runner);
-        genericRunnerBehaviourScript = ((RunnerBehaviour)PlayerUtils.FetchCorrespondingPlayerBehaviourScript(runner, runnerStatusScript));
-        return genericRunnerBehaviourScript.NextBase;
     }
 
     public GameObject BallGameObject { get => ballGameObject; set => ballGameObject = value; }

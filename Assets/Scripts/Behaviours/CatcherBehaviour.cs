@@ -35,10 +35,13 @@ public class CatcherBehaviour : GenericPlayerBehaviour
         BatterBehaviour currentBatterBehaviour = PlayerUtils.FetchBatterBehaviourScript(currentBatter);
         GameObject bat = currentBatterBehaviour.EquipedBat;
         PlayerStatus currentBatterStatus = PlayerUtils.FetchPlayerStatusScript(currentBatter);
+        PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
+        GameObject pitcher = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.PITCHER, TeamUtils.GetPlayerIdFromPlayerFieldPosition(PlayerFieldPositionEnum.PITCHER));
 
         float catchSuccesRate = ActionCalculationUtils.CalculateCatchSuccessRate(this.gameObject, pitcherGameObject);
         if (!ActionCalculationUtils.HasActionSucceeded(catchSuccesRate))
         {
+            ballControllerScript.Target = null;
             StopCoroutine(ballControllerScript.MovementCoroutine);
             ballControllerScript.IsPitched = false;
             ballControllerScript.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetCathcherOutBallZonePosition());
@@ -48,9 +51,6 @@ public class CatcherBehaviour : GenericPlayerBehaviour
                 RunnerBehaviour runnerBehaviour = currentBatterBehaviour.ConvertBatterToRunner(currentBatterStatus);
                 currentBatterBehaviour.AddRunnerAbilitiesToBatter(currentBatter);
 
-                gameManager.AttackTeamRunnerList.Add(currentBatter);
-                gameManager.AttackTeamBatterList.Remove(currentBatter);
-
                 //Not realy hit but rather not catch properly!!!!!
                 ballControllerScript.IsHit = true;
                 currentBatterStatus.IsAllowedToMove = true;
@@ -59,6 +59,16 @@ public class CatcherBehaviour : GenericPlayerBehaviour
 
                 //TODO : wait half a second before continue
                 StartCoroutine(this.WaitForAction(4f));
+            }
+            else
+            {
+                gameManager.ReinitPitcher(pitcher);
+                gameManager.ReturnBallToPitcher(ballControllerScript.gameObject);
+                currentBatter.transform.rotation = Quaternion.identity;
+                bat.transform.position = FieldUtils.GetBatCorrectPosition(currentBatter.transform.position);
+                bat.transform.rotation = Quaternion.Euler(0f, 0f, -70f);
+                playersTurnManager.TurnState = TurnStateEnum.PITCHER_TURN;
+                PlayersTurnManager.IsCommandPhase = true;
             }
         }
         else
@@ -85,8 +95,6 @@ public class CatcherBehaviour : GenericPlayerBehaviour
                 RunnerBehaviour newRunnerBehaviour = currentBatterBehaviour.ConvertBatterToRunner(currentBatterStatus);
                 currentBatterBehaviour.AddRunnerAbilitiesToBatter(currentBatter);
 
-                gameManager.AttackTeamRunnerList.Add(newRunnerBehaviour.gameObject);
-                gameManager.AttackTeamBatterList.Remove(currentBatter);
                 newRunnerBehaviour.IsInWalkState = isInWalkState;
                 currentBatterStatus.IsAllowedToMove = true;
                 newRunnerBehaviour.EnableMovement = true;
@@ -101,19 +109,20 @@ public class CatcherBehaviour : GenericPlayerBehaviour
                 bat.transform.rotation = Quaternion.Euler(0f, 0f, -70f);
             }
 
+           
+            gameManager.ReinitPitcher(pitcher);
             gameManager.ReturnBallToPitcher(ballControllerScript.gameObject);
 
             bool isInningHalfEnd = gameManager.BatterOutCount == 3;
 
             if (isInningHalfEnd)
             {
-                //TODO
-                //team switch attack/defense
+                //TODO team switch attack/defense
+                gameManager.BatterOutCount = 0;
             }
 
             if (!isInWalkState && !isInningHalfEnd)
             {
-                PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
                 playersTurnManager.TurnState = TurnStateEnum.PITCHER_TURN;
                 PlayersTurnManager.IsCommandPhase = true;
             }
@@ -123,7 +132,7 @@ public class CatcherBehaviour : GenericPlayerBehaviour
     private void SetUpNewBatter(GameManager gameManager, GameObject bat)
     {
         GameObject newBatter = gameManager.AttackTeamBatterList.First();
-        TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.BATTER, newBatter, TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum.BATTER));
+        TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.BATTER, newBatter, TeamUtils.GetPlayerIdFromPlayerFieldPosition(PlayerFieldPositionEnum.BATTER));
         newBatter.SetActive(true);
         gameManager.EquipBatToPlayer(newBatter, bat);
     }

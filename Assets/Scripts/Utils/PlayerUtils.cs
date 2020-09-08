@@ -141,13 +141,6 @@ public class PlayerUtils : MonoBehaviour
         return isMoveAllowed;
     }
 
-    public static bool IsCurrentPlayerPosition(GameObject player, PlayerFieldPositionEnum playerFieldPositionToTest)
-    {
-        PlayerStatus currentPlayerStatusScript = FetchPlayerStatusScript(player);
-        return currentPlayerStatusScript.PlayerFieldPosition.Equals(playerFieldPositionToTest);
-    }
-
-
     public static bool HasFielderPosition(GameObject player)
     {
         PlayerStatus currentPlayerStatusScript = FetchPlayerStatusScript(player);
@@ -178,10 +171,26 @@ public class PlayerUtils : MonoBehaviour
         return playerPosition == PlayerFieldPositionEnum.CATCHER;
     }
 
+    public static bool HasRunnerPosition(GameObject player)
+    {
+        PlayerStatus currentPlayerStatusScript = FetchPlayerStatusScript(player);
+        PlayerFieldPositionEnum playerPosition = currentPlayerStatusScript.PlayerFieldPosition;
+
+        return playerPosition == PlayerFieldPositionEnum.RUNNER;
+    }
+
+    public static bool HasBatterPosition(GameObject player)
+    {
+        PlayerStatus currentPlayerStatusScript = FetchPlayerStatusScript(player);
+        PlayerFieldPositionEnum playerPosition = currentPlayerStatusScript.PlayerFieldPosition;
+
+        return playerPosition == PlayerFieldPositionEnum.BATTER;
+    }
+
     public static List<GameObject> GetRunnersOnField()
     {
         return GameObject.FindGameObjectsWithTag(TagsConstants.BASEBALL_PLAYER_TAG)
-            .Where(baseBallPlayer => IsCurrentPlayerPosition(baseBallPlayer, PlayerFieldPositionEnum.RUNNER))
+            .Where(baseBallPlayer => HasRunnerPosition(baseBallPlayer))
             .ToList();
     }
 

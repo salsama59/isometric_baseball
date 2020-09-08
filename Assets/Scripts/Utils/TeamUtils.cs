@@ -56,7 +56,7 @@ public class TeamUtils : MonoBehaviour
     }
 
 
-    public static PlayerEnum GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum playerFieldPositionEnum)
+    public static PlayerEnum GetPlayerIdFromPlayerFieldPosition(PlayerFieldPositionEnum playerFieldPositionEnum)
     {
         foreach (KeyValuePair<PlayerEnum, List<PlayerFieldPositionEnum>> entry in GameData.playerFieldPositionEnumListMap)
         {

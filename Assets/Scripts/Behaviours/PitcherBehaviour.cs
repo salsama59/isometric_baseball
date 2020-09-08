@@ -37,6 +37,12 @@ public class PitcherBehaviour : GenericPlayerBehaviour
         int runnersOnFieldCount = -1;
         List<GameObject> runners = PlayerUtils.GetRunnersOnField();
         runnersOnFieldCount = runners.Count;
+
+        if(runnersOnFieldCount < 1)
+        {
+            return;
+        }
+
         //Choose the runner who just hit the ball
         GameObject runnerToGetOut = runners.First();
 
@@ -77,7 +83,7 @@ public class PitcherBehaviour : GenericPlayerBehaviour
                 bat.transform.rotation = Quaternion.Euler(0f, 0f, -70f);
                 bat.transform.SetParent(gameManager.AttackTeamBatterList.First().transform);
                 batterBehaviourScript.EquipedBat.SetActive(true);
-                TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.BATTER, batterBehaviourScript.gameObject, TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum.BATTER));
+                TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.BATTER, batterBehaviourScript.gameObject, TeamUtils.GetPlayerIdFromPlayerFieldPosition(PlayerFieldPositionEnum.BATTER));
             }
             
         }

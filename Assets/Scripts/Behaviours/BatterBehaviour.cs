@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class BatterBehaviour : GenericPlayerBehaviour
@@ -45,7 +46,7 @@ public class BatterBehaviour : GenericPlayerBehaviour
 
     private void DoBattingAction(BallController ballControllerScript, PlayerStatus playerStatusScript, float pitchSuccesRate)
     {
-        GameManager gameManager = GameUtils.FetchGameManager();
+        PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
 
         if (!ActionCalculationUtils.HasActionSucceeded(pitchSuccesRate))
         {
@@ -58,11 +59,9 @@ public class BatterBehaviour : GenericPlayerBehaviour
             RunnerBehaviour runnerBehaviour = this.ConvertBatterToRunner(playerStatusScript);
             this.AddRunnerAbilitiesToBatter(this.gameObject);
 
-            gameManager.AttackTeamRunnerList.Add(this.gameObject);
-            gameManager.AttackTeamBatterList.Remove(this.gameObject);
-
             playerStatusScript.IsAllowedToMove = true;
             runnerBehaviour.EnableMovement = true;
+            playersTurnManager.IsRunnersTurnsDone = false;
         }
         else
         {
@@ -101,18 +100,28 @@ public class BatterBehaviour : GenericPlayerBehaviour
         playerAbilities.AddAbility(StaySafePlayerAbility);
     }
 
-    public RunnerBehaviour ConvertBatterToRunner(PlayerStatus playerStatusScript)
+    public RunnerBehaviour ConvertBatterToRunner(PlayerStatus batterStatusScript)
     {
-        GameObject bat = PlayerUtils.GetPlayerBatGameObject(playerStatusScript.gameObject);
+        GameObject currentBatter = batterStatusScript.gameObject;
+        GameObject bat = PlayerUtils.GetPlayerBatGameObject(currentBatter);
+        GameManager gameManager = GameUtils.FetchGameManager();
+        RunnerBehaviour runnerBehaviour = currentBatter.AddComponent<RunnerBehaviour>();
+        gameManager.AttackTeamRunnerList.Add(runnerBehaviour.gameObject);
+        gameManager.AttackTeamBatterList.Remove(currentBatter);
+        runnerBehaviour.EquipedBat = bat;
         bat.SetActive(false);
-        Destroy(playerStatusScript.gameObject.GetComponent<BatterBehaviour>());
+        Destroy(currentBatter.GetComponent<BatterBehaviour>());
 
-        playerStatusScript.PlayerFieldPosition = PlayerFieldPositionEnum.RUNNER;
-        TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.RUNNER, this.gameObject, PlayerEnum.PLAYER_1);
+        batterStatusScript.PlayerFieldPosition = PlayerFieldPositionEnum.RUNNER;
+        TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.RUNNER, currentBatter, PlayerEnum.PLAYER_1);
+        GameObject nextBatter = gameManager.AttackTeamBatterList.First();
+        TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.BATTER, nextBatter, TeamUtils.GetPlayerIdFromPlayerFieldPosition(PlayerFieldPositionEnum.BATTER));
+
         PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
         playersTurnManager.TurnState = TurnStateEnum.STANDBY;
-        RunnerBehaviour runnerBehaviour = playerStatusScript.gameObject.AddComponent<RunnerBehaviour>();
-        runnerBehaviour.EquipedBat = bat;
+        string newRunnerName = NameConstants.RUNNER_NAME + "_" + gameManager.AttackTeamRunnerList.IndexOf(runnerBehaviour.gameObject);
+        runnerBehaviour.gameObject.name = newRunnerName;
+
         return runnerBehaviour;
     }
 

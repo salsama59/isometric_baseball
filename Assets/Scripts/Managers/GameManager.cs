@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -23,6 +24,8 @@ public class GameManager : MonoBehaviour
     private List<GameObject> attackTeamBatterList = new List<GameObject>();
     private List<GameObject> attackTeamRunnerList = new List<GameObject>();
     private int batterOutCount = 0;
+    private GameObject fieldBall;
+    private bool isStateCheckAllowed;
     
 
     void Start()
@@ -31,7 +34,7 @@ public class GameManager : MonoBehaviour
 
         GameObject ball = Instantiate(ballModel, this.transform.position, this.transform.rotation);
         ball.SetActive(false);
-
+        FieldBall = ball;
         CameraController cameraController = CameraUtils.FetchCameraController();
         cameraController.BallGameObject = ball;
 
@@ -78,9 +81,54 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-
+        if (IsStateCheckAllowed)
+        {
+            this.CheckRunnersState();
+            IsStateCheckAllowed = false;
+        }
+       
     }
 
+
+
+    private void CheckRunnersState()
+    {
+        if(this.AttackTeamRunnerList.Count > 0)
+        {
+           
+
+           bool isRunnersAllSafeAndStaying = this.AttackTeamRunnerList.TrueForAll(runner => {
+                RunnerBehaviour runnerBehaviour = PlayerUtils.FetchRunnerBehaviourScript(runner);
+                return runnerBehaviour.IsSafe && runnerBehaviour.IsStaying;
+            });
+
+            if (isRunnersAllSafeAndStaying)
+            {
+                BallController ballControllerScript = BallUtils.FetchBallControllerScript(FieldBall);
+                //Return ball to pitcher and place back players.
+                this.ReinitPitcher(ballControllerScript.CurrentPitcher);
+                this.ReturnBallToPitcher(ballControllerScript.gameObject);
+                this.ReinitFielders(TeamUtils.fielderList);
+
+                GameObject newBatter = this.AttackTeamBatterList.First();
+                GameObject lastRunner = this.AttackTeamRunnerList.Last();
+                newBatter.SetActive(true);
+
+                BatterBehaviour newbatterBehaviourScript = PlayerUtils.FetchBatterBehaviourScript(newBatter);
+                RunnerBehaviour runnerBehaviour = PlayerUtils.FetchRunnerBehaviourScript(lastRunner);
+
+                newbatterBehaviourScript.EquipedBat = runnerBehaviour.EquipedBat;
+                this.EquipBatToPlayer(newBatter, newbatterBehaviourScript.EquipedBat);
+
+                PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
+                playersTurnManager.TurnState = TurnStateEnum.PITCHER_TURN;
+                PlayersTurnManager.IsCommandPhase = true;
+                playersTurnManager.MakeAllPlayerAvailable();
+            }
+            
+        }
+        
+    }
 
     private List<PlayerFieldPositionEnum> GetEligiblePlayerFieldPositionList(PlayerEnum playerEnum)
     {
@@ -256,7 +304,7 @@ public class GameManager : MonoBehaviour
         if (PlayerUtils.HasFielderPosition(player))
         {
             PlayerAbility passPlayerAbility = new PlayerAbility("Pass to fielder", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.GenericPassAction, player, true);
-            PlayerAbility tagOutPlayerAbility = new PlayerAbility("Go for tagout", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.GenericTagOutAimAction, player);
+            PlayerAbility tagOutPlayerAbility = new PlayerAbility("Go for tagout", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.GenericTagOutAimAction, player, false);
             playerAbilities.AddAbility(passPlayerAbility);
             playerAbilities.AddAbility(tagOutPlayerAbility);
         }
@@ -362,8 +410,6 @@ public class GameManager : MonoBehaviour
 
     private TileInformation GetFieldTileInformation(Vector3Int localPlace, Tilemap tilemap, int collumn, int line)
     {
-        //float camHeight = this.GetCamHeight()/2;
-        //float camWidth = this.GetCamWidth()/2;
         TileInformation tileInformation = new TileInformation();
         
         string dictionarykey = this.BuildKey(collumn, line);
@@ -379,31 +425,6 @@ public class GameManager : MonoBehaviour
             tileInformation.TileIndex = (int)VerticalyPaintedDirtDictionary[dictionarykey];
             return tileInformation;
         }
-
-        //Camera cam = Camera.main;
-
-        //Vector3 camPosition = cam.transform.position;
-
-        //Vector3 place = tileMap.CellToWorld(localPlace);
-
-
-
-        /*if (place.x < camPosition.x + camWidth && place.x > camPosition.x - camWidth)
-        {
-            if(place.y < camPosition.y + camHeight && place.y > camPosition.y - camHeight)
-            {
-                return (int)TileType.ROAD;
-            }
-        }*/
-
-        /*if (collumn == tilemap.cellBounds.xMin || collumn == tilemap.cellBounds.xMax - 1 || line == tilemap.cellBounds.yMin || line == tilemap.cellBounds.yMax - 1)
-        {
-            return (int)TileType.ROAD;
-        }
-        else
-        {
-            return (int)TileType.GRASS;
-        }*/
 
         return tileInformation;
     }
@@ -592,25 +613,9 @@ public class GameManager : MonoBehaviour
         }
 
         BallController ballControllerScript = BallUtils.FetchBallControllerScript(fieldBall);
-        PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
+       
         //Update Pitcher informations
-        PitcherBehaviour pitcherBehaviourScript = PlayerUtils.FetchPitcherBehaviourScript(ballControllerScript.CurrentPitcher);
-        PlayerAbilities pitcherPlayerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(ballControllerScript.CurrentPitcher);
-        PlayerStatus pitcherPlayerStatus = PlayerUtils.FetchPlayerStatusScript(ballControllerScript.CurrentPitcher);
-        PlayerAbility throwBallPlayerAbility = new PlayerAbility("Throw", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.PitchBallAction, ballControllerScript.CurrentPitcher);
-        PlayerAbility gyroBallSpecialPlayerAbility = new PlayerAbility("Gyro ball", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.NORMAL, playerActionsManager.PitchBallAction, ballControllerScript.CurrentPitcher);
-        PlayerAbility fireBallSpecialPlayerAbility = new PlayerAbility("Fire ball", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.NORMAL, playerActionsManager.PitchBallAction, ballControllerScript.CurrentPitcher);
-        PlayerAbility menuBackAction = new PlayerAbility("Back", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.UI, null, null);
-        pitcherPlayerAbilities.PlayerAbilityList.Clear();
-        pitcherPlayerAbilities.AddAbility(throwBallPlayerAbility);
-        pitcherPlayerAbilities.AddAbility(gyroBallSpecialPlayerAbility);
-        pitcherPlayerAbilities.AddAbility(fireBallSpecialPlayerAbility);
-        pitcherPlayerAbilities.AddAbility(menuBackAction);
-        pitcherPlayerAbilities.HasSpecialAbilities = true;
-        pitcherBehaviourScript.Target = null;
-        ballControllerScript.CurrentPitcher.transform.position = TeamUtils.playerTeamMenberPositionLocation[pitcherPlayerStatus.PlayerFieldPosition];
-        pitcherPlayerStatus.IsAllowedToMove = false;
-        pitcherBehaviourScript.HasSpottedBall = false;
+        this.ReinitPitcher(ballControllerScript.CurrentPitcher);
 
         //Update ball informations
         this.ReturnBallToPitcher(fieldBall);
@@ -619,35 +624,48 @@ public class GameManager : MonoBehaviour
         BatterBehaviour batterBehaviourScript = PlayerUtils.FetchBatterBehaviourScript(newBatterStatus.gameObject);
         GameObject bat = batterBehaviourScript.EquipedBat;
         this.EquipBatToPlayer(newBatterStatus.gameObject, bat);
-        TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.BATTER, batterBehaviourScript.gameObject, TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum.BATTER));
+        TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.BATTER, batterBehaviourScript.gameObject, TeamUtils.GetPlayerIdFromPlayerFieldPosition(PlayerFieldPositionEnum.BATTER));
 
         //Update fielder informations
 
         if (fielderPlayerStatus != null)
         {
-            FielderBehaviour fielderBehaviourScript = PlayerUtils.FetchFielderBehaviourScript(fielderPlayerStatus.gameObject);
-            fielderPlayerStatus.IsAllowedToMove = true;
-            fielderBehaviourScript.HasSpottedBall = false;
-            fielderBehaviourScript.IsPrepared = false;
-            fielderBehaviourScript.Target = null;
-            fielderBehaviourScript.IsHoldingBall = false;
-            fielderBehaviourScript.TargetPlayerToTagOut = null;
-            fielderBehaviourScript.IsMoving = false;
-            fielderBehaviourScript.gameObject.transform.position = TeamUtils.playerTeamMenberPositionLocation[fielderPlayerStatus.PlayerFieldPosition];
-            fielderBehaviourScript.transform.rotation = Quaternion.identity;
-            fielderBehaviourScript.IsoRenderer.LastDirection = 4;
-            fielderBehaviourScript.IsoRenderer.SetDirection(Vector2.zero);
+            List<GameObject> fielders = new List<GameObject>();
+            fielders.Add(fielderPlayerStatus.gameObject);
+            this.ReinitFielders(fielders);
         }
 
         //Reinit turn
         PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
         PlayersTurnManager.IsCommandPhase = true;
         playersTurnManager.TurnState = TurnStateEnum.PITCHER_TURN;
+        playersTurnManager.MakeAllPlayerAvailable();
 
         //Remove pause state
         GameData.isPaused = false;
     }
 
+    public void ReinitPitcher(GameObject pitcher)
+    {
+        PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
+        PitcherBehaviour pitcherBehaviourScript = PlayerUtils.FetchPitcherBehaviourScript(pitcher);
+        PlayerAbilities pitcherPlayerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(pitcher);
+        PlayerStatus pitcherPlayerStatus = PlayerUtils.FetchPlayerStatusScript(pitcher);
+        PlayerAbility throwBallPlayerAbility = new PlayerAbility("Throw", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.PitchBallAction, pitcher);
+        PlayerAbility gyroBallSpecialPlayerAbility = new PlayerAbility("Gyro ball", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.NORMAL, playerActionsManager.PitchBallAction, pitcher);
+        PlayerAbility fireBallSpecialPlayerAbility = new PlayerAbility("Fire ball", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.NORMAL, playerActionsManager.PitchBallAction, pitcher);
+        PlayerAbility menuBackAction = new PlayerAbility("Back", AbilityTypeEnum.SPECIAL, AbilityCategoryEnum.UI, null, null);
+        pitcherPlayerAbilities.PlayerAbilityList.Clear();
+        pitcherPlayerAbilities.AddAbility(throwBallPlayerAbility);
+        pitcherPlayerAbilities.AddAbility(gyroBallSpecialPlayerAbility);
+        pitcherPlayerAbilities.AddAbility(fireBallSpecialPlayerAbility);
+        pitcherPlayerAbilities.AddAbility(menuBackAction);
+        pitcherPlayerAbilities.HasSpecialAbilities = true;
+        pitcherBehaviourScript.Target = null;
+        pitcher.transform.position = TeamUtils.playerTeamMenberPositionLocation[pitcherPlayerStatus.PlayerFieldPosition];
+        pitcherPlayerStatus.IsAllowedToMove = false;
+        pitcherBehaviourScript.HasSpottedBall = false;
+    }
 
     public void EquipBatToPlayer(GameObject player, GameObject bat)
     {
@@ -663,7 +681,7 @@ public class GameManager : MonoBehaviour
     public void ReturnBallToPitcher(GameObject ball)
     {
         BallController ballControllerScript = BallUtils.FetchBallControllerScript(ball);
-        GameObject pitcher = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.PITCHER, TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum.PITCHER));
+        GameObject pitcher = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.PITCHER, TeamUtils.GetPlayerIdFromPlayerFieldPosition(PlayerFieldPositionEnum.PITCHER));
         ballControllerScript.BallHeight = BallHeightEnum.NONE;
         ball.transform.position = pitcher.transform.position;
         ballControllerScript.CurrentHolder = null;
@@ -674,9 +692,32 @@ public class GameManager : MonoBehaviour
         ballControllerScript.IsHeld = false;
         ballControllerScript.IsPitched = false;
         ballControllerScript.IsMoving = false;
+        ballControllerScript.IsPassed = false;
         ballControllerScript.IsTargetedByFielder = false;
         ballControllerScript.IsTargetedByPitcher = false;
         ballControllerScript.IsHit = false;
+        StopCoroutine(ballControllerScript.MovementCoroutine);
+    }
+
+    public void ReinitFielders(List<GameObject> fielders)
+    {
+        foreach (GameObject fielder in fielders)
+        {
+            FielderBehaviour fielderBehaviourScript = PlayerUtils.FetchFielderBehaviourScript(fielder);
+            PlayerStatus fielderPlayerStatus = PlayerUtils.FetchPlayerStatusScript(fielder);
+            fielderPlayerStatus.IsAllowedToMove = true;
+            fielderBehaviourScript.HasSpottedBall = false;
+            fielderBehaviourScript.IsPrepared = false;
+            fielderBehaviourScript.Target = null;
+            fielderBehaviourScript.IsHoldingBall = false;
+            fielderBehaviourScript.TargetPlayerToTagOut = null;
+            fielderBehaviourScript.IsMoving = false;
+            fielderBehaviourScript.gameObject.transform.position = TeamUtils.playerTeamMenberPositionLocation[fielderPlayerStatus.PlayerFieldPosition];
+            fielderBehaviourScript.transform.rotation = Quaternion.identity;
+            fielderBehaviourScript.IsoRenderer.LastDirection = 4;
+            fielderBehaviourScript.IsoRenderer.SetDirection(Vector2.zero);
+        }
+        
     }
 
 
@@ -689,4 +730,6 @@ public class GameManager : MonoBehaviour
     public List<GameObject> AttackTeamBatterList { get => attackTeamBatterList; set => attackTeamBatterList = value; }
     public List<GameObject> AttackTeamRunnerList { get => attackTeamRunnerList; set => attackTeamRunnerList = value; }
     public int BatterOutCount { get => batterOutCount; set => batterOutCount = value; }
+    public GameObject FieldBall { get => fieldBall; set => fieldBall = value; }
+    public bool IsStateCheckAllowed { get => isStateCheckAllowed; set => isStateCheckAllowed = value; }
 }

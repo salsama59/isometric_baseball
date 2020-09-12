@@ -119,6 +119,8 @@ public class RunnerBehaviour : GenericPlayerBehaviour
         this.IsStaying = true;
         PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
         playersTurnManager.UpdatePlayerTurnAvailability(this.gameObject.name, TurnAvailabilityEnum.WAITING);
+        IsometricCharacterRenderer isometricCharacterRenderer = PlayerUtils.FetchPlayerIsometricRenderer(this.gameObject);
+        isometricCharacterRenderer.ReinitializeAnimator();
         this.CalculateNextAction();
     }
 
@@ -157,6 +159,8 @@ public class RunnerBehaviour : GenericPlayerBehaviour
                     TeamsScoreManager teamsScoreManagerScript = GameUtils.FetchTeamsScoreManager();
                     teamsScoreManagerScript.IncrementTeamScore(GameData.teamIdEnumMap[playerEnum]);
                     this.IsStaying = true;
+                    IsometricCharacterRenderer isometricCharacterRenderer = PlayerUtils.FetchPlayerIsometricRenderer(this.gameObject);
+                    isometricCharacterRenderer.ReinitializeAnimator();
                 }
                 playersTurnManager.UpdatePlayerTurnAvailability(this.gameObject.name, turnAvailabilityEnum);
                 break;

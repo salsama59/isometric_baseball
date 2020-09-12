@@ -10,7 +10,8 @@ public class IsometricCharacterRenderer : MonoBehaviour
     public static readonly string[] runDirections = {"Run N", "Run NW", "Run W", "Run SW", "Run S", "Run SE", "Run E", "Run NE"};
 
     private Animator animator;
-    private int lastDirection = 4;
+    private int lastDirection = 0;
+    public static readonly int defaultStaticDirectionIndex = 4;
 
     private void Awake()
     {
@@ -21,7 +22,7 @@ public class IsometricCharacterRenderer : MonoBehaviour
     public void SetDirection(Vector2 direction){
 
         //use the Run states by default
-        string[] directionArray = null;
+        string[] directionArray;
 
         //measure the magnitude of the input.
         if (direction.magnitude < .01f)
@@ -40,7 +41,13 @@ public class IsometricCharacterRenderer : MonoBehaviour
         }
 
         //tell the animator to play the requested state
-        Animator.Play(directionArray[LastDirection]);
+        this.Animator.Play(directionArray[LastDirection]);
+    }
+
+    public void ReinitializeAnimator()
+    {
+        this.Animator.Play(staticDirections[defaultStaticDirectionIndex]);
+        this.Animator.enabled = false;
     }
 
     public Animator Animator { get => animator; set => animator = value; }

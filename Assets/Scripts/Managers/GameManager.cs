@@ -665,6 +665,7 @@ public class GameManager : MonoBehaviour
         pitcher.transform.position = TeamUtils.playerTeamMenberPositionLocation[pitcherPlayerStatus.PlayerFieldPosition];
         pitcherPlayerStatus.IsAllowedToMove = false;
         pitcherBehaviourScript.HasSpottedBall = false;
+        pitcherBehaviourScript.IsoRenderer.ReinitializeAnimator();
     }
 
     public void EquipBatToPlayer(GameObject player, GameObject bat)
@@ -714,6 +715,7 @@ public class GameManager : MonoBehaviour
             fielderBehaviourScript.IsMoving = false;
             fielderBehaviourScript.gameObject.transform.position = TeamUtils.playerTeamMenberPositionLocation[fielderPlayerStatus.PlayerFieldPosition];
             fielderBehaviourScript.transform.rotation = Quaternion.identity;
+            fielderBehaviourScript.IsoRenderer.ReinitializeAnimator();
             fielderBehaviourScript.IsoRenderer.LastDirection = 4;
             fielderBehaviourScript.IsoRenderer.SetDirection(Vector2.zero);
         }

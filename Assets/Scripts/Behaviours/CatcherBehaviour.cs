@@ -42,7 +42,6 @@ public class CatcherBehaviour : GenericPlayerBehaviour
         if (!ActionCalculationUtils.HasActionSucceeded(catchSuccesRate))
         {
             ballControllerScript.Target = null;
-            StopCoroutine(ballControllerScript.MovementCoroutine);
             ballControllerScript.IsPitched = false;
             ballControllerScript.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetCathcherOutBallZonePosition());
 
@@ -73,7 +72,6 @@ public class CatcherBehaviour : GenericPlayerBehaviour
         }
         else
         {
-            StopCoroutine(ballControllerScript.MovementCoroutine);
             bool isInWalkState = false;
 
             ballGameObject.SetActive(false);

@@ -8,6 +8,12 @@ public class BatCollider : MonoBehaviour
     {
         if (this.HasBallCollided(collision))
         {
+            BallController ballController = BallUtils.FetchBallControllerScript(collision.transform.gameObject);
+            ballController.Target = null;
+            ballController.IsMoving = false;
+            ballController.IsPassed = false;
+            ballController.IsPitched = false;
+            ballController.IsHit = false;
             PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
             playersTurnManager.TurnState = TurnStateEnum.BATTER_TURN;
             PlayersTurnManager.IsCommandPhase = true;

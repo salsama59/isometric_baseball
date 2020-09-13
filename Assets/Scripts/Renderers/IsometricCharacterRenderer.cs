@@ -52,8 +52,7 @@ public class IsometricCharacterRenderer : MonoBehaviour
 
     public void LookAtBallAnimation(Vector3 ballPosition)
     {
-        Vector3 distance = ballPosition - this.gameObject.transform.position;
-        Vector2 direction = distance.normalized;
+        Vector2 direction = MathUtils.CalculateDirection(this.gameObject.transform.position, ballPosition);
         int directionIndex = AnimationUtils.DirectionToIndex(direction, 8);
         this.Animator.Play(staticDirections[directionIndex]);
     }

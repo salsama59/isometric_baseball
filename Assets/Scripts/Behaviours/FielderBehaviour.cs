@@ -51,7 +51,8 @@ public class FielderBehaviour : GenericPlayerBehaviour
         BallController ballControlerScript = BallUtils.FetchBallControllerScript(FieldBall);
         if (FieldBall.activeInHierarchy && !HasSpottedBall)
         {
-            GetAngleToLookAt();
+            IsoRenderer.LookAtBallAnimation(FieldBall.transform.position);
+            this.GetAngleToLookAt();
         }
         else if (HasSpottedBall && FieldBall.activeInHierarchy && !IsHoldingBall && ballControlerScript.IsTargetedByFielder)
         {
@@ -64,7 +65,11 @@ public class FielderBehaviour : GenericPlayerBehaviour
         Vector3 dir = FieldBall.transform.position - this.transform.position;
         dir.Normalize();
         float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-        this.transform.rotation = Quaternion.AngleAxis(angle - 90, Vector3.forward);
+
+        GameObject playerSight = this.gameObject.transform.GetChild(0)
+            .GetChild(0)
+            .GetChild(0).gameObject;
+        playerSight.transform.rotation = Quaternion.AngleAxis(angle - 90, Vector3.forward);
     }
 
     public void CalculateFielderColliderInterraction(GameObject ballGameObject, BallController ballControllerScript, GenericPlayerBehaviour genericPlayerBehaviourScript)

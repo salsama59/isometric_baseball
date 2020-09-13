@@ -47,7 +47,15 @@ public class IsometricCharacterRenderer : MonoBehaviour
     public void ReinitializeAnimator()
     {
         this.Animator.Play(staticDirections[defaultStaticDirectionIndex]);
-        this.Animator.enabled = false;
+        //this.Animator.enabled = false;
+    }
+
+    public void LookAtBallAnimation(Vector3 ballPosition)
+    {
+        Vector3 distance = ballPosition - this.gameObject.transform.position;
+        Vector2 direction = distance.normalized;
+        int directionIndex = AnimationUtils.DirectionToIndex(direction, 8);
+        this.Animator.Play(staticDirections[directionIndex]);
     }
 
     public Animator Animator { get => animator; set => animator = value; }

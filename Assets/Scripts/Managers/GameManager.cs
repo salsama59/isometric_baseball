@@ -225,7 +225,6 @@ public class GameManager : MonoBehaviour
                 player.SetActive(false);
                 break;
             case PlayerFieldPositionEnum.PITCHER:
-                //ball.SetActive(true);
                 playerStatus.PitchEfficiency = 50f;
                 playerStatus.PitchingPower = 2;
                 playerStatus.PitchingEffect = 10f;
@@ -332,7 +331,11 @@ public class GameManager : MonoBehaviour
 
     private void UpdatePlayerColliderSettings(GameObject player)
     {
-        BoxCollider2D boxCollider = player.AddComponent<BoxCollider2D>();
+
+        BoxCollider2D boxCollider = player.transform.GetChild(0)
+            .GetChild(0)
+            .GetComponentInChildren<BoxCollider2D>();
+
         boxCollider.isTrigger = true;
         boxCollider.size = new Vector2(2, 15);
         if (PlayerUtils.HasPitcherPosition(player))
@@ -714,7 +717,8 @@ public class GameManager : MonoBehaviour
             fielderBehaviourScript.TargetPlayerToTagOut = null;
             fielderBehaviourScript.IsMoving = false;
             fielderBehaviourScript.gameObject.transform.position = TeamUtils.playerTeamMenberPositionLocation[fielderPlayerStatus.PlayerFieldPosition];
-            fielderBehaviourScript.transform.rotation = Quaternion.identity;
+            GameObject fielderSight = fielderBehaviourScript.gameObject.transform.GetChild(0).GetChild(0).GetChild(0).gameObject;
+            fielderSight.transform.rotation = Quaternion.identity;
             fielderBehaviourScript.IsoRenderer.ReinitializeAnimator();
             fielderBehaviourScript.IsoRenderer.LastDirection = 4;
             fielderBehaviourScript.IsoRenderer.SetDirection(Vector2.zero);

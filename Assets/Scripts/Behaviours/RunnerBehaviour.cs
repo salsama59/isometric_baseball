@@ -173,6 +173,8 @@ public class RunnerBehaviour : GenericPlayerBehaviour
                 {
                     this.IsInWalkState = false;
                     turnAvailabilityEnum = TurnAvailabilityEnum.WAITING;
+                    IsometricCharacterRenderer isometricCharacterRenderer = PlayerUtils.FetchPlayerIsometricRenderer(this.gameObject);
+                    isometricCharacterRenderer.ReinitializeAnimator();
                 }
                 
                 playersTurnManager.UpdatePlayerTurnAvailability(this.gameObject.name, turnAvailabilityEnum);

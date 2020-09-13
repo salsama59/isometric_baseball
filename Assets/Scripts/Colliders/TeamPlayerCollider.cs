@@ -11,7 +11,7 @@ public class TeamPlayerCollider : MonoBehaviour
         PlayerStatus playerStatusScript = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
         GenericPlayerBehaviour genericPlayerBehaviourScript = PlayerUtils.FetchCorrespondingPlayerBehaviourScript(this.gameObject, playerStatusScript);
 
-        if (this.HasBallCollided(collision.collider))
+        if (ColliderUtils.HasBallCollided(collision.collider))
         {
             GameObject ballGameObject = collision.collider.gameObject;
             BallController ballControllerScript = BallUtils.FetchBallControllerScript(ballGameObject);
@@ -38,7 +38,7 @@ public class TeamPlayerCollider : MonoBehaviour
                 ((PitcherBehaviour)genericPlayerBehaviourScript).CalculatePitcherColliderInterraction(ballGameObject, ballControllerScript, genericPlayerBehaviourScript);
             }
         }
-        else if (this.HasPlayerCollided(collision))
+        else if (ColliderUtils.HasPlayerCollided(collision))
         {
             if (PlayerUtils.HasFielderPosition(this.gameObject) && genericPlayerBehaviourScript.IsHoldingBall && PlayerUtils.HasRunnerPosition(collision.gameObject))
             {
@@ -56,7 +56,7 @@ public class TeamPlayerCollider : MonoBehaviour
             if (PlayerUtils.HasRunnerPosition(this.gameObject))
             {
                 
-                if (!IsBaseTile(collision.gameObject.name))
+                if (!ColliderUtils.IsBaseTile(collision.gameObject.name))
                 {
                     return;
                 }
@@ -96,10 +96,6 @@ public class TeamPlayerCollider : MonoBehaviour
                 else
                 {
                     //Runner next turn
-                    //PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
-                    //playersTurnManager.TurnState = TurnStateEnum.RUNNER_TURN;
-                    //PlayersTurnManager.IsCommandPhase = true;
-                    //playersTurnManager.UpdatePlayerTurnAvailability(name, TurnAvailabilityEnum.READY);
                     runnerBehaviour.CalculateRunnerColliderInterraction(FieldUtils.GetTileEnumFromName(collision.gameObject.name), true);
                 }
             }
@@ -108,7 +104,7 @@ public class TeamPlayerCollider : MonoBehaviour
 
     private void OnCollisionStay2D(Collision2D collision)
     {
-        if (PlayerUtils.HasRunnerPosition(this.gameObject) && IsBaseTile(collision.gameObject.name))
+        if (PlayerUtils.HasRunnerPosition(this.gameObject) && ColliderUtils.IsBaseTile(collision.gameObject.name))
         {
             PlayerStatus playerStatusScript = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
             RunnerBehaviour runnerBehaviourScript = ((RunnerBehaviour)PlayerUtils.FetchCorrespondingPlayerBehaviourScript(this.gameObject, playerStatusScript));
@@ -118,79 +114,11 @@ public class TeamPlayerCollider : MonoBehaviour
 
     private void OnCollisionExit2D(Collision2D collision)
     {
-        if (PlayerUtils.HasRunnerPosition(this.gameObject) && IsBaseTile(collision.gameObject.name))
+        if (PlayerUtils.HasRunnerPosition(this.gameObject) && ColliderUtils.IsBaseTile(collision.gameObject.name))
         {
             PlayerStatus playerStatusScript = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
             RunnerBehaviour runnerBehaviourScript = ((RunnerBehaviour)PlayerUtils.FetchCorrespondingPlayerBehaviourScript(this.gameObject, playerStatusScript));
             runnerBehaviourScript.ToggleRunnerSafeStatus();
         }
-    }
-
-    private void OnTriggerStay2D(Collider2D collision)
-    {
-        if (this.HasBallCollided(collision))
-        {
-            GameObject ballGameObject = collision.gameObject;
-            BallController ballControlerScript =  BallUtils.FetchBallControllerScript(ballGameObject);
-            PlayerStatus currentPlayerStatus = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
-            GenericPlayerBehaviour genericPlayerBehaviourScript = PlayerUtils.FetchCorrespondingPlayerBehaviourScript(this.gameObject, currentPlayerStatus);
-
-            if (ballControlerScript.IsMoving && ballControlerScript.IsHit && !ballControlerScript.IsPitched)
-            {
-
-                if (PlayerUtils.HasPitcherPosition(this.gameObject) && !ballControlerScript.IsTargetedByFielder)
-                {
-                    ballControlerScript.IsTargetedByPitcher = true;
-                    ((PitcherBehaviour)genericPlayerBehaviourScript).CalculateFielderTriggerInterraction(ballGameObject, genericPlayerBehaviourScript, currentPlayerStatus);
-                }
-
-                if (PlayerUtils.HasFielderPosition(this.gameObject) && !ballControlerScript.IsTargetedByFielder && !ballControlerScript.IsTargetedByPitcher)
-                {
-                    GameObject nearestFielder = TeamUtils.GetNearestFielderFromGameObject(ballGameObject);
-                    PlayerStatus nearestFielderStatus = PlayerUtils.FetchPlayerStatusScript(nearestFielder);
-
-                    if (nearestFielderStatus.PlayerFieldPosition == currentPlayerStatus.PlayerFieldPosition)
-                    {
-                        ((FielderBehaviour)genericPlayerBehaviourScript).CalculateFielderTriggerInterraction(genericPlayerBehaviourScript);
-                    }
-                }
-            }
-                
-        }
-    }
-
-    private void OnTriggerExit2D(Collider2D collision)
-    {
-        if (this.HasBallCollided(collision))
-        {
-            GameObject ballGameObject = collision.gameObject;
-            BallController ballControlerScript = BallUtils.FetchBallControllerScript(ballGameObject);
-
-            if (!ballControlerScript.IsMoving && !ballControlerScript.IsHit && !ballControlerScript.IsPitched)
-            {
-                if (PlayerUtils.HasPitcherPosition(this.gameObject))
-                {
-                    ballControlerScript.IsTargetedByPitcher = false;
-                }
-            }
-        }
-    }
-
-    private bool IsBaseTile(string tileName)
-    {
-        return tileName == NameConstants.HOME_BASE_NAME
-            || tileName == NameConstants.FIRST_BASE_NAME
-            || tileName == NameConstants.SECOND_BASE_NAME
-            || tileName == NameConstants.THIRD_BASE_NAME;
-    }
-
-    private bool HasBallCollided(Collider2D collider2D)
-    {
-        return collider2D.transform.gameObject.CompareTag(TagsConstants.BALL_TAG);
-    }
-
-    private bool HasPlayerCollided(Collision2D collision2D)
-    {
-        return collision2D.collider.transform.gameObject.CompareTag(TagsConstants.BASEBALL_PLAYER_TAG);
     }
 }

@@ -26,4 +26,6 @@ public class TagsConstants
     public static string TEAM_2_SCORE = "TeamTwoScore";
     public static string DIALOG_BOX_MANAGER = "DialogBoxManager";
     public static string TARGET_SELECTION_MANAGER = "TargetSelectionManager";
+    public static string PLAYER_SIGHT_TAG = "PLayerSight";
+    
 }

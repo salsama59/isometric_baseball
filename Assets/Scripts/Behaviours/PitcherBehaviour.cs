@@ -5,10 +5,14 @@ using UnityEngine;
 
 public class PitcherBehaviour : GenericPlayerBehaviour
 {
+    private BallController ballControlerScript;
+
     public override void Start()
     {
         base.Start();
+        IsoRenderer.LastDirection = 4;
         IsoRenderer.SetDirection(Vector2.zero);
+        ballControlerScript = BallUtils.FetchBallControllerScript(FieldBall);
     }
 
     public override void Awake()
@@ -18,7 +22,6 @@ public class PitcherBehaviour : GenericPlayerBehaviour
 
     private void Update()
     {
-        BallController ballControlerScript = BallUtils.FetchBallControllerScript(FieldBall);
 
         if (HasSpottedBall && FieldBall.activeInHierarchy && !IsHoldingBall && ballControlerScript.IsTargetedByFielder)
         {

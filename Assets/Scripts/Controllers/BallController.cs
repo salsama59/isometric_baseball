@@ -55,7 +55,7 @@ public class BallController : MonoBehaviour
             //Move inside first if statement to avoid graphical bugs
             if (Target.HasValue && Target.Value != this.transform.position)
             {
-                BallAnimator.enabled = true;
+                this.AnimateBall();
                 MovementCoroutine = StartCoroutine(Move(transform.position, Target.Value, IsHit || IsPassed));
             }
             else
@@ -69,6 +69,33 @@ public class BallController : MonoBehaviour
         }
 
         IsMoving = (IsHit || IsPitched || IsPassed) && Target.HasValue;
+    }
+
+    private void AnimateBall()
+    {
+        BallAnimator.enabled = true;
+       
+        Vector2 direction = MathUtils.CalculateDirection(transform.position, Target.Value);
+
+        if(direction.x == 0 && direction.y < 0)
+        {
+            BallAnimator.SetBool("reverse", true);
+        }
+        else if(direction.x < 0 && direction.y == 0)
+        {
+            BallAnimator.SetBool("reverse", false);
+        }
+        else if(direction.x < 0 && direction.y < 0)
+        {
+            BallAnimator.SetBool("reverse", false);
+        }
+        else
+        {
+            BallAnimator.SetBool("reverse", true);
+        }
+
+        float angle = MathUtils.CalculateDirectionAngle(direction);
+        this.transform.rotation = Quaternion.AngleAxis(angle - 90, Vector3.forward);
     }
 
     private BallHeightEnum GetBallHeightState(Vector3 ballStartPosition, Vector3 ballEndposition, Vector3 ballCurrentPosition)

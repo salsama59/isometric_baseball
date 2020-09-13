@@ -83,9 +83,9 @@ public class BatterBehaviour : GenericPlayerBehaviour
                 outcomeMessage = "BALL!!!";
             }
 
-            ballControllerScript.IsPitched = false;
+            ballControllerScript.IsPitched = true;
             ballControllerScript.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetCatcherZonePosition());
-            dialogBoxManagerScript.DisplayDialogAndTextForGivenAmountOfTime(2f, true, outcomeMessage);
+            dialogBoxManagerScript.DisplayDialogAndTextForGivenAmountOfTime(1f, false, outcomeMessage);
         }
     }
 

@@ -607,7 +607,7 @@ public class GameManager : MonoBehaviour
     }
 
 
-    public IEnumerator WaitAndReinit(DialogBoxManager dialogBoxManagerScript, PlayerStatus newBatterStatus, PlayerStatus fielderPlayerStatus, GameObject fieldBall)
+    public IEnumerator WaitAndReinit(DialogBoxManager dialogBoxManagerScript, PlayerStatus newBatterStatus, GameObject fieldBall)
     {
         yield return new WaitForSeconds(2f);
         if (dialogBoxManagerScript.DialogTextBoxGameObject.activeSelf)
@@ -630,14 +630,8 @@ public class GameManager : MonoBehaviour
         TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.BATTER, batterBehaviourScript.gameObject, TeamUtils.GetPlayerIdFromPlayerFieldPosition(PlayerFieldPositionEnum.BATTER));
 
         //Update fielder informations
-
-        if (fielderPlayerStatus != null)
-        {
-            List<GameObject> fielders = new List<GameObject>();
-            fielders.Add(fielderPlayerStatus.gameObject);
-            this.ReinitFielders(fielders);
-        }
-
+        this.ReinitFielders(TeamUtils.fielderList);
+        
         //Reinit turn
         PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
         PlayersTurnManager.IsCommandPhase = true;

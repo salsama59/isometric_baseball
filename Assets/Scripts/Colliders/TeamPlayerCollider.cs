@@ -49,6 +49,10 @@ public class TeamPlayerCollider : MonoBehaviour
                 {
                     ((FielderBehaviour)genericPlayerBehaviourScript).TagOutRunner(collision.transform.gameObject);
                 }
+                else
+                {
+                    ((FielderBehaviour)genericPlayerBehaviourScript).ReplanAction();
+                }
             }
         }
         else

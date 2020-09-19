@@ -143,6 +143,27 @@ public class FielderBehaviour : GenericPlayerBehaviour
         
     }
 
+    public void ReplanAction()
+    {
+       
+        GameManager gameManager = GameUtils.FetchGameManager();
+        bool isRunnersAllSafe = gameManager.AttackTeamRunnerList.TrueForAll(runner => {
+            RunnerBehaviour runnerBehaviour = PlayerUtils.FetchRunnerBehaviourScript(runner);
+            return runnerBehaviour.IsSafe;
+        });
+
+        if (isRunnersAllSafe)
+        {
+            gameManager.IsStateCheckAllowed = true;
+        }
+        else
+        {
+            PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
+            playersTurnManager.TurnState = TurnStateEnum.FIELDER_TURN;
+            PlayersTurnManager.IsCommandPhase = true;
+        }
+    }
+
     public void CalculateFielderTriggerInterraction(GenericPlayerBehaviour genericPlayerBehaviourScript)
     {
         PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();

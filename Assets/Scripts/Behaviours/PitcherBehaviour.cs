@@ -47,7 +47,7 @@ public class PitcherBehaviour : GenericPlayerBehaviour
         }
 
         //Choose the runner who just hit the ball
-        GameObject runnerToGetOut = runners.First();
+        GameObject runnerToGetOut = runners.Last();
 
         bool hasIntercepted = false;
 
@@ -56,12 +56,11 @@ public class PitcherBehaviour : GenericPlayerBehaviour
             
             GameManager gameManager = GameUtils.FetchGameManager();
             DialogBoxManager dialogBoxManagerScript = GameUtils.FetchDialogBoxManager();
-            dialogBoxManagerScript.SetDialogTextBox("TAG OUT !!!!!!!");
-            dialogBoxManagerScript.ToggleDialogTextBox();
+            dialogBoxManagerScript.DisplayDialogAndTextForGivenAmountOfTime(1f, false, "TAG OUT !!!!!!!");
 
             ballControllerScript.Target = null;
             
-            GameData.isPaused = true;
+            
             PlayerActionsManager.InterceptBall(ballGameObject, ballControllerScript, genericPlayerBehaviourScript);
             hasIntercepted = true;
 
@@ -75,6 +74,7 @@ public class PitcherBehaviour : GenericPlayerBehaviour
 
             if (runnersOnFieldCount == 1)
             {
+                GameData.isPaused = true;
                 StartCoroutine(gameManager.WaitAndReinit(dialogBoxManagerScript, PlayerUtils.FetchPlayerStatusScript(gameManager.AttackTeamBatterList.First()), null, FieldBall));
                 return;
             }

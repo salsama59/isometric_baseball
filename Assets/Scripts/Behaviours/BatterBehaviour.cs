@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -114,12 +114,15 @@ public class BatterBehaviour : GenericPlayerBehaviour
 
         batterStatusScript.PlayerFieldPosition = PlayerFieldPositionEnum.RUNNER;
         TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.RUNNER, currentBatter, PlayerEnum.PLAYER_1);
+        //TODO check for the batterlist count before because there is a case where all the batter has took turn.
+        //Maybe pass to the second half???
         GameObject nextBatter = gameManager.AttackTeamBatterList.First();
         TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.BATTER, nextBatter, TeamUtils.GetPlayerIdFromPlayerFieldPosition(PlayerFieldPositionEnum.BATTER));
 
         PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
         playersTurnManager.TurnState = TurnStateEnum.STANDBY;
-        string newRunnerName = NameConstants.RUNNER_NAME + "_" + gameManager.AttackTeamRunnerList.IndexOf(runnerBehaviour.gameObject);
+        string runnerNumber = runnerBehaviour.gameObject.name.Split('_').Last();
+        string newRunnerName = NameConstants.RUNNER_NAME + "_" + runnerNumber;
         runnerBehaviour.gameObject.name = newRunnerName;
 
         return runnerBehaviour;

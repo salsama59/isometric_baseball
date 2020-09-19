@@ -63,6 +63,7 @@ public class CatcherBehaviour : GenericPlayerBehaviour
             {
                 gameManager.ReinitPitcher(pitcher);
                 gameManager.ReturnBallToPitcher(ballControllerScript.gameObject);
+                gameManager.ReinitRunners(gameManager.AttackTeamRunnerList);
                 currentBatter.transform.rotation = Quaternion.identity;
                 bat.transform.position = FieldUtils.GetBatCorrectPosition(currentBatter.transform.position);
                 bat.transform.rotation = Quaternion.Euler(0f, 0f, -70f);
@@ -110,6 +111,7 @@ public class CatcherBehaviour : GenericPlayerBehaviour
            
             gameManager.ReinitPitcher(pitcher);
             gameManager.ReturnBallToPitcher(ballControllerScript.gameObject);
+            gameManager.ReinitRunners(gameManager.AttackTeamRunnerList);
 
             bool isInningHalfEnd = gameManager.BatterOutCount == 3;
 

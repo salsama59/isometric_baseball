@@ -87,14 +87,17 @@ public class PlayersTurnManager : MonoBehaviour
             return null;
         }
 
-        List<GameObject> availableRunnerList = GameManager.AttackTeamRunnerList
-               .Where(runner => this.IsplayerAvailable(runner.name))
+        List<GameObject> availableAndNotStayingRunnerList = GameManager.AttackTeamRunnerList
+               .Where(runner => {
+                   RunnerBehaviour runnerBehaviour = PlayerUtils.FetchRunnerBehaviourScript(runner);
+                   return this.IsplayerAvailable(runner.name) && !runnerBehaviour.IsStaying;
+                   })
                .ToList();
 
-        int runnerCount = availableRunnerList.Count;
+        int runnerCount = availableAndNotStayingRunnerList.Count;
         if (CurrentRunner == null)
         {
-            CurrentRunner = availableRunnerList.First();
+            CurrentRunner = availableAndNotStayingRunnerList.First();
             CurrentIndex = 0;
             if (runnerCount == 1)
             {
@@ -103,30 +106,30 @@ public class PlayersTurnManager : MonoBehaviour
         }
         else
         {
-            int runnerIndex = availableRunnerList.IndexOf(CurrentRunner);
+            int runnerIndex = availableAndNotStayingRunnerList.IndexOf(CurrentRunner);
 
             if (runnerIndex == runnerCount - 1)
             {
-                CurrentRunner = availableRunnerList.First();
+                CurrentRunner = availableAndNotStayingRunnerList.First();
                 CurrentIndex = 0;
                 IsRunnersTurnsDone = true;
             }
             else if (runnerIndex == -1)
             {
                 //Index can't be found
-                CurrentRunner = availableRunnerList.First();
+                CurrentRunner = availableAndNotStayingRunnerList.First();
                 CurrentIndex = 0;
             }
             else
             {
                 int nextIndex = runnerIndex + 1;
-                CurrentRunner = availableRunnerList[nextIndex];
+                CurrentRunner = availableAndNotStayingRunnerList[nextIndex];
                 CurrentIndex = nextIndex;
             }
 
             if (IsSkipNextRunnerTurnEnabled)
             {
-                this.SkipNextRunner(runnerCount, availableRunnerList);
+                this.SkipNextRunner(runnerCount, availableAndNotStayingRunnerList);
             }
         }
 
@@ -156,7 +159,10 @@ public class PlayersTurnManager : MonoBehaviour
     public GameObject GetNextRunnerTakingAction()
     {
         List<GameObject> availableRunnerList = GameManager.AttackTeamRunnerList
-               .Where(attackTeamRunner => this.IsplayerAvailable(attackTeamRunner.name))
+                .Where(attackTeamRunner => {
+                    RunnerBehaviour runnerBehaviour = PlayerUtils.FetchRunnerBehaviourScript(attackTeamRunner);
+                    return this.IsplayerAvailable(attackTeamRunner.name) && !runnerBehaviour.IsStaying;
+                })
                .ToList();
 
         int runnerCount = availableRunnerList.Count;
@@ -205,7 +211,8 @@ public class PlayersTurnManager : MonoBehaviour
 
     public bool IsplayerAvailable(string playerName)
     {
-        return this.PlayerTurnAvailability.ContainsKey(playerName) && this.PlayerTurnAvailability[playerName].Equals(TurnAvailabilityEnum.READY);
+        return this.PlayerTurnAvailability.ContainsKey(playerName) 
+            && this.PlayerTurnAvailability[playerName].Equals(TurnAvailabilityEnum.READY);
     }
 
     public void MakeAllPlayerAvailable()

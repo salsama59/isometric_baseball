@@ -95,7 +95,7 @@ public class RunnerBehaviour : GenericPlayerBehaviour
 
         if (!isAutomaticCommand)
         {
-            Debug.Log(this.name + " proceed manualy");
+            Debug.Log(this.name + " proceed manually");
             this.CalculateNextAction();
         }
         else if(isAutomaticCommand && gameManager.AttackTeamRunnerList.Count > 1)
@@ -124,7 +124,12 @@ public class RunnerBehaviour : GenericPlayerBehaviour
 
         GameManager gameManager = GameUtils.FetchGameManager();
 
-        if(gameManager.AttackTeamRunnerList.Count == 1)
+        bool isRunnersAllSafeAndStaying = gameManager.AttackTeamRunnerList.TrueForAll(runner => {
+            RunnerBehaviour runnerBehaviour = PlayerUtils.FetchRunnerBehaviourScript(runner);
+            return runnerBehaviour.IsSafe && runnerBehaviour.IsStaying;
+        });
+
+        if (isRunnersAllSafeAndStaying)
         {
             playersTurnManager.IsRunnersTurnsDone = true;
         }
@@ -172,6 +177,7 @@ public class RunnerBehaviour : GenericPlayerBehaviour
                     GameManager gameManager = GameUtils.FetchGameManager();
                     gameManager.IsStateCheckAllowed = true;
                     this.gameObject.SetActive(false);
+                    gameManager.AttackTeamRunnerList.Remove(this.gameObject);
                     playersTurnManager.PlayerTurnAvailability.Remove(this.gameObject.name);
                 }
                 
@@ -224,6 +230,12 @@ public class RunnerBehaviour : GenericPlayerBehaviour
             PlayersTurnManager.IsCommandPhase = false;
             GameManager gameManager = GameUtils.FetchGameManager();
             gameManager.IsStateCheckAllowed = true;
+            playersTurnManager.IsRunnersTurnsDone = false;
+        }
+        else
+        {
+            playersTurnManager.TurnState = TurnStateEnum.RUNNER_TURN;
+            PlayersTurnManager.IsCommandPhase = true;
         }
     }
 

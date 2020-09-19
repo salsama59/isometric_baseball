@@ -109,6 +109,7 @@ public class GameManager : MonoBehaviour
                 this.ReinitPitcher(ballControllerScript.CurrentPitcher);
                 this.ReturnBallToPitcher(ballControllerScript.gameObject);
                 this.ReinitFielders(TeamUtils.fielderList);
+                this.ReinitRunners(this.AttackTeamRunnerList);
 
                 GameObject newBatter = this.AttackTeamBatterList.First();
                 GameObject lastRunner = this.AttackTeamRunnerList.Last();
@@ -629,9 +630,12 @@ public class GameManager : MonoBehaviour
         this.EquipBatToPlayer(newBatterStatus.gameObject, bat);
         TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.BATTER, batterBehaviourScript.gameObject, TeamUtils.GetPlayerIdFromPlayerFieldPosition(PlayerFieldPositionEnum.BATTER));
 
-        //Update fielder informations
+        //Update fielders informations
         this.ReinitFielders(TeamUtils.fielderList);
-        
+
+        //Update runners informations
+        this.ReinitRunners(this.attackTeamRunnerList);
+
         //Reinit turn
         PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
         PlayersTurnManager.IsCommandPhase = true;
@@ -718,6 +722,15 @@ public class GameManager : MonoBehaviour
             fielderBehaviourScript.IsoRenderer.SetDirection(Vector2.zero);
         }
         
+    }
+
+    public void ReinitRunners(List<GameObject> runners)
+    {
+        foreach (GameObject runner in runners)
+        {
+            RunnerBehaviour runnerBehaviourScript = PlayerUtils.FetchRunnerBehaviourScript(runner);
+            runnerBehaviourScript.IsStaying = false;
+        }
     }
 
 

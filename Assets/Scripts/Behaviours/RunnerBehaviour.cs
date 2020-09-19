@@ -124,8 +124,12 @@ public class RunnerBehaviour : GenericPlayerBehaviour
 
         GameManager gameManager = GameUtils.FetchGameManager();
 
+        bool isRunnersAllSafeAndStaying = gameManager.AttackTeamRunnerList.TrueForAll(runner => {
+            RunnerBehaviour runnerBehaviour = PlayerUtils.FetchRunnerBehaviourScript(runner);
+            return runnerBehaviour.IsSafe && runnerBehaviour.IsStaying;
+        });
 
-        if(gameManager.AttackTeamRunnerList.Count == 1)
+        if (isRunnersAllSafeAndStaying)
         {
             playersTurnManager.IsRunnersTurnsDone = true;
         }
@@ -227,6 +231,11 @@ public class RunnerBehaviour : GenericPlayerBehaviour
             GameManager gameManager = GameUtils.FetchGameManager();
             gameManager.IsStateCheckAllowed = true;
             playersTurnManager.IsRunnersTurnsDone = false;
+        }
+        else
+        {
+            playersTurnManager.TurnState = TurnStateEnum.RUNNER_TURN;
+            PlayersTurnManager.IsCommandPhase = true;
         }
     }
 

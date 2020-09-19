@@ -50,6 +50,7 @@ public class PitcherBehaviour : GenericPlayerBehaviour
         GameObject runnerToGetOut = runners.Last();
 
         bool hasIntercepted = false;
+        PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
 
         if (ballControllerScript.BallHeight == BallHeightEnum.HIGH || ballControllerScript.BallHeight == BallHeightEnum.LOW)
         {
@@ -66,6 +67,7 @@ public class PitcherBehaviour : GenericPlayerBehaviour
 
             gameManager.AttackTeamRunnerList.Remove(runnerToGetOut);
             runnerToGetOut.SetActive(false);
+            playersTurnManager.PlayerTurnAvailability.Remove(runnerToGetOut.name);
             gameManager.AttackTeamBatterList.First().SetActive(true);
             RunnerBehaviour runnerBehaviourScript = PlayerUtils.FetchRunnerBehaviourScript(runnerToGetOut);
             BatterBehaviour batterBehaviourScript = PlayerUtils.FetchBatterBehaviourScript(gameManager.AttackTeamBatterList.First());
@@ -75,7 +77,7 @@ public class PitcherBehaviour : GenericPlayerBehaviour
             if (runnersOnFieldCount == 1)
             {
                 GameData.isPaused = true;
-                StartCoroutine(gameManager.WaitAndReinit(dialogBoxManagerScript, PlayerUtils.FetchPlayerStatusScript(gameManager.AttackTeamBatterList.First()), null, FieldBall));
+                StartCoroutine(gameManager.WaitAndReinit(dialogBoxManagerScript, PlayerUtils.FetchPlayerStatusScript(gameManager.AttackTeamBatterList.First()), FieldBall));
                 return;
             }
             else
@@ -103,8 +105,6 @@ public class PitcherBehaviour : GenericPlayerBehaviour
             playerAbilities.PlayerAbilityList.Clear();
             PlayerAbility passPlayerAbility = new PlayerAbility("Pass to fielder", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.GenericPassAction, this.gameObject, true);
             playerAbilities.AddAbility(passPlayerAbility);
-
-            PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
             playersTurnManager.TurnState = TurnStateEnum.PITCHER_TURN;
             PlayersTurnManager.IsCommandPhase = true;
         }

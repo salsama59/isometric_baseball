@@ -152,10 +152,10 @@ public class RunnerBehaviour : GenericPlayerBehaviour
                     Debug.Log("Get on HOME BASE FIRST TIME !!");
                     this.NextBase = BaseEnum.FIRST_BASE;
                     playersTurnManager.TurnState = TurnStateEnum.STANDBY;
+                    playersTurnManager.UpdatePlayerTurnAvailability(this.gameObject.name, turnAvailabilityEnum);
                 }
                 else
                 {
-                    turnAvailabilityEnum = TurnAvailabilityEnum.WAITING;
                     Debug.Log("Get on HOME BASE to mark a point");
                     Debug.Log("WIN ONE POINT !!!");
                     this.Target = null;
@@ -169,8 +169,12 @@ public class RunnerBehaviour : GenericPlayerBehaviour
                     this.IsStaying = true;
                     IsometricCharacterRenderer isometricCharacterRenderer = PlayerUtils.FetchPlayerIsometricRenderer(this.gameObject);
                     isometricCharacterRenderer.ReinitializeAnimator();
+                    GameManager gameManager = GameUtils.FetchGameManager();
+                    gameManager.IsStateCheckAllowed = true;
+                    this.gameObject.SetActive(false);
+                    playersTurnManager.PlayerTurnAvailability.Remove(this.gameObject.name);
                 }
-                playersTurnManager.UpdatePlayerTurnAvailability(this.gameObject.name, turnAvailabilityEnum);
+                
                 break;
             case BaseEnum.FIRST_BASE:
                 Debug.Log("Get on FIRST BASE");

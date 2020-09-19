@@ -60,7 +60,7 @@ public class PlayersTurnManager : MonoBehaviour
                     playerAbilitiesScript = PlayerUtils.FetchPlayerAbilitiesScript(catcher);
                     break;
                 case TurnStateEnum.FIELDER_TURN:
-                    GameObject fielder = TeamUtils.GetPlayerTeamMember(currentFielderTypeTurn, TeamUtils.GetPlayerIdFromPlayerFieldPosition(currentFielderTypeTurn));
+                    GameObject fielder = TeamUtils.GetPlayerTeamMember(CurrentFielderTypeTurn, TeamUtils.GetPlayerIdFromPlayerFieldPosition(CurrentFielderTypeTurn));
                     playerAbilitiesScript = PlayerUtils.FetchPlayerAbilitiesScript(fielder);
                     break;
                 default:
@@ -205,7 +205,7 @@ public class PlayersTurnManager : MonoBehaviour
 
     public bool IsplayerAvailable(string playerName)
     {
-        return this.PlayerTurnAvailability[playerName].Equals(TurnAvailabilityEnum.READY);
+        return this.PlayerTurnAvailability.ContainsKey(playerName) && this.PlayerTurnAvailability[playerName].Equals(TurnAvailabilityEnum.READY);
     }
 
     public void MakeAllPlayerAvailable()

@@ -104,21 +104,43 @@ public class FielderBehaviour : GenericPlayerBehaviour
         GameObject newBatter = gameManager.AttackTeamBatterList.First();
         PlayerStatus fielderPlayerStatus = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
         PlayerStatus newBatterStatus = PlayerUtils.FetchPlayerStatusScript(newBatter);
-
-        GameData.isPaused = true;
         DialogBoxManager dialogBoxManagerScript =  GameUtils.FetchDialogBoxManager();
 
-        dialogBoxManagerScript.SetDialogTextBox("TAG OUT !!!!!!!");
-        dialogBoxManagerScript.ToggleDialogTextBox();
+        dialogBoxManagerScript.DisplayDialogAndTextForGivenAmountOfTime(1f, false, "TAG OUT !!!!!!!");
+        PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
 
         gameManager.AttackTeamRunnerList.Remove(targetToTagOut);
         targetToTagOut.SetActive(false);
+        playersTurnManager.PlayerTurnAvailability.Remove(targetToTagOut.name);
         newBatter.SetActive(true);
         RunnerBehaviour tagOutRunnerBehaviourScript = PlayerUtils.FetchRunnerBehaviourScript(targetToTagOut);
         BatterBehaviour newbatterBehaviourScript = PlayerUtils.FetchBatterBehaviourScript(newBatter);
         newbatterBehaviourScript.EquipedBat = tagOutRunnerBehaviourScript.EquipedBat;
         tagOutRunnerBehaviourScript.EquipedBat = null;
-        StartCoroutine(gameManager.WaitAndReinit(dialogBoxManagerScript, newBatterStatus, fielderPlayerStatus, FieldBall));
+        int runnersCount = gameManager.AttackTeamRunnerList.Count;
+
+        if (runnersCount == 0)
+        {
+            StartCoroutine(gameManager.WaitAndReinit(dialogBoxManagerScript, newBatterStatus, FieldBall));
+        }
+        else if (runnersCount > 0)
+        {
+            bool isRunnersAllSafeAndStaying = gameManager.AttackTeamRunnerList.TrueForAll(runner => {
+                RunnerBehaviour runnerBehaviour = PlayerUtils.FetchRunnerBehaviourScript(runner);
+                return runnerBehaviour.IsSafe && runnerBehaviour.IsStaying;
+            });
+
+            if (isRunnersAllSafeAndStaying)
+            {
+                StartCoroutine(gameManager.WaitAndReinit(dialogBoxManagerScript, newBatterStatus, FieldBall));
+            }
+            else
+            {
+                playersTurnManager.TurnState = TurnStateEnum.FIELDER_TURN;
+                PlayersTurnManager.IsCommandPhase = true;
+            }
+        }
+        
     }
 
     public void CalculateFielderTriggerInterraction(GenericPlayerBehaviour genericPlayerBehaviourScript)

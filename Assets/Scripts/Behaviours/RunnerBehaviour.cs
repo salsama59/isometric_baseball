@@ -121,6 +121,14 @@ public class RunnerBehaviour : GenericPlayerBehaviour
         playersTurnManager.UpdatePlayerTurnAvailability(this.gameObject.name, TurnAvailabilityEnum.WAITING);
         IsometricCharacterRenderer isometricCharacterRenderer = PlayerUtils.FetchPlayerIsometricRenderer(this.gameObject);
         isometricCharacterRenderer.ReinitializeAnimator();
+
+        GameManager gameManager = GameUtils.FetchGameManager();
+
+        if(gameManager.AttackTeamRunnerList.Count == 1)
+        {
+            playersTurnManager.IsRunnersTurnsDone = true;
+        }
+        
         this.CalculateNextAction();
     }
 

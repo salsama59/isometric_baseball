@@ -106,6 +106,11 @@ public class TeamsScoreManager : MonoBehaviour
             {
                 teamIdEnum = TeamIdEnum.TEAM_1;
             }
+            else if(i == (int)TeamIdEnum.TEAM_2)
+            {
+                teamIdEnum = TeamIdEnum.TEAM_2;
+            }
+
             this.UpdateTeamScore(teamIdEnum);
         }
 

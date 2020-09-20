@@ -20,7 +20,7 @@ public class PlayerSightCollider : MonoBehaviour
                 if (PlayerUtils.HasPitcherPosition(player) && !ballControlerScript.IsTargetedByFielder)
                 {
                     ballControlerScript.IsTargetedByPitcher = true;
-                    ((PitcherBehaviour)genericPlayerBehaviourScript).CalculateFielderTriggerInterraction(ballGameObject, genericPlayerBehaviourScript, currentPlayerStatus);
+                    ((PitcherBehaviour)genericPlayerBehaviourScript).CalculatePitcherTriggerInterraction(ballGameObject, genericPlayerBehaviourScript, currentPlayerStatus);
                 }
 
                 if (PlayerUtils.HasFielderPosition(player) && !ballControlerScript.IsTargetedByFielder && !ballControlerScript.IsTargetedByPitcher)
@@ -45,12 +45,15 @@ public class PlayerSightCollider : MonoBehaviour
             GameObject ballGameObject = collision.gameObject;
             BallController ballControlerScript = BallUtils.FetchBallControllerScript(ballGameObject);
 
-            if (!ballControlerScript.IsMoving && !ballControlerScript.IsHit && !ballControlerScript.IsPitched)
+            if (ballControlerScript.IsMoving && ballControlerScript.IsHit && !ballControlerScript.IsPitched)
             {
                 GameObject player = this.gameObject.transform.parent.parent.parent.gameObject;
                 if (PlayerUtils.HasPitcherPosition(player))
                 {
                     ballControlerScript.IsTargetedByPitcher = false;
+                    PitcherBehaviour pitcherBehaviour = PlayerUtils.FetchPitcherBehaviourScript(player);
+                    pitcherBehaviour.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetPitcherBaseTilePosition());
+                    pitcherBehaviour.HasSpottedBall = false;
                 }
             }
         }

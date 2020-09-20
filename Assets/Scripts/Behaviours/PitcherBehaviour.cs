@@ -111,7 +111,7 @@ public class PitcherBehaviour : GenericPlayerBehaviour
 
     }
 
-    public void CalculateFielderTriggerInterraction(GameObject ballGameObject, GenericPlayerBehaviour genericPlayerBehaviourScript, PlayerStatus playerStatus)
+    public void CalculatePitcherTriggerInterraction(GameObject ballGameObject, GenericPlayerBehaviour genericPlayerBehaviourScript, PlayerStatus playerStatus)
     {
         BallController ballControlerScript = BallUtils.FetchBallControllerScript(ballGameObject);
         ballControlerScript.IsTargetedByPitcher = true;

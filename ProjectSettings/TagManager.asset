@@ -24,6 +24,8 @@ TagManager:
   - TeamOneScore
   - TeamsInformationsPanel
   - DialogBoxManager
+  - TargetSelectionManager
+  - PLayerSight
   layers:
   - Default
   - TransparentFX

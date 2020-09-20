@@ -8,13 +8,14 @@ public class BatCollider : MonoBehaviour
     {
         if (this.HasBallCollided(collision))
         {
-            Debug.Log("Ball has collide with the bat collider");
-
-            GameObject batter = this.gameObject.transform.parent.gameObject;
-            BatterBehaviour batterBehaviourScript = PlayerUtils.FetchBatterBehaviourScript(batter);
-
+            BallController ballController = BallUtils.FetchBallControllerScript(collision.transform.gameObject);
+            ballController.Target = null;
+            ballController.IsMoving = false;
+            ballController.IsPassed = false;
+            ballController.IsPitched = false;
+            ballController.IsHit = false;
             PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
-            playersTurnManager.turnState = TurnStateEnum.BATTER_TURN;
+            playersTurnManager.TurnState = TurnStateEnum.BATTER_TURN;
             PlayersTurnManager.IsCommandPhase = true;
         }
     }

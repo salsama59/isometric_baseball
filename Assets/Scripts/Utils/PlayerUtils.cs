@@ -141,13 +141,6 @@ public class PlayerUtils : MonoBehaviour
         return isMoveAllowed;
     }
 
-    public static bool IsCurrentPlayerPosition(GameObject player, PlayerFieldPositionEnum playerFieldPositionToTest)
-    {
-        PlayerStatus currentPlayerStatusScript = FetchPlayerStatusScript(player);
-        return currentPlayerStatusScript.PlayerFieldPosition.Equals(playerFieldPositionToTest);
-    }
-
-
     public static bool HasFielderPosition(GameObject player)
     {
         PlayerStatus currentPlayerStatusScript = FetchPlayerStatusScript(player);
@@ -162,10 +155,49 @@ public class PlayerUtils : MonoBehaviour
             || playerPosition == PlayerFieldPositionEnum.FIRST_BASEMAN;
     }
 
+    public static bool HasPitcherPosition(GameObject player)
+    {
+        PlayerStatus currentPlayerStatusScript = FetchPlayerStatusScript(player);
+        PlayerFieldPositionEnum playerPosition = currentPlayerStatusScript.PlayerFieldPosition;
+
+        return playerPosition == PlayerFieldPositionEnum.PITCHER;
+    }
+
+    public static bool HasCatcherPosition(GameObject player)
+    {
+        PlayerStatus currentPlayerStatusScript = FetchPlayerStatusScript(player);
+        PlayerFieldPositionEnum playerPosition = currentPlayerStatusScript.PlayerFieldPosition;
+
+        return playerPosition == PlayerFieldPositionEnum.CATCHER;
+    }
+
+    public static bool HasRunnerPosition(GameObject player)
+    {
+        PlayerStatus currentPlayerStatusScript = FetchPlayerStatusScript(player);
+        PlayerFieldPositionEnum playerPosition = currentPlayerStatusScript.PlayerFieldPosition;
+
+        return playerPosition == PlayerFieldPositionEnum.RUNNER;
+    }
+
+    public static bool HasBatterPosition(GameObject player)
+    {
+        PlayerStatus currentPlayerStatusScript = FetchPlayerStatusScript(player);
+        PlayerFieldPositionEnum playerPosition = currentPlayerStatusScript.PlayerFieldPosition;
+
+        return playerPosition == PlayerFieldPositionEnum.BATTER;
+    }
+
     public static List<GameObject> GetRunnersOnField()
     {
         return GameObject.FindGameObjectsWithTag(TagsConstants.BASEBALL_PLAYER_TAG)
-            .Where(baseBallPlayer => IsCurrentPlayerPosition(baseBallPlayer, PlayerFieldPositionEnum.RUNNER))
+            .Where(baseBallPlayer => HasRunnerPosition(baseBallPlayer))
+            .ToList();
+    }
+
+    public static List<GameObject> GetFieldersOnField()
+    {
+        return GameObject.FindGameObjectsWithTag(TagsConstants.BASEBALL_PLAYER_TAG)
+            .Where(baseBallPlayer => HasFielderPosition(baseBallPlayer))
             .ToList();
     }
 

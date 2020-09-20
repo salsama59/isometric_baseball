@@ -1,5 +1,6 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class BatterBehaviour : GenericPlayerBehaviour
@@ -8,6 +9,8 @@ public class BatterBehaviour : GenericPlayerBehaviour
     private Quaternion targetRotation = Quaternion.Euler(0, 0, 45f);
     private bool isReadyToSwing = false;
     private bool isSwingHasFinished = false;
+    private int strikeOutcomeCount = 0;
+    private int ballOutcomeCount = 0;
 
     public override void Awake()
     {
@@ -38,53 +41,91 @@ public class BatterBehaviour : GenericPlayerBehaviour
     public void CalculateBatterColliderInterraction(GameObject pitcherGameObject, BallController ballControllerScript, PlayerStatus playerStatusScript)
     {
         float pitchSuccesRate = ActionCalculationUtils.CalculatePitchSuccessRate(pitcherGameObject, this.gameObject);
-        Debug.Log("pitchSuccesRate = " + pitchSuccesRate);
         StartCoroutine(this.WaitForSwing(pitchSuccesRate, ballControllerScript, playerStatusScript));
-        Debug.Log("After the coroutine to WaitForSwing");
     }
 
     private void DoBattingAction(BallController ballControllerScript, PlayerStatus playerStatusScript, float pitchSuccesRate)
     {
+        PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
+
         if (!ActionCalculationUtils.HasActionSucceeded(pitchSuccesRate))
         {
-            Debug.Log("Pitch has not succeed");
-            Debug.Log("Batter has hit the ball");
             ballControllerScript.IsPitched = false;
             ballControllerScript.IsHit = true;
             List<Vector2Int> ballPositionList = ActionCalculationUtils.CalculateBallFallPositionList(this.gameObject, 0, 180, 10, true);
             int ballPositionIndex = Random.Range(0, ballPositionList.Count - 1);
             Vector2Int ballTilePosition = ballPositionList[ballPositionIndex];
             ballControllerScript.Target = FieldUtils.GetTileCenterPositionInGameWorld(ballTilePosition);
-            GameObject bat = PlayerUtils.GetPlayerBatGameObject(this.gameObject);
-            bat.SetActive(false);
-            Destroy(this.gameObject.GetComponent<BatterBehaviour>());
-            
-            playerStatusScript.PlayerFieldPosition = PlayerFieldPositionEnum.RUNNER;
-            TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.RUNNER, this.gameObject, PlayerEnum.PLAYER_1);
-            PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
-            playersTurnManager.turnState = TurnStateEnum.STANDBY;
-            RunnerBehaviour runnerBehaviour = this.gameObject.AddComponent<RunnerBehaviour>();
-            runnerBehaviour.EquipedBat = bat;
-            PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
-            PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(this.gameObject);
-            playerAbilities.PlayerAbilityList.Clear();
-            PlayerAbility runPlayerAbility = new PlayerAbility("Run to next base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.RunAction);
-            PlayerAbility StaySafePlayerAbility = new PlayerAbility("Stay on base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.StayAction);
-            playerAbilities.AddAbility(runPlayerAbility);
-            playerAbilities.AddAbility(StaySafePlayerAbility);
-            ballControllerScript.EnableMovement = true;
+            RunnerBehaviour runnerBehaviour = this.ConvertBatterToRunner(playerStatusScript);
+            this.AddRunnerAbilitiesToBatter(this.gameObject);
+
             playerStatusScript.IsAllowedToMove = true;
             runnerBehaviour.EnableMovement = true;
+            playersTurnManager.IsRunnersTurnsDone = false;
         }
         else
         {
-            Debug.Log("Pitch has succeeded");
-            Debug.Log("Batter has not hit the ball");
-            Debug.Log("Go to the catcher");
-            ballControllerScript.IsPitched = false;
+
+            float ballOutcomeRate = ActionCalculationUtils.CalculateBallOutcomeProbability(ballControllerScript.CurrentPitcher);
+            bool isBallOutcome = ActionCalculationUtils.HasActionSucceeded(ballOutcomeRate);
+            DialogBoxManager dialogBoxManagerScript = GameUtils.FetchDialogBoxManager();
+            string outcomeMessage;
+
+            if (!isBallOutcome)
+            {
+                StrikeOutcomeCount++;
+                outcomeMessage = "STRIKE!!!";
+                
+            }
+            else
+            {
+                BallOutcomeCount++;
+                outcomeMessage = "BALL!!!";
+            }
+
+            ballControllerScript.IsPitched = true;
             ballControllerScript.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetCatcherZonePosition());
-            ballControllerScript.EnableMovement = true;
+            dialogBoxManagerScript.DisplayDialogAndTextForGivenAmountOfTime(1f, false, outcomeMessage);
         }
+    }
+
+    public void AddRunnerAbilitiesToBatter(GameObject player)
+    {
+        PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
+        PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(player);
+        playerAbilities.PlayerAbilityList.Clear();
+        PlayerAbility runPlayerAbility = new PlayerAbility("Run to next base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.RunAction, player);
+        PlayerAbility StaySafePlayerAbility = new PlayerAbility("Stay on base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.StayOnBaseAction, player);
+        playerAbilities.AddAbility(runPlayerAbility);
+        playerAbilities.AddAbility(StaySafePlayerAbility);
+    }
+
+    public RunnerBehaviour ConvertBatterToRunner(PlayerStatus batterStatusScript)
+    {
+        GameObject currentBatter = batterStatusScript.gameObject;
+        GameObject bat = PlayerUtils.GetPlayerBatGameObject(currentBatter);
+        GameManager gameManager = GameUtils.FetchGameManager();
+        RunnerBehaviour runnerBehaviour = currentBatter.AddComponent<RunnerBehaviour>();
+        gameManager.AttackTeamRunnerList.Add(runnerBehaviour.gameObject);
+        gameManager.AttackTeamBatterList.Remove(currentBatter);
+        runnerBehaviour.EquipedBat = bat;
+        bat.SetActive(false);
+        Destroy(currentBatter.GetComponent<BatterBehaviour>());
+
+        batterStatusScript.PlayerFieldPosition = PlayerFieldPositionEnum.RUNNER;
+        TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.RUNNER, currentBatter, PlayerEnum.PLAYER_1);
+        //TODO check for the batterlist count before because there is a case where all the batter has took turn.
+        //Maybe pass to the second half???
+        GameObject nextBatter = gameManager.AttackTeamBatterList.First();
+        TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.BATTER, nextBatter, TeamUtils.GetPlayerIdFromPlayerFieldPosition(PlayerFieldPositionEnum.BATTER));
+
+        PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
+        playersTurnManager.TurnState = TurnStateEnum.STANDBY;
+        string runnerNumber = runnerBehaviour.gameObject.name.Split('_').Last();
+        string newRunnerName = NameConstants.RUNNER_NAME + "_" + runnerNumber;
+        runnerBehaviour.gameObject.name = newRunnerName;
+
+        return runnerBehaviour;
     }
 
     private IEnumerator RotatePlayer(GameObject player)
@@ -96,10 +137,11 @@ public class BatterBehaviour : GenericPlayerBehaviour
     private IEnumerator WaitForSwing(float pitchSuccesRate, BallController ballControllerScript, PlayerStatus playerStatusScript)
     {
         yield return new WaitUntil(() => IsSwingHasFinished == true);
-        Debug.Log("During the coroutine to WaitForSwing");
         this.DoBattingAction(ballControllerScript, playerStatusScript, pitchSuccesRate);
     }
 
     public bool IsReadyToSwing { get => isReadyToSwing; set => isReadyToSwing = value; }
     public bool IsSwingHasFinished { get => isSwingHasFinished; set => isSwingHasFinished = value; }
+    public int StrikeOutcomeCount { get => strikeOutcomeCount; set => strikeOutcomeCount = value; }
+    public int BallOutcomeCount { get => ballOutcomeCount; set => ballOutcomeCount = value; }
 }

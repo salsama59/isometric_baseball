@@ -12,6 +12,8 @@ public class RunnerBehaviour : GenericPlayerBehaviour
     private bool hasReachedHomeBase = false;
     private bool enableMovement = false;
     private bool isSafe = false;
+    private bool isInWalkState = false;
+    private bool isStaying = false;
 
     public override void Start()
     {
@@ -54,28 +56,108 @@ public class RunnerBehaviour : GenericPlayerBehaviour
         Target = targetPosition;
     }
 
-    public void CalculateRunnerColliderInterraction(BaseEnum baseReached, bool isStaying)
-    {
 
+    public void GoToNextBase(BaseEnum currentBase, bool isAutomaticCommand = false)
+    {
+        Debug.Log(this.name + " go to next base");
+        this.IsStaying = false;
+        Vector3 nextPosition = new Vector3();
+        PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
+        playersTurnManager.UpdatePlayerTurnAvailability(this.gameObject.name, TurnAvailabilityEnum.WAITING);
+
+        switch (currentBase)
+        {
+            case BaseEnum.HOME_BASE:
+                Debug.Log("GO FROM HOME BASE TO FIRST BASE !!");
+                nextPosition = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetFirstBaseTilePosition());
+                break;
+            case BaseEnum.FIRST_BASE:
+                Debug.Log("GO FROM FIRST BASE TO SECOND BASE !!");
+                nextPosition = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetSecondBaseTilePosition());
+                break;
+            case BaseEnum.SECOND_BASE:
+                Debug.Log("GO FROM SECOND BASE TO THIRD BASE !!");
+                nextPosition = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetThirdBaseTilePosition());
+                break;
+            case BaseEnum.THIRD_BASE:
+                Debug.Log("GO FROM THIRD BASE TO HOME BASE !!");
+                nextPosition = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetHomeBaseTilePosition());
+                break;
+            default:
+                Debug.Log("DO NOT KNOW WHAT HAPPEN");
+                break;
+        }
+
+        this.Target = nextPosition;
+        this.EnableMovement = true;
+
+        GameManager gameManager = GameUtils.FetchGameManager();
+
+        if (!isAutomaticCommand)
+        {
+            Debug.Log(this.name + " proceed manually");
+            this.CalculateNextAction();
+        }
+        else if(isAutomaticCommand && gameManager.AttackTeamRunnerList.Count > 1)
+        {
+
+            if (this.gameObject.Equals(playersTurnManager.GetNextRunnerTakingAction()))
+            {
+                playersTurnManager.IsSkipNextRunnerTurnEnabled = true;
+            }
+
+            Debug.Log(this.name + " proceed automaticaly");
+            
+            playersTurnManager.TurnState = TurnStateEnum.RUNNER_TURN;
+            PlayersTurnManager.IsCommandPhase = true;
+        }
+    }
+
+    public void StayOnCurrentBase()
+    {
+        Debug.Log(this.name + " wait on current base");
+        this.IsStaying = true;
+        PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
+        playersTurnManager.UpdatePlayerTurnAvailability(this.gameObject.name, TurnAvailabilityEnum.WAITING);
+        IsometricCharacterRenderer isometricCharacterRenderer = PlayerUtils.FetchPlayerIsometricRenderer(this.gameObject);
+        isometricCharacterRenderer.ReinitializeAnimator();
+
+        GameManager gameManager = GameUtils.FetchGameManager();
+
+        bool isRunnersAllSafeAndStaying = gameManager.AttackTeamRunnerList.TrueForAll(runner => {
+            RunnerBehaviour runnerBehaviour = PlayerUtils.FetchRunnerBehaviourScript(runner);
+            return runnerBehaviour.IsSafe && runnerBehaviour.IsStaying;
+        });
+
+        if (isRunnersAllSafeAndStaying)
+        {
+            playersTurnManager.IsRunnersTurnsDone = true;
+        }
+        
+        this.CalculateNextAction();
+    }
+
+    public void CalculateRunnerColliderInterraction(BaseEnum baseReached, bool isNextRunnerTurnPossible = false)
+    {
+        Debug.Log(this.name + " interracted with " + baseReached.ToString());
         this.CurrentBase = baseReached;
 
         PlayerStatus playerStatusScript = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
         this.EnableMovement = false;
 
+        PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
+        TurnAvailabilityEnum turnAvailabilityEnum = TurnAvailabilityEnum.READY;
+
         switch (baseReached)
         {
             case BaseEnum.HOME_BASE:
-
+                
                 if (baseReached == BaseEnum.HOME_BASE && !this.HasPassedThroughThreeFirstBases())
                 {
                     Debug.Log("Get on HOME BASE FIRST TIME !!");
-                    if (!isStaying)
-                    {
-                        this.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetFirstBaseTilePosition());
-                        this.EnableMovement = true;
-                    }
                     this.NextBase = BaseEnum.FIRST_BASE;
-                    this.HasReachedFirstBase = true;
+                    playersTurnManager.TurnState = TurnStateEnum.STANDBY;
+                    playersTurnManager.UpdatePlayerTurnAvailability(this.gameObject.name, turnAvailabilityEnum);
                 }
                 else
                 {
@@ -86,56 +168,85 @@ public class RunnerBehaviour : GenericPlayerBehaviour
                     playerStatusScript.IsAllowedToMove = false;
                     this.HasReachedHomeBase = true;
 
-                    PlayerEnum playerEnum = TeamUtils.GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum.RUNNER);
+                    PlayerEnum playerEnum = TeamUtils.GetPlayerIdFromPlayerFieldPosition(PlayerFieldPositionEnum.RUNNER);
                     TeamsScoreManager teamsScoreManagerScript = GameUtils.FetchTeamsScoreManager();
-                    teamsScoreManagerScript.IncrementTeamScore(GameData.playerEnumTeamMap[playerEnum]);
-
+                    teamsScoreManagerScript.IncrementTeamScore(GameData.teamIdEnumMap[playerEnum]);
+                    this.IsStaying = true;
+                    IsometricCharacterRenderer isometricCharacterRenderer = PlayerUtils.FetchPlayerIsometricRenderer(this.gameObject);
+                    isometricCharacterRenderer.ReinitializeAnimator();
+                    GameManager gameManager = GameUtils.FetchGameManager();
+                    gameManager.IsStateCheckAllowed = true;
+                    this.gameObject.SetActive(false);
+                    gameManager.AttackTeamRunnerList.Remove(this.gameObject);
+                    playersTurnManager.PlayerTurnAvailability.Remove(this.gameObject.name);
                 }
                 
                 break;
             case BaseEnum.FIRST_BASE:
                 Debug.Log("Get on FIRST BASE");
-                if (!isStaying)
-                {
-                    this.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetSecondBaseTilePosition());
-                    this.EnableMovement = true;
-                }
+
                 this.NextBase = BaseEnum.SECOND_BASE;
                 this.HasReachedFirstBase = true;
+                if (this.IsInWalkState)
+                {
+                    this.IsInWalkState = false;
+                    turnAvailabilityEnum = TurnAvailabilityEnum.WAITING;
+                    IsometricCharacterRenderer isometricCharacterRenderer = PlayerUtils.FetchPlayerIsometricRenderer(this.gameObject);
+                    isometricCharacterRenderer.ReinitializeAnimator();
+                }
+                
+                playersTurnManager.UpdatePlayerTurnAvailability(this.gameObject.name, turnAvailabilityEnum);
                 break;
             case BaseEnum.SECOND_BASE:
                 Debug.Log("Get on SECOND BASE");
-                if (!isStaying)
-                {
-                    this.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetThirdBaseTilePosition());
-                    this.EnableMovement = true;
-                }
                 this.NextBase = BaseEnum.THIRD_BASE;
                 this.HasReachedSecondBase = true;
+                playersTurnManager.UpdatePlayerTurnAvailability(this.gameObject.name, turnAvailabilityEnum);
                 break;
             case BaseEnum.THIRD_BASE:
                 Debug.Log("Get on THIRD BASE");
-                if (!isStaying)
-                {
-                    this.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetHomeBaseTilePosition());
-                    this.EnableMovement = true;
-                }
                 this.NextBase = BaseEnum.HOME_BASE;
                 this.HasReachedThirdBase = true;
+                playersTurnManager.UpdatePlayerTurnAvailability(this.gameObject.name, turnAvailabilityEnum);
                 break;
             default:
                 Debug.Log("DO NOT KNOW WHAT HAPPEN");
                 break;
         }
 
+        if (isNextRunnerTurnPossible)
+        {
+            playersTurnManager.TurnState = TurnStateEnum.RUNNER_TURN;
+            PlayersTurnManager.IsCommandPhase = true;
+        }
+    }
+
+    private void CalculateNextAction()
+    {
         PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
-        playersTurnManager.turnState = TurnStateEnum.STANDBY;
-        PlayersTurnManager.IsCommandPhase = false;
+        if (playersTurnManager.IsRunnersTurnsDone)
+        {
+            playersTurnManager.TurnState = TurnStateEnum.STANDBY;
+            PlayersTurnManager.IsCommandPhase = false;
+            GameManager gameManager = GameUtils.FetchGameManager();
+            gameManager.IsStateCheckAllowed = true;
+            playersTurnManager.IsRunnersTurnsDone = false;
+        }
+        else
+        {
+            playersTurnManager.TurnState = TurnStateEnum.RUNNER_TURN;
+            PlayersTurnManager.IsCommandPhase = true;
+        }
     }
 
     public bool HasPassedThroughThreeFirstBases()
     {
         return this.HasReachedFirstBase && this.HasReachedSecondBase && this.HasReachedThirdBase;
+    }
+
+    public bool HasPassedThroughAllBases()
+    {
+        return this.HasPassedThroughThreeFirstBases() && this.HasReachedHomeBase;
     }
 
     public void ToggleRunnerSafeStatus()
@@ -149,4 +260,6 @@ public class RunnerBehaviour : GenericPlayerBehaviour
     public bool HasReachedHomeBase { get => hasReachedHomeBase; set => hasReachedHomeBase = value; }
     public bool EnableMovement { get => enableMovement; set => enableMovement = value; }
     public bool IsSafe { get => isSafe; set => isSafe = value; }
+    public bool IsInWalkState { get => isInWalkState; set => isInWalkState = value; }
+    public bool IsStaying { get => isStaying; set => isStaying = value; }
 }

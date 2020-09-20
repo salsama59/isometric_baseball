@@ -48,25 +48,16 @@ public class FielderBehaviour : GenericPlayerBehaviour
 
     private void InitiateFielderAction()
     {
-        Nullable<Vector3> targetPosition = new Nullable<Vector3>();
         BallController ballControlerScript = BallUtils.FetchBallControllerScript(FieldBall);
         if (FieldBall.activeInHierarchy && !HasSpottedBall)
         {
-            GetAngleToLookAt();
-        }
-        else if (!FieldBall.activeInHierarchy && IsHoldingBall)
-        {
-            //Find the nearest runner on field
-            GameObject nearestRunner = TeamUtils.GetNearestRunerFromFielder(this.gameObject);
-            TargetPlayerToTagOut = nearestRunner;
-            targetPosition = TargetPlayerToTagOut.transform.position;
+            IsoRenderer.LookAtBallAnimation(FieldBall.transform.position);
+            this.GetAngleToLookAt();
         }
         else if (HasSpottedBall && FieldBall.activeInHierarchy && !IsHoldingBall && ballControlerScript.IsTargetedByFielder)
         {
-            targetPosition = FieldBall.transform.position;
+            Target = FieldBall.transform.position;
         }
-
-        Target = targetPosition;
     }
 
     private void GetAngleToLookAt()
@@ -74,103 +65,108 @@ public class FielderBehaviour : GenericPlayerBehaviour
         Vector3 dir = FieldBall.transform.position - this.transform.position;
         dir.Normalize();
         float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-        this.transform.rotation = Quaternion.AngleAxis(angle - 90, Vector3.forward);
+
+        GameObject playerSight = this.gameObject.transform.GetChild(0)
+            .GetChild(0)
+            .GetChild(0).gameObject;
+        playerSight.transform.rotation = Quaternion.AngleAxis(angle - 90, Vector3.forward);
     }
 
     public void CalculateFielderColliderInterraction(GameObject ballGameObject, BallController ballControllerScript, GenericPlayerBehaviour genericPlayerBehaviourScript)
     {
-        ballControllerScript.BallHeight = BallHeightEnum.NONE;
-        ballGameObject.transform.SetParent(this.gameObject.transform);
-        ballGameObject.SetActive(false);
-        ballControllerScript.CurrentHolder = this.gameObject;
-        ballControllerScript.IsHeld = true;
-        genericPlayerBehaviourScript.IsHoldingBall = true;
-        genericPlayerBehaviourScript.HasSpottedBall = false;
+
+        float passSuccessRate;
+
+        if (ballControllerScript.IsPassed)
+        {
+            passSuccessRate = ActionCalculationUtils.CalculatePassSuccessRate(this.gameObject, ballControllerScript.CurrentHolder, ballControllerScript.BallHeight);
+        }
+        else
+        {
+            passSuccessRate = 100f;
+        }
+
+        if (ActionCalculationUtils.HasActionSucceeded(passSuccessRate))
+        {
+            PlayerActionsManager.InterceptBall(ballGameObject, ballControllerScript, genericPlayerBehaviourScript);
+            PlayerStatus fielderStatus = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
+            PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
+            playersTurnManager.TurnState = TurnStateEnum.FIELDER_TURN;
+            playersTurnManager.CurrentFielderTypeTurn = fielderStatus.PlayerFieldPosition;
+            PlayersTurnManager.IsCommandPhase = true;
+        }
+
     }
 
     public void TagOutRunner(GameObject targetToTagOut)
     {
+        GameManager gameManager = GameUtils.FetchGameManager();
+        GameObject newBatter = gameManager.AttackTeamBatterList.First();
         PlayerStatus fielderPlayerStatus = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
-        PlayerStatus runnerPlayerStatus = PlayerUtils.FetchPlayerStatusScript(targetToTagOut);
-
-        GameData.isPaused = true;
+        PlayerStatus newBatterStatus = PlayerUtils.FetchPlayerStatusScript(newBatter);
         DialogBoxManager dialogBoxManagerScript =  GameUtils.FetchDialogBoxManager();
 
-        dialogBoxManagerScript.SetDialogTextBox("TAG OUT !!!!!!!");
-        dialogBoxManagerScript.ToggleDialogTextBox();
-
-        StartCoroutine(WaitAndReinit(dialogBoxManagerScript, runnerPlayerStatus, fielderPlayerStatus));
-
-    }
-
-    IEnumerator WaitAndReinit(DialogBoxManager dialogBoxManagerScript, PlayerStatus tagedOutRunnerStatus, PlayerStatus fielderPlayerStatus)
-    {
-        yield return new WaitForSeconds(2f);
-        if (dialogBoxManagerScript.DialogTextBoxGameObject.activeSelf)
-        {
-            dialogBoxManagerScript.ToggleDialogTextBox();
-        }
-
-        //Update ball informations
-        BallController ballControllerScript =  BallUtils.FetchBallControllerScript(FieldBall);
-        ballControllerScript.BallHeight = BallHeightEnum.NONE;
-        FieldBall.transform.position = ballControllerScript.CurrentPitcher.transform.position;
-        ballControllerScript.CurrentHolder = null;
-        ballControllerScript.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetHomeBaseTilePosition());
-        //No parent
-        FieldBall.transform.SetParent(null);
-        ballControllerScript.IsHeld = false;
-        ballControllerScript.IsPitched = false;
-        ballControllerScript.IsMoving = false;
-        ballControllerScript.IsTargetedByFielder = false;
-        ballControllerScript.EnableMovement = true;
-
-        //Update taged out runner and new batter informations
-        tagedOutRunnerStatus.IsAllowedToMove = false;
-        tagedOutRunnerStatus.PlayerFieldPosition = PlayerFieldPositionEnum.BATTER;
-        RunnerBehaviour runnerBehaviourScript =  PlayerUtils.FetchRunnerBehaviourScript(tagedOutRunnerStatus.gameObject);
-        GameObject bat = runnerBehaviourScript.EquipedBat;
-        Destroy(tagedOutRunnerStatus.gameObject.GetComponent<RunnerBehaviour>());
-        tagedOutRunnerStatus.gameObject.AddComponent<BatterBehaviour>();
-        tagedOutRunnerStatus.gameObject.transform.position = TeamUtils.playerTeamMenberPositionLocation[PlayerFieldPositionEnum.BATTER];
-        BatterBehaviour batterBehaviourScript = PlayerUtils.FetchBatterBehaviourScript(tagedOutRunnerStatus.gameObject);
-        batterBehaviourScript.Start();
-        batterBehaviourScript.EquipedBat = bat;
-        batterBehaviourScript.EquipedBat.SetActive(true);
-        tagedOutRunnerStatus.gameObject.transform.rotation = Quaternion.identity;
-        batterBehaviourScript.IsoRenderer.LastDirection = 6;
-        batterBehaviourScript.IsoRenderer.SetDirection(Vector2.zero);
-        PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(tagedOutRunnerStatus.gameObject);
-        PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
-        PlayerAbility hitBallPlayerAbility = new PlayerAbility("Hit ball", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.HitBallAction);
-        playerAbilities.PlayerAbilityList.Clear();
-        playerAbilities.AddAbility(hitBallPlayerAbility);
-
-        //Update fielder informations
-        fielderPlayerStatus.IsAllowedToMove = false;
-        this.HasSpottedBall = false;
-        this.Target = null;
-        this.IsHoldingBall = false;
-        this.TargetPlayerToTagOut = null;
-        this.gameObject.transform.position = TeamUtils.playerTeamMenberPositionLocation[fielderPlayerStatus.PlayerFieldPosition];
-        this.transform.rotation = Quaternion.identity;
-        IsoRenderer.LastDirection = 4;
-        IsoRenderer.SetDirection(Vector2.zero);
+        dialogBoxManagerScript.DisplayDialogAndTextForGivenAmountOfTime(1f, false, "TAG OUT !!!!!!!");
         PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
-        PlayersTurnManager.IsCommandPhase = true;
-        playersTurnManager.turnState = TurnStateEnum.PITCHER_TURN;
 
-        //Remove pause state
-        GameData.isPaused = false;
+        gameManager.AttackTeamRunnerList.Remove(targetToTagOut);
+        targetToTagOut.SetActive(false);
+        playersTurnManager.PlayerTurnAvailability.Remove(targetToTagOut.name);
+        newBatter.SetActive(true);
+        RunnerBehaviour tagOutRunnerBehaviourScript = PlayerUtils.FetchRunnerBehaviourScript(targetToTagOut);
+        BatterBehaviour newbatterBehaviourScript = PlayerUtils.FetchBatterBehaviourScript(newBatter);
+        newbatterBehaviourScript.EquipedBat = tagOutRunnerBehaviourScript.EquipedBat;
+        tagOutRunnerBehaviourScript.EquipedBat = null;
+        int runnersCount = gameManager.AttackTeamRunnerList.Count;
+
+        if (runnersCount == 0)
+        {
+            StartCoroutine(gameManager.WaitAndReinit(dialogBoxManagerScript, newBatterStatus, FieldBall));
+        }
+        else if (runnersCount > 0)
+        {
+            bool isRunnersAllSafeAndStaying = gameManager.AttackTeamRunnerList.TrueForAll(runner => {
+                RunnerBehaviour runnerBehaviour = PlayerUtils.FetchRunnerBehaviourScript(runner);
+                return runnerBehaviour.IsSafe && runnerBehaviour.IsStaying;
+            });
+
+            if (isRunnersAllSafeAndStaying)
+            {
+                StartCoroutine(gameManager.WaitAndReinit(dialogBoxManagerScript, newBatterStatus, FieldBall));
+            }
+            else
+            {
+                playersTurnManager.TurnState = TurnStateEnum.FIELDER_TURN;
+                PlayersTurnManager.IsCommandPhase = true;
+            }
+        }
+        
     }
 
-    public void CalculateFielderTriggerInterraction(GameObject ballGameObject, GenericPlayerBehaviour genericPlayerBehaviourScript, PlayerStatus playerStatus)
+    public void ReplanAction()
     {
-        BallController ballControlerScript = BallUtils.FetchBallControllerScript(ballGameObject);
-        ballControlerScript.IsTargetedByFielder = true;
-        genericPlayerBehaviourScript.HasSpottedBall = true;
-        playerStatus.IsAllowedToMove = true;
-        genericPlayerBehaviourScript.Target = ballGameObject.transform.position;
-        this.transform.rotation = Quaternion.identity;
+       
+        GameManager gameManager = GameUtils.FetchGameManager();
+        bool isRunnersAllSafe = gameManager.AttackTeamRunnerList.TrueForAll(runner => {
+            RunnerBehaviour runnerBehaviour = PlayerUtils.FetchRunnerBehaviourScript(runner);
+            return runnerBehaviour.IsSafe;
+        });
+
+        if (isRunnersAllSafe)
+        {
+            gameManager.IsStateCheckAllowed = true;
+        }
+        else
+        {
+            PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
+            playersTurnManager.TurnState = TurnStateEnum.FIELDER_TURN;
+            PlayersTurnManager.IsCommandPhase = true;
+        }
+    }
+
+    public void CalculateFielderTriggerInterraction(GenericPlayerBehaviour genericPlayerBehaviourScript)
+    {
+        PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
+        playerActionsManager.AimForTheBall(genericPlayerBehaviourScript);
     }
 }

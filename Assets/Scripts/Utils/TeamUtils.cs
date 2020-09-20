@@ -56,9 +56,9 @@ public class TeamUtils : MonoBehaviour
     }
 
 
-    public static PlayerEnum GetPlayerEnumEligibleToPlayerPositionEnum(PlayerFieldPositionEnum playerFieldPositionEnum)
+    public static PlayerEnum GetPlayerIdFromPlayerFieldPosition(PlayerFieldPositionEnum playerFieldPositionEnum)
     {
-        foreach (KeyValuePair<PlayerEnum, List<PlayerFieldPositionEnum>> entry in GameData.playerEligibilityMap)
+        foreach (KeyValuePair<PlayerEnum, List<PlayerFieldPositionEnum>> entry in GameData.playerFieldPositionEnumListMap)
         {
             if(entry.Value.Contains(playerFieldPositionEnum))
             {
@@ -93,14 +93,14 @@ public class TeamUtils : MonoBehaviour
         GetPlayerTeam(playerId).Clear();
     }
 
-    public static GameObject GetNearestFielderFromBall(GameObject ball)
+    public static GameObject GetNearestFielderFromGameObject(GameObject gameObject)
     {
         Nullable<float> nearestDistance = null;
         GameObject nearestFielder = null;
 
         foreach (GameObject fielderGameObject in fielderList)
         {
-            float distance = Vector3.Distance(ball.transform.position, fielderGameObject.transform.position);
+            float distance = Vector3.Distance(gameObject.transform.position, fielderGameObject.transform.position);
 
             if (!nearestDistance.HasValue)
             {

@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using UnityEngine.Video;
 
 public class GameManager : MonoBehaviour
 {
@@ -19,6 +20,7 @@ public class GameManager : MonoBehaviour
     public GameObject ballModel = null;
     public GameObject batModel = null;
     public GameObject baseModel = null;
+    public GameObject foulZoneModel = null;
     private Dictionary<string, TileTypeEnum> horizontalyPaintedDirtDictionary = new Dictionary<string, TileTypeEnum>();
     private Dictionary<string, TileTypeEnum> verticalyPaintedDirtDictionary = new Dictionary<string, TileTypeEnum>();
     private List<GameObject> attackTeamBatterList = new List<GameObject>();
@@ -31,6 +33,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         this.BuildGameField();
+        this.BuildFoulZones();
 
         GameObject ball = Instantiate(ballModel, this.transform.position, this.transform.rotation);
         ball.SetActive(false);
@@ -87,6 +90,43 @@ public class GameManager : MonoBehaviour
             IsStateCheckAllowed = false;
         }
        
+    }
+
+
+    private void BuildFoulZones()
+    {
+        
+        Vector3 firstBasePosition = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetFirstBaseTilePosition());
+        Vector3 homeBasePosition = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetHomeBaseTilePosition());
+        Vector3 thirdBasePosition = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetThirdBaseTilePosition());
+
+        //Left foul zone creation and positioning
+        GameObject leftSideFoulzone = Instantiate(foulZoneModel, this.transform.position, this.transform.rotation);
+        leftSideFoulzone.name = NameConstants.LEFT_SIDE_FOUL_ZONE_NAME;
+        leftSideFoulzone.tag = TagsConstants.LEFT_SIDE_FOUL_ZONE_TAG;
+        float homeBaseToThirdBaseDistance = Vector3.Distance(homeBasePosition, thirdBasePosition);
+        Vector3 leftSideFictionalPosition = new Vector3(thirdBasePosition.x, homeBasePosition.y, 0);
+        float homeBaseToLeftSideFictionalDistance = Vector3.Distance(homeBasePosition, leftSideFictionalPosition);
+        float leftSidefoulZoneAngle = Mathf.Acos(homeBaseToLeftSideFictionalDistance / homeBaseToThirdBaseDistance);
+        leftSideFoulzone.transform.rotation = Quaternion.Euler(0, 0, leftSidefoulZoneAngle * -1 * Mathf.Rad2Deg);
+        float leftSideZonePositioningAndEffectSize = (float)rowMinimum / 4f + (float)rowMinimum / 2f + (float)FieldUtils.GRID_SIZE;
+        leftSideFoulzone.transform.position = new Vector3(leftSideZonePositioningAndEffectSize, (float)columnMinimum / 2f - (float)FieldUtils.GRID_SIZE / 2f, 0);
+        BoxCollider2D leftSideFoulZoneCollider = leftSideFoulzone.GetComponent<BoxCollider2D>();
+        leftSideFoulZoneCollider.size = new Vector2(homeBaseToThirdBaseDistance, Mathf.Abs(leftSideZonePositioningAndEffectSize));
+
+        //Rigth foul zone creation and positioning
+        GameObject rightSideFoulzone = Instantiate(foulZoneModel, this.transform.position, this.transform.rotation);
+        rightSideFoulzone.name = NameConstants.RIGTH_SIDE_FOUL_ZONE_NAME;
+        rightSideFoulzone.tag = TagsConstants.RIGTH_SIDE_FOUL_ZONE_TAG;
+        float homeBaseToFirstBaseDistance = Vector3.Distance(homeBasePosition, firstBasePosition);
+        Vector3 rigthSideFictionalPosition = new Vector3(firstBasePosition.x, homeBasePosition.y, 0);
+        float homeBaseToRigthSideFictionalDistance = Vector3.Distance(homeBasePosition, rigthSideFictionalPosition);
+        float rigthSidefoulZoneAngle = Mathf.Acos(homeBaseToRigthSideFictionalDistance / homeBaseToFirstBaseDistance);
+        rightSideFoulzone.transform.rotation = Quaternion.Euler(0, 0, rigthSidefoulZoneAngle * Mathf.Rad2Deg);
+        float rigthSideZonePositioningAndEffectSize = (float)rowMaximum / 4f + (float)rowMaximum / 2f - (float)FieldUtils.GRID_SIZE;
+        rightSideFoulzone.transform.position = new Vector3(rigthSideZonePositioningAndEffectSize, (float)columnMinimum / 2f - (float)FieldUtils.GRID_SIZE/2f, 0);
+        BoxCollider2D rightSideFoulZoneCollider = rightSideFoulzone.GetComponent<BoxCollider2D>();
+        rightSideFoulZoneCollider.size = new Vector2(homeBaseToFirstBaseDistance, rigthSideZonePositioningAndEffectSize);
     }
 
 

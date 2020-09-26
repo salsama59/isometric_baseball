@@ -42,16 +42,16 @@ public class TeamsScoreManager : MonoBehaviour
     public void UpdateTeamScore(TeamIdEnum teamIdEnum)
     {
         int teamId = (int)teamIdEnum;
-        string teamsInformationPanelTag = TagsConstants.TEAMS_INFORMATIONS_PANEL;
+        string teamsInformationPanelTag = TagsConstants.TEAMS_INFORMATIONS_PANEL_TAG;
         string scoreTextTag;
 
         switch (teamIdEnum)
         {
             case TeamIdEnum.TEAM_1:
-                scoreTextTag = TagsConstants.TEAM_1_SCORE;
+                scoreTextTag = TagsConstants.TEAM_1_SCORE_TAG;
                 break;
             case TeamIdEnum.TEAM_2:
-                scoreTextTag = TagsConstants.TEAM_2_SCORE;
+                scoreTextTag = TagsConstants.TEAM_2_SCORE_TAG;
                 break;
             default:
                 scoreTextTag = "";
@@ -67,16 +67,16 @@ public class TeamsScoreManager : MonoBehaviour
     public void UpdateTeamName(TeamIdEnum teamIdEnum, string teamName)
     {
         int teamId = (int)teamIdEnum;
-        string teamsInformationsPanelTag = TagsConstants.TEAMS_INFORMATIONS_PANEL;
+        string teamsInformationsPanelTag = TagsConstants.TEAMS_INFORMATIONS_PANEL_TAG;
         string nameTextTag;
 
         switch (teamIdEnum)
         {
             case TeamIdEnum.TEAM_1:
-                nameTextTag = TagsConstants.TEAM_1_NAME;
+                nameTextTag = TagsConstants.TEAM_1_NAME_TAG;
                 break;
             case TeamIdEnum.TEAM_2:
-                nameTextTag = TagsConstants.TEAM_2_NAME;
+                nameTextTag = TagsConstants.TEAM_2_NAME_TAG;
                 break;
             default:
                 nameTextTag = "";

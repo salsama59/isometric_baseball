@@ -18,14 +18,15 @@ public class TagsConstants
     public static string COMMAND_MENU_MANAGER_TAG = "CommandMenuManager";
     public static string PLAYER_ACTIONS_MANAGER_TAG = "PlayerActionsManager";
     public static string COMMAND_MENU_TAG = "CommandMenu";
-    public static string TEAMS_SCORE_MANAGER = "TeamsScoreManager";
-    public static string TEAMS_INFORMATIONS_PANEL = "TeamsInformationsPanel";
-    public static string TEAM_1_NAME = "TeamOneName";
-    public static string TEAM_2_NAME = "TeamTwoName";
-    public static string TEAM_1_SCORE = "TeamOneScore";
-    public static string TEAM_2_SCORE = "TeamTwoScore";
-    public static string DIALOG_BOX_MANAGER = "DialogBoxManager";
-    public static string TARGET_SELECTION_MANAGER = "TargetSelectionManager";
+    public static string TEAMS_SCORE_MANAGER_TAG = "TeamsScoreManager";
+    public static string TEAMS_INFORMATIONS_PANEL_TAG = "TeamsInformationsPanel";
+    public static string TEAM_1_NAME_TAG = "TeamOneName";
+    public static string TEAM_2_NAME_TAG = "TeamTwoName";
+    public static string TEAM_1_SCORE_TAG = "TeamOneScore";
+    public static string TEAM_2_SCORE_TAG = "TeamTwoScore";
+    public static string DIALOG_BOX_MANAGER_TAG = "DialogBoxManager";
+    public static string TARGET_SELECTION_MANAGER_TAG = "TargetSelectionManager";
     public static string PLAYER_SIGHT_TAG = "PLayerSight";
-    
+    public static string LEFT_SIDE_FOUL_ZONE_TAG = "LeftSideFoulZone";
+    public static string RIGTH_SIDE_FOUL_ZONE_TAG = "RigthSideFoulZone";
 }

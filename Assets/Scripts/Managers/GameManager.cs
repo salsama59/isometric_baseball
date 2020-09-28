@@ -716,6 +716,7 @@ public class GameManager : MonoBehaviour
         bat.transform.rotation = Quaternion.Euler(0f, 0f, -70f);
         bat.transform.SetParent(player.transform);
         bat.SetActive(true);
+        bat.GetComponent<CapsuleCollider2D>().enabled = true;
         BatterBehaviour currentBatterBehaviour = PlayerUtils.FetchBatterBehaviourScript(player);
         currentBatterBehaviour.EquipedBat = bat;
     }
@@ -738,7 +739,8 @@ public class GameManager : MonoBehaviour
         ballControllerScript.IsTargetedByFielder = false;
         ballControllerScript.IsTargetedByPitcher = false;
         ballControllerScript.IsHit = false;
-        StopCoroutine(ballControllerScript.MovementCoroutine);
+        ballControllerScript.IsInFoulState = false;
+        ballControllerScript.StopCoroutine(ballControllerScript.MovementCoroutine);
     }
 
     public void ReinitFielders(List<GameObject> fielders)

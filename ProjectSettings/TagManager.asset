@@ -26,6 +26,8 @@ TagManager:
   - DialogBoxManager
   - TargetSelectionManager
   - PLayerSight
+  - LeftSideFoulZone
+  - RigthSideFoulZone
   layers:
   - Default
   - TransparentFX

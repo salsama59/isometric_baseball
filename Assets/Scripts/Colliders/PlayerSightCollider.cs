@@ -17,13 +17,13 @@ public class PlayerSightCollider : MonoBehaviour
             if (ballControlerScript.IsMoving && ballControlerScript.IsHit && !ballControlerScript.IsPitched)
             {
 
-                if (PlayerUtils.HasPitcherPosition(player) && !ballControlerScript.IsTargetedByFielder)
+                if (PlayerUtils.HasPitcherPosition(player) && !ballControlerScript.IsTargetedByFielder && !ballControlerScript.IsInFoulState)
                 {
                     ballControlerScript.IsTargetedByPitcher = true;
                     ((PitcherBehaviour)genericPlayerBehaviourScript).CalculatePitcherTriggerInterraction(ballGameObject, genericPlayerBehaviourScript, currentPlayerStatus);
                 }
 
-                if (PlayerUtils.HasFielderPosition(player) && !ballControlerScript.IsTargetedByFielder && !ballControlerScript.IsTargetedByPitcher)
+                if (PlayerUtils.HasFielderPosition(player) && !ballControlerScript.IsTargetedByFielder && !ballControlerScript.IsTargetedByPitcher && !ballControlerScript.IsInFoulState)
                 {
                     GameObject nearestFielder = TeamUtils.GetNearestFielderFromGameObject(ballGameObject);
                     PlayerStatus nearestFielderStatus = PlayerUtils.FetchPlayerStatusScript(nearestFielder);

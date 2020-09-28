@@ -11,6 +11,7 @@ public class BatterBehaviour : GenericPlayerBehaviour
     private bool isSwingHasFinished = false;
     private int strikeOutcomeCount = 0;
     private int ballOutcomeCount = 0;
+    private int foulOutcomeCount = 0;
 
     public override void Awake()
     {
@@ -50,18 +51,35 @@ public class BatterBehaviour : GenericPlayerBehaviour
 
         if (!ActionCalculationUtils.HasActionSucceeded(pitchSuccesRate))
         {
+            this.EquipedBat.GetComponent<CapsuleCollider2D>().enabled = false;
             ballControllerScript.IsPitched = false;
             ballControllerScript.IsHit = true;
-            List<Vector2Int> ballPositionList = ActionCalculationUtils.CalculateBallFallPositionList(this.gameObject, 0, 180, 10, true);
+            List<Vector2Int> ballPositionList = ActionCalculationUtils.CalculateBallFallPositionList(this.gameObject, 0, (int)MathUtils.HALF_CIRCLE_ANGLE_IN_DEGREE, 10, true);
             int ballPositionIndex = Random.Range(0, ballPositionList.Count - 1);
             Vector2Int ballTilePosition = ballPositionList[ballPositionIndex];
             ballControllerScript.Target = FieldUtils.GetTileCenterPositionInGameWorld(ballTilePosition);
-            RunnerBehaviour runnerBehaviour = this.ConvertBatterToRunner(playerStatusScript);
-            this.AddRunnerAbilitiesToBatter(this.gameObject);
 
-            playerStatusScript.IsAllowedToMove = true;
-            runnerBehaviour.EnableMovement = true;
+            Vector2 direction = MathUtils.CalculateDirection(ballControllerScript.gameObject.transform.position, ballControllerScript.Target.Value);
+            float ballDirectionAngle = MathUtils.CalculateDirectionAngle(direction);
+
+            Vector3 firstBasePosition = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetFirstBaseTilePosition());
+            Vector3 homeBasePosition = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetHomeBaseTilePosition());
+            float homeBaseToFirstBaseDistance = Vector3.Distance(homeBasePosition, firstBasePosition);
+            Vector3 rigthSideFictionalPosition = new Vector3(firstBasePosition.x, homeBasePosition.y, 0);
+            float homeBaseToRigthSideFictionalDistance = Vector3.Distance(homeBasePosition, rigthSideFictionalPosition);
+            float foulZoneAngle = Mathf.Acos(homeBaseToRigthSideFictionalDistance / homeBaseToFirstBaseDistance);
+
+            if (MathUtils.HALF_CIRCLE_ANGLE_IN_DEGREE - foulZoneAngle * Mathf.Rad2Deg >= ballDirectionAngle && ballDirectionAngle >= foulZoneAngle * Mathf.Rad2Deg)
+            {
+                RunnerBehaviour runnerBehaviour = this.ConvertBatterToRunner(playerStatusScript);
+                this.AddRunnerAbilitiesToBatter(this.gameObject);
+                playerStatusScript.IsAllowedToMove = true;
+                runnerBehaviour.EnableMovement = true;
+            }
+            
             playersTurnManager.IsRunnersTurnsDone = false;
+
+            StartCoroutine(this.WaitToEnableBatCollider());
         }
         else
         {
@@ -87,6 +105,13 @@ public class BatterBehaviour : GenericPlayerBehaviour
             ballControllerScript.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetCatcherZonePosition());
             dialogBoxManagerScript.DisplayDialogAndTextForGivenAmountOfTime(1f, false, outcomeMessage);
         }
+    }
+
+
+    private IEnumerator WaitToEnableBatCollider()
+    {
+        yield return new WaitForSeconds(2f);
+        this.EquipedBat.GetComponent<CapsuleCollider2D>().enabled = true;
     }
 
     public void AddRunnerAbilitiesToBatter(GameObject player)
@@ -144,4 +169,5 @@ public class BatterBehaviour : GenericPlayerBehaviour
     public bool IsSwingHasFinished { get => isSwingHasFinished; set => isSwingHasFinished = value; }
     public int StrikeOutcomeCount { get => strikeOutcomeCount; set => strikeOutcomeCount = value; }
     public int BallOutcomeCount { get => ballOutcomeCount; set => ballOutcomeCount = value; }
+    public int FoulOutcomeCount { get => foulOutcomeCount; set => foulOutcomeCount = value; }
 }

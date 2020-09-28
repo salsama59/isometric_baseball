@@ -22,4 +22,11 @@ public class ColliderUtils : MonoBehaviour
     {
         return collision2D.collider.transform.gameObject.CompareTag(TagsConstants.BASEBALL_PLAYER_TAG);
     }
+
+    public static bool HasFoulZoneCollided(Collider2D collider2D)
+    {
+        GameObject objectColliding = collider2D.transform.gameObject;
+        return objectColliding.CompareTag(TagsConstants.RIGTH_SIDE_FOUL_ZONE_TAG) 
+            || objectColliding.CompareTag(TagsConstants.LEFT_SIDE_FOUL_ZONE_TAG);
+    }
 }

@@ -87,6 +87,7 @@ public class TeamPlayerCollider : MonoBehaviour
                 else if(baseReached == BaseEnum.FIRST_BASE && runnerBehaviour.IsInWalkState)
                 {
                     //Walk done after 4 ball from pitcher
+                    runnerBehaviour.CalculateRunnerColliderInterraction(FieldUtils.GetTileEnumFromName(collision.gameObject.name));
                     PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
                     playersTurnManager.TurnState = TurnStateEnum.PITCHER_TURN;
                     PlayersTurnManager.IsCommandPhase = true;

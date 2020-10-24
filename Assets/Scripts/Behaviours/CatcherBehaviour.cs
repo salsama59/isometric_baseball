@@ -31,7 +31,7 @@ public class CatcherBehaviour : GenericPlayerBehaviour
     public void CalculateCatcherColliderInterraction(GameObject pitcherGameObject, GameObject ballGameObject, BallController ballControllerScript)
     {
         GameManager gameManager = GameUtils.FetchGameManager();
-        GameObject currentBatter = gameManager.AttackTeamBatterList.First();
+        GameObject currentBatter = gameManager.AttackTeamBatterListClone.First();
         BatterBehaviour currentBatterBehaviour = PlayerUtils.FetchBatterBehaviourScript(currentBatter);
         GameObject bat = currentBatterBehaviour.EquipedBat;
         PlayerStatus currentBatterStatus = PlayerUtils.FetchPlayerStatusScript(currentBatter);
@@ -56,7 +56,6 @@ public class CatcherBehaviour : GenericPlayerBehaviour
                 runnerBehaviour.EnableMovement = true;
                 this.SetUpNewBatter(gameManager, bat);
 
-                //TODO : wait half a second before continue
                 StartCoroutine(this.WaitForAction(4f));
             }
             else
@@ -81,7 +80,7 @@ public class CatcherBehaviour : GenericPlayerBehaviour
             if (currentBatterBehaviour.StrikeOutcomeCount == 3)
             {
                 currentBatter.SetActive(false);
-                gameManager.AttackTeamBatterList.Remove(currentBatter);
+                gameManager.AttackTeamBatterListClone.Remove(currentBatter);
                 this.SetUpNewBatter(gameManager, bat);
                 currentBatterBehaviour.StrikeOutcomeCount = 0;
                 currentBatterBehaviour.BallOutcomeCount = 0;
@@ -117,8 +116,9 @@ public class CatcherBehaviour : GenericPlayerBehaviour
 
             if (isInningHalfEnd)
             {
-                //TODO team switch attack/defense
+                //Team switch attack/defense
                 gameManager.BatterOutCount = 0;
+                gameManager.ProcessNextInningHalf();
             }
 
             if (!isInWalkState && !isInningHalfEnd)
@@ -131,7 +131,7 @@ public class CatcherBehaviour : GenericPlayerBehaviour
 
     private void SetUpNewBatter(GameManager gameManager, GameObject bat)
     {
-        GameObject newBatter = gameManager.AttackTeamBatterList.First();
+        GameObject newBatter = gameManager.AttackTeamBatterListClone.First();
         TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.BATTER, newBatter, TeamUtils.GetPlayerIdFromPlayerFieldPosition(PlayerFieldPositionEnum.BATTER));
         newBatter.SetActive(true);
         gameManager.EquipBatToPlayer(newBatter, bat);

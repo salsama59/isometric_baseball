@@ -132,7 +132,7 @@ public class BatterBehaviour : GenericPlayerBehaviour
         GameManager gameManager = GameUtils.FetchGameManager();
         RunnerBehaviour runnerBehaviour = currentBatter.AddComponent<RunnerBehaviour>();
         gameManager.AttackTeamRunnerList.Add(runnerBehaviour.gameObject);
-        gameManager.AttackTeamBatterList.Remove(currentBatter);
+        gameManager.AttackTeamBatterListClone.Remove(currentBatter);
         runnerBehaviour.EquipedBat = bat;
         bat.SetActive(false);
         Destroy(currentBatter.GetComponent<BatterBehaviour>());
@@ -141,7 +141,7 @@ public class BatterBehaviour : GenericPlayerBehaviour
         TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.RUNNER, currentBatter, PlayerEnum.PLAYER_1);
         //TODO check for the batterlist count before because there is a case where all the batter has took turn.
         //Maybe pass to the second half???
-        GameObject nextBatter = gameManager.AttackTeamBatterList.First();
+        GameObject nextBatter = gameManager.AttackTeamBatterListClone.First();
         TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.BATTER, nextBatter, TeamUtils.GetPlayerIdFromPlayerFieldPosition(PlayerFieldPositionEnum.BATTER));
 
         PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();

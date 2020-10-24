@@ -101,7 +101,7 @@ public class FielderBehaviour : GenericPlayerBehaviour
     public void TagOutRunner(GameObject targetToTagOut)
     {
         GameManager gameManager = GameUtils.FetchGameManager();
-        GameObject newBatter = gameManager.AttackTeamBatterList.First();
+        GameObject newBatter = gameManager.AttackTeamBatterListClone.First();
         PlayerStatus fielderPlayerStatus = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
         PlayerStatus newBatterStatus = PlayerUtils.FetchPlayerStatusScript(newBatter);
         DialogBoxManager dialogBoxManagerScript =  GameUtils.FetchDialogBoxManager();

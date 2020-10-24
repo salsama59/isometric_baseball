@@ -1,5 +1,6 @@
 ﻿public enum TeamSideEnum
 {
     ATTACK,
-    DEFENSE
+    DEFENSE,
+    NONE
 }

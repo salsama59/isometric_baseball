@@ -45,7 +45,7 @@ public class FoulzoneCollider : MonoBehaviour
                     PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
                     GameObject pitcher = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.PITCHER, TeamUtils.GetPlayerIdFromPlayerFieldPosition(PlayerFieldPositionEnum.PITCHER));
                     GameManager gameManager = GameUtils.FetchGameManager();
-                    GameObject currentBatter = gameManager.AttackTeamBatterList.First();
+                    GameObject currentBatter = gameManager.AttackTeamBatterListClone.First();
                     BatterBehaviour currentBatterBehaviour = PlayerUtils.FetchBatterBehaviourScript(currentBatter);
                     GameObject bat = currentBatterBehaviour.EquipedBat;
                     currentBatterBehaviour.FoulOutcomeCount += 1;

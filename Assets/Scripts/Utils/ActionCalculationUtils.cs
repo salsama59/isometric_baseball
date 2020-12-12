@@ -93,14 +93,13 @@ public class ActionCalculationUtils
         return result;
     }
 
-    public static List<Vector2Int> CalculateBallFallPositionList(GameObject playerInvolved, int angleMinRange, int angleMaxRange, int angleStep, bool Iscritical)
+    public static List<Vector2Int> CalculateBallFallPositionList(GameObject playerInvolved, int angleMinRange, int angleMaxRange, int angleStep, bool Iscritical, Vector2Int ballOrigin)
     {
         List<Vector2Int> ballPositionList = new List<Vector2Int>();
-        int x = 0;
-        int y = 0;
+        int x;
+        int y;
         int criticalFactor = 1;
         PlayerStatus playerInvolvedStatus = PlayerUtils.FetchPlayerStatusScript(playerInvolved);
-        Vector2Int playerInvolvedPosition = FieldUtils.GetGameObjectTilePositionOnField(playerInvolved);
         int property = playerInvolvedStatus.BattingPower;
 
         /*
@@ -118,11 +117,11 @@ public class ActionCalculationUtils
             criticalFactor = CalculateCriticalFactor();
         }
 
-        for (int angle = angleMinRange; angle < angleMaxRange - angleStep; angle = angle + angleStep)
+        for (int angle = angleMinRange; angle < angleMaxRange + angleStep; angle += angleStep)
         {
             float theta = ConvertDegreeAngleToRadianAngle(GetFixedIsometricAngle(angle));
-            x = (int)(property * criticalFactor * Mathf.Cos(theta) + playerInvolvedPosition.x);
-            y = (int)(property * criticalFactor * Mathf.Sin(theta) + playerInvolvedPosition.y);
+            x = (int)(property * criticalFactor * Mathf.Cos(theta) + ballOrigin.x);
+            y = (int)(property * criticalFactor * Mathf.Sin(theta) + ballOrigin.y);
 
             ballPositionList.Add(new Vector2Int(x, y));
         }

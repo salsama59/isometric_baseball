@@ -129,7 +129,17 @@ public class RunnerBehaviour : GenericPlayerBehaviour
             return runnerBehaviour.IsSafe && runnerBehaviour.IsStaying;
         });
 
-        if (isRunnersAllSafeAndStaying)
+        //test if all remaining runner are out and there no more batters
+        int runnersCount = gameManager.AttackTeamRunnerList.Count;
+        int batterCount = gameManager.AttackTeamBatterListClone.Count;
+
+        if (runnersCount == 0 && batterCount == 0 || batterCount == 0 && runnersCount > 0 && isRunnersAllSafeAndStaying)
+        {
+            gameManager.IsStateCheckAllowed = false;
+            gameManager.ProcessNextInningHalf();
+            return;
+        }
+        else if (isRunnersAllSafeAndStaying)
         {
             playersTurnManager.IsRunnersTurnsDone = true;
         }
@@ -168,17 +178,45 @@ public class RunnerBehaviour : GenericPlayerBehaviour
                     playerStatusScript.IsAllowedToMove = false;
                     this.HasReachedHomeBase = true;
 
-                    PlayerEnum playerEnum = TeamUtils.GetPlayerIdFromPlayerFieldPosition(PlayerFieldPositionEnum.RUNNER);
+                    PlayerEnum playerEnum = playerStatusScript.PlayerOwner;
                     TeamsScoreManager teamsScoreManagerScript = GameUtils.FetchTeamsScoreManager();
                     teamsScoreManagerScript.IncrementTeamScore(GameData.teamIdEnumMap[playerEnum]);
                     this.IsStaying = true;
                     IsometricCharacterRenderer isometricCharacterRenderer = PlayerUtils.FetchPlayerIsometricRenderer(this.gameObject);
                     isometricCharacterRenderer.ReinitializeAnimator();
                     GameManager gameManager = GameUtils.FetchGameManager();
-                    gameManager.IsStateCheckAllowed = true;
+                    
                     this.gameObject.SetActive(false);
                     gameManager.AttackTeamRunnerList.Remove(this.gameObject);
                     playersTurnManager.PlayerTurnAvailability.Remove(this.gameObject.name);
+                    gameManager.AttackTeamRunnerHomeList.Add(this.gameObject);
+
+                    int batterCount = gameManager.AttackTeamBatterListClone.Count;
+                    if (this.EquipedBat != null && batterCount > 0)
+                    {
+                        GameObject newBatter = gameManager.AttackTeamBatterListClone.First();
+                        BatterBehaviour newbatterBehaviourScript = PlayerUtils.FetchBatterBehaviourScript(newBatter);
+                        newbatterBehaviourScript.EquipedBat = this.EquipedBat;
+                        this.EquipedBat = null;
+                        gameManager.EquipBatToPlayer(newBatter);
+                    }
+                   
+                    int runnersCount = gameManager.AttackTeamRunnerList.Count;
+                    
+                    bool isRunnersAllSafeAndStaying = gameManager.AttackTeamRunnerList.TrueForAll(runner => {
+                        RunnerBehaviour runnerBehaviour = PlayerUtils.FetchRunnerBehaviourScript(runner);
+                        return runnerBehaviour.IsSafe && runnerBehaviour.IsStaying;
+                    });
+
+                    if (runnersCount == 0 && batterCount == 0 || batterCount == 0 && runnersCount > 0 && isRunnersAllSafeAndStaying)
+                    {
+                        gameManager.IsStateCheckAllowed = false;
+                        gameManager.ProcessNextInningHalf();
+                    }
+                    else
+                    {
+                        gameManager.IsStateCheckAllowed = true;
+                    }
                 }
                 
                 break;

@@ -88,7 +88,7 @@ public class PitcherBehaviour : GenericPlayerBehaviour
                 bat.transform.rotation = Quaternion.Euler(0f, 0f, -70f);
                 bat.transform.SetParent(gameManager.AttackTeamBatterListClone.First().transform);
                 batterBehaviourScript.EquipedBat.SetActive(true);
-                TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.BATTER, batterBehaviourScript.gameObject, TeamUtils.GetPlayerIdFromPlayerFieldPosition(PlayerFieldPositionEnum.BATTER));
+                TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.BATTER, batterBehaviourScript.gameObject, TeamUtils.GetBaseballPlayerOwner(batterBehaviourScript.gameObject));
             }
             
         }
@@ -102,7 +102,7 @@ public class PitcherBehaviour : GenericPlayerBehaviour
             
             PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
             PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(this.gameObject);
-            playerAbilities.PlayerAbilityList.Clear();
+            playerAbilities.ReinitAbilities();
             PlayerAbility passPlayerAbility = new PlayerAbility("Pass to fielder", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.GenericPassAction, this.gameObject, true);
             playerAbilities.AddAbility(passPlayerAbility);
             playersTurnManager.TurnState = TurnStateEnum.PITCHER_TURN;

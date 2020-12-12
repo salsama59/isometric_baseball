@@ -59,6 +59,7 @@ public class CommandMenuManager : MonoBehaviour
         if (playerAbilities.HasSpecialAbilities)
         {
             specialButtonGameObject = Instantiate(buttonModel, panelGameObject.transform.position, panelGameObject.transform.rotation);
+            specialButtonGameObject.name = "special ability button";
         }
 
         bool isSpecialButonInitialized = false;
@@ -66,6 +67,7 @@ public class CommandMenuManager : MonoBehaviour
         foreach (PlayerAbility ability in abilityList)
         {
             GameObject buttonGameObject = Instantiate(buttonModel, panelGameObject.transform.position, panelGameObject.transform.rotation);
+            buttonGameObject.name = ability.AbilityName;
             TextMeshProUGUI buttonText = buttonGameObject.GetComponentInChildren<TextMeshProUGUI>();
             PlayerAbility.AbilityDelegate playerActions;
 
@@ -210,6 +212,20 @@ public class CommandMenuManager : MonoBehaviour
     {
         GameObject menu = GameObject.FindGameObjectWithTag(TagsConstants.COMMAND_MENU_TAG);
         menu.SetActive(false);
+        this.CleanMenuFromButtons();
+    }
+
+    private void CleanMenuFromButtons()
+    {
+        foreach (GameObject subMenuButtonGameObject in SubMenuButtons)
+        {
+            Destroy(subMenuButtonGameObject);
+        }
+
+        foreach (GameObject menuButtonGameObject in MenuButtons)
+        {
+            Destroy(menuButtonGameObject);
+        }
     }
 
     public GameObject MenuGameObject { get => menuGameObject; set => menuGameObject = value; }

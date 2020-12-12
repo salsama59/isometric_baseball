@@ -6,7 +6,7 @@ using UnityEngine;
 public class FoulzoneCollider : MonoBehaviour
 {
     private float timeElapsed = 0f;
-    private const float TIME_TO_WAIT_IN_FOUL_ZONE = 1f;
+    private const float TIME_TO_WAIT_IN_FOUL_ZONE = 2f;
 
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -25,7 +25,7 @@ public class FoulzoneCollider : MonoBehaviour
 
     private void OnTriggerStay2D(Collider2D collision)
     {
-        if(ColliderUtils.HasBallCollided(collision))
+        if(ColliderUtils.HasBallCollided(collision) && !GameData.isPaused)
         {
             GameObject ball = collision.gameObject;
             BallController ballControllerScript = BallUtils.FetchBallControllerScript(ball);
@@ -74,6 +74,7 @@ public class FoulzoneCollider : MonoBehaviour
             {
                 Debug.Log("the ball not foul any more");
                 ballControllerScript.IsInFoulState = false;
+                timeElapsed = 0;
             }
         }
     }

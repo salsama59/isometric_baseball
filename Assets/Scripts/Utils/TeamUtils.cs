@@ -78,7 +78,14 @@ public class TeamUtils : MonoBehaviour
             }
         }
 
+        Debug.LogWarning("No match found for player position during search in playerFieldPositionEnumListMap so default will be : " + PlayerEnum.PLAYER_1);
         return PlayerEnum.PLAYER_1;
+    }
+
+    public static PlayerEnum GetBaseballPlayerOwner(GameObject baseballPlayer)
+    {
+        PlayerStatus playerStatus = PlayerUtils.FetchPlayerStatusScript(baseballPlayer);
+        return playerStatus.PlayerOwner;
     }
 
     public static Dictionary<int, GameObject> GetPlayerTeam(PlayerEnum playerId)

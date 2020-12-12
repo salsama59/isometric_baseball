@@ -28,6 +28,8 @@ TagManager:
   - PLayerSight
   - LeftSideFoulZone
   - RigthSideFoulZone
+  - InningCount
+  - InningPhase
   layers:
   - Default
   - TransparentFX

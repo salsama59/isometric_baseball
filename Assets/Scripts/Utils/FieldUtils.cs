@@ -120,6 +120,15 @@ public class FieldUtils
         return new Vector2Int(cellPosition.x, cellPosition.y);
     }
 
+    public static Vector3 GetGameObjectTileCenterPositionOnField(GameObject gameObject)
+    {
+        Tilemap tileMap = FetchFieldTileMap();
+        Grid tileMapGrid = tileMap.layoutGrid;
+        Vector3Int cellPosition = tileMapGrid.WorldToCell(gameObject.transform.position);
+        Vector3 localCellCenter = tileMapGrid.GetCellCenterLocal(cellPosition);
+        return localCellCenter;
+    }
+
     public static Vector3 GetBatCorrectPosition(Vector3 position)
     {
         return new Vector3(position.x + GRID_SIZE/3, position.y + GRID_SIZE/4, position.z);

@@ -100,37 +100,49 @@ public class FielderBehaviour : GenericPlayerBehaviour
 
     public void TagOutRunner(GameObject targetToTagOut)
     {
+        PlayerStatus newBatterStatus = null;
         GameManager gameManager = GameUtils.FetchGameManager();
-        GameObject newBatter = gameManager.AttackTeamBatterListClone.First();
-        PlayerStatus fielderPlayerStatus = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
-        PlayerStatus newBatterStatus = PlayerUtils.FetchPlayerStatusScript(newBatter);
-        DialogBoxManager dialogBoxManagerScript =  GameUtils.FetchDialogBoxManager();
-
-        dialogBoxManagerScript.DisplayDialogAndTextForGivenAmountOfTime(1f, false, "TAG OUT !!!!!!!");
+        DialogBoxManager dialogBoxManagerScript = GameUtils.FetchDialogBoxManager();
         PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
+        
 
+        RunnerBehaviour tagOutRunnerBehaviourScript = PlayerUtils.FetchRunnerBehaviourScript(targetToTagOut);
+
+        int batterCount = gameManager.AttackTeamBatterListClone.Count;
+        //test in case there no one left to pick
+        if (batterCount > 0)
+        {
+            GameObject newBatter = gameManager.AttackTeamBatterListClone.First();
+            newBatterStatus = PlayerUtils.FetchPlayerStatusScript(newBatter);
+            BatterBehaviour newbatterBehaviourScript = PlayerUtils.FetchBatterBehaviourScript(newBatter);
+            newbatterBehaviourScript.EquipedBat = tagOutRunnerBehaviourScript.EquipedBat;
+            newBatter.SetActive(true);
+        }
+        
+        dialogBoxManagerScript.DisplayDialogAndTextForGivenAmountOfTime(1f, false, "TAG OUT !!!!!!!");
+        tagOutRunnerBehaviourScript.EquipedBat = null;
         gameManager.AttackTeamRunnerList.Remove(targetToTagOut);
         targetToTagOut.SetActive(false);
         playersTurnManager.PlayerTurnAvailability.Remove(targetToTagOut.name);
-        newBatter.SetActive(true);
-        RunnerBehaviour tagOutRunnerBehaviourScript = PlayerUtils.FetchRunnerBehaviourScript(targetToTagOut);
-        BatterBehaviour newbatterBehaviourScript = PlayerUtils.FetchBatterBehaviourScript(newBatter);
-        newbatterBehaviourScript.EquipedBat = tagOutRunnerBehaviourScript.EquipedBat;
-        tagOutRunnerBehaviourScript.EquipedBat = null;
+        
         int runnersCount = gameManager.AttackTeamRunnerList.Count;
+        
+        bool isRunnersAllSafeAndStaying = gameManager.AttackTeamRunnerList.TrueForAll(runner => {
+            RunnerBehaviour runnerBehaviour = PlayerUtils.FetchRunnerBehaviourScript(runner);
+            return runnerBehaviour.IsSafe && runnerBehaviour.IsStaying;
+        });
 
-        if (runnersCount == 0)
+        if (runnersCount == 0 && batterCount == 0 || batterCount == 0 && runnersCount > 0 && isRunnersAllSafeAndStaying)
+        {
+            gameManager.ProcessNextInningHalf();
+        }
+        else if (runnersCount == 0 && batterCount > 0)
         {
             StartCoroutine(gameManager.WaitAndReinit(dialogBoxManagerScript, newBatterStatus, FieldBall));
         }
         else if (runnersCount > 0)
         {
-            bool isRunnersAllSafeAndStaying = gameManager.AttackTeamRunnerList.TrueForAll(runner => {
-                RunnerBehaviour runnerBehaviour = PlayerUtils.FetchRunnerBehaviourScript(runner);
-                return runnerBehaviour.IsSafe && runnerBehaviour.IsStaying;
-            });
-
-            if (isRunnersAllSafeAndStaying)
+            if (isRunnersAllSafeAndStaying && batterCount > 0)
             {
                 StartCoroutine(gameManager.WaitAndReinit(dialogBoxManagerScript, newBatterStatus, FieldBall));
             }

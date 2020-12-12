@@ -11,6 +11,12 @@ public class PlayerAbilities : MonoBehaviour
         PlayerAbilityList.Add(playerAbility);
     }
 
+    public void ReinitAbilities()
+    {
+        PlayerAbilityList.Clear();
+        HasSpecialAbilities = false;
+    }
+
     public List<PlayerAbility> PlayerAbilityList { get => playerAbilityList; set => playerAbilityList = value; }
     public bool HasSpecialAbilities { get => hasSpecialAbilities; set => hasSpecialAbilities = value; }
 }

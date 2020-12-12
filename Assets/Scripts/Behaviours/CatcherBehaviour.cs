@@ -54,7 +54,7 @@ public class CatcherBehaviour : GenericPlayerBehaviour
                 ballControllerScript.IsHit = true;
                 currentBatterStatus.IsAllowedToMove = true;
                 runnerBehaviour.EnableMovement = true;
-                this.SetUpNewBatter(gameManager, bat);
+                this.SetUpNewBatter(gameManager);
 
                 StartCoroutine(this.WaitForAction(4f));
             }
@@ -81,7 +81,7 @@ public class CatcherBehaviour : GenericPlayerBehaviour
             {
                 currentBatter.SetActive(false);
                 gameManager.AttackTeamBatterListClone.Remove(currentBatter);
-                this.SetUpNewBatter(gameManager, bat);
+                this.SetUpNewBatter(gameManager);
                 currentBatterBehaviour.StrikeOutcomeCount = 0;
                 currentBatterBehaviour.BallOutcomeCount = 0;
                 gameManager.BatterOutCount++;
@@ -98,7 +98,7 @@ public class CatcherBehaviour : GenericPlayerBehaviour
                 newRunnerBehaviour.EnableMovement = true;
                 currentBatterBehaviour.StrikeOutcomeCount = 0;
                 currentBatterBehaviour.BallOutcomeCount = 0;
-                this.SetUpNewBatter(gameManager, bat);
+                this.SetUpNewBatter(gameManager);
             }
             else
             {
@@ -129,19 +129,19 @@ public class CatcherBehaviour : GenericPlayerBehaviour
         }
     }
 
-    private void SetUpNewBatter(GameManager gameManager, GameObject bat)
+    private void SetUpNewBatter(GameManager gameManager)
     {
         GameObject newBatter = gameManager.AttackTeamBatterListClone.First();
-        TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.BATTER, newBatter, TeamUtils.GetPlayerIdFromPlayerFieldPosition(PlayerFieldPositionEnum.BATTER));
+        TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.BATTER, newBatter, TeamUtils.GetBaseballPlayerOwner(newBatter));
         newBatter.SetActive(true);
-        gameManager.EquipBatToPlayer(newBatter, bat);
+        gameManager.EquipBatToPlayer(newBatter);
     }
 
     public void AddFielderAbilitiesToCatcher(GameObject player)
     {
         PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
         PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(player);
-        playerAbilities.PlayerAbilityList.Clear();
+        playerAbilities.ReinitAbilities();
         PlayerAbility passPlayerAbility = new PlayerAbility("Pass to fielder", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.GenericPassAction, player, true);
         playerAbilities.AddAbility(passPlayerAbility);
     }
@@ -164,13 +164,8 @@ public class CatcherBehaviour : GenericPlayerBehaviour
 
     public void ReturnToInitialPosition(GameObject actionUser = null, GameObject targetPlayer = null)
     {
-        PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
-        PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(actionUser);
-        playerAbilities.PlayerAbilityList.Clear();
-        PlayerAbility catchPlayerAbility = new PlayerAbility("Catch ball", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.CatchBallAction, actionUser);
-        playerAbilities.AddAbility(catchPlayerAbility);
-        PlayerStatus playerStatus = PlayerUtils.FetchPlayerStatusScript(actionUser);
-        playerStatus.IsAllowedToMove = true;
+        GameManager gameManager = GameUtils.FetchGameManager();
+        gameManager.ReinitCatcher(this.gameObject);
         this.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetCatcherZonePosition());
     }
 

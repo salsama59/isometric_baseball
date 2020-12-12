@@ -29,4 +29,6 @@ public class TagsConstants
     public static string PLAYER_SIGHT_TAG = "PLayerSight";
     public static string LEFT_SIDE_FOUL_ZONE_TAG = "LeftSideFoulZone";
     public static string RIGTH_SIDE_FOUL_ZONE_TAG = "RigthSideFoulZone";
+    public static string INNING_COUNT_TAG = "InningCount";
+    public static string INNING_PHASE_TAG = "InningPhase";
 }

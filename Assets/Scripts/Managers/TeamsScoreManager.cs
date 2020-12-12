@@ -11,6 +11,7 @@ public class TeamsScoreManager : MonoBehaviour
     public GameObject scoreDisplayModel;
     private Dictionary<int, int> teamsScore;
     private GameObject scoreGameObject;
+    private GameManager gameManager;
 
     // Start is called before the first frame update
     void Start()
@@ -18,6 +19,7 @@ public class TeamsScoreManager : MonoBehaviour
         //this.ToggleScoreUiDisplay();
         TeamsScore = new Dictionary<int, int>();
         this.InitializeTeamsScore();
+        gameManager = GameUtils.FetchGameManager();
     }
 
     private void Awake()
@@ -32,6 +34,17 @@ public class TeamsScoreManager : MonoBehaviour
     void Update()
     {
         this.UpdateTeamsScore();
+        this.UpdateInning();
+    }
+
+    public void UpdateInning()
+    {
+        GameObject inningCountField =  GameObject.FindGameObjectWithTag(TagsConstants.INNING_COUNT_TAG);
+        GameObject inningPhaseField = GameObject.FindGameObjectWithTag(TagsConstants.INNING_PHASE_TAG);
+        TextMeshProUGUI inningCountText = inningCountField.GetComponentInChildren<TextMeshProUGUI>();
+        TextMeshProUGUI inningPhaseText = inningPhaseField.GetComponentInChildren<TextMeshProUGUI>();
+        inningCountText.text = gameManager.InningCount.ToString();
+        inningPhaseText.text = gameManager.CurrentInningPhase.ToString();
     }
 
     public void ToggleScoreUiDisplay()
@@ -96,6 +109,29 @@ public class TeamsScoreManager : MonoBehaviour
         TeamsScore[teamId] = newScore;
     }
 
+    public TeamIdEnum CalculateCurrentWinnerTeam()
+    {
+        TeamIdEnum result;
+
+        int team1score = TeamsScore[(int)TeamIdEnum.TEAM_1];
+        int team2score = TeamsScore[(int)TeamIdEnum.TEAM_2];
+
+        if (team1score > team2score)
+        {
+            result = TeamIdEnum.TEAM_1;
+        }
+        else if(team2score > team1score)
+        {
+            result = TeamIdEnum.TEAM_2;
+        }
+        else
+        {
+            result = TeamIdEnum.NO_TEAM;
+        }
+
+        return result;
+    }
+
     private void UpdateTeamsScore()
     {
         TeamIdEnum teamIdEnum = TeamIdEnum.TEAM_1;
@@ -118,7 +154,7 @@ public class TeamsScoreManager : MonoBehaviour
 
     private void InitializeTeamsScore()
     {
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < GameData.playerNumber; i++)
         {
             TeamsScore.Add(i, 0);
         }

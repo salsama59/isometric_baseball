@@ -97,9 +97,13 @@ public class PlayersTurnManager : MonoBehaviour
         int runnerCount = availableAndNotStayingRunnerList.Count;
         if (CurrentRunner == null)
         {
-            CurrentRunner = availableAndNotStayingRunnerList.First();
+            if(runnerCount > 0)
+            {
+                CurrentRunner = availableAndNotStayingRunnerList.First();
+            }
+            
             CurrentIndex = 0;
-            if (runnerCount == 1)
+            if (runnerCount == 1 || runnerCount == 0)
             {
                 IsRunnersTurnsDone = true;
             }
@@ -108,7 +112,16 @@ public class PlayersTurnManager : MonoBehaviour
         {
             int runnerIndex = availableAndNotStayingRunnerList.IndexOf(CurrentRunner);
 
-            if (runnerIndex == runnerCount - 1)
+            if(runnerIndex == -1 && runnerCount == 0)
+            {
+                GameManager gameManager = GameUtils.FetchGameManager();
+                IsRunnersTurnsDone = true;
+                gameManager.IsStateCheckAllowed = true;
+                TurnState = TurnStateEnum.STANDBY;
+                IsCommandPhase = false;
+                return null;
+            }
+            else if (runnerIndex == runnerCount - 1)
             {
                 CurrentRunner = availableAndNotStayingRunnerList.First();
                 CurrentIndex = 0;

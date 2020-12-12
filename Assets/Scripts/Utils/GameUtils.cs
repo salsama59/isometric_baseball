@@ -52,4 +52,10 @@ public class GameUtils : MonoBehaviour
         TargetSelectionManager targetSelectionManager = targetSelectionManagerObject.GetComponent<TargetSelectionManager>();
         return targetSelectionManager;
     }
+
+    public static GameObject FetchBaseGameObject(string tagName)
+    {
+        GameObject baseGameObject = GameObject.FindGameObjectWithTag(tagName);
+        return baseGameObject;
+    }
 }

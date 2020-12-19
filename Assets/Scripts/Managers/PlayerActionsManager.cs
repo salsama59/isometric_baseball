@@ -148,6 +148,8 @@ public class PlayerActionsManager : MonoBehaviour
     public static void InterceptBall(GameObject ballGameObject, BallController ballControllerScript, GenericPlayerBehaviour genericPlayerBehaviourScript)
     {
         ballControllerScript.BallHeight = BallHeightEnum.NONE;
+        ballGameObject.transform.position = genericPlayerBehaviourScript.gameObject.transform.position;
+        ballGameObject.transform.rotation = Quaternion.identity;
         ballGameObject.transform.SetParent(genericPlayerBehaviourScript.gameObject.transform);
         ballGameObject.SetActive(false);
         ballControllerScript.CurrentHolder = genericPlayerBehaviourScript.gameObject;

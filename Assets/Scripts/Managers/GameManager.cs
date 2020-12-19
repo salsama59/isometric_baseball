@@ -788,6 +788,7 @@ public class GameManager : MonoBehaviour
         }
         ballControllerScript.BallHeight = BallHeightEnum.NONE;
         ball.transform.position = pitcher.transform.position;
+        ball.transform.rotation = Quaternion.identity;
         ballControllerScript.CurrentHolder = null;
         ballControllerScript.Target = null;
         ballControllerScript.CurrentPasser = null;

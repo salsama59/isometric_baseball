@@ -50,9 +50,9 @@ public class IsometricCharacterRenderer : MonoBehaviour
         //this.Animator.enabled = false;
     }
 
-    public void LookAtBallAnimation(Vector3 ballPosition)
+    public void LookAtFieldElementAnimation(Vector3 fieldElementPosition)
     {
-        Vector2 direction = MathUtils.CalculateDirection(this.gameObject.transform.position, ballPosition);
+        Vector2 direction = MathUtils.CalculateDirection(this.gameObject.transform.position, fieldElementPosition);
         int directionIndex = AnimationUtils.DirectionToIndex(direction, 8);
         this.Animator.Play(staticDirections[directionIndex]);
     }

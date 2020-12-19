@@ -51,7 +51,7 @@ public class FielderBehaviour : GenericPlayerBehaviour
         BallController ballControlerScript = BallUtils.FetchBallControllerScript(FieldBall);
         if (FieldBall.activeInHierarchy && !HasSpottedBall)
         {
-            IsoRenderer.LookAtBallAnimation(FieldBall.transform.position);
+            IsoRenderer.LookAtFieldElementAnimation(FieldBall.transform.position);
             this.GetAngleToLookAt();
         }
         else if (HasSpottedBall && FieldBall.activeInHierarchy && !IsHoldingBall && ballControlerScript.IsTargetedByFielder)

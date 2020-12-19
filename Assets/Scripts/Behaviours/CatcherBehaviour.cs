@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -55,7 +55,7 @@ public class CatcherBehaviour : GenericPlayerBehaviour
                 currentBatterStatus.IsAllowedToMove = true;
                 runnerBehaviour.EnableMovement = true;
                 this.SetUpNewBatter(gameManager);
-
+                bat.GetComponent<CapsuleCollider2D>().enabled = false;
                 StartCoroutine(this.WaitForAction(4f));
             }
             else

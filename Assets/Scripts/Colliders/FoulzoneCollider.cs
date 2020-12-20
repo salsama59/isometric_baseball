@@ -6,7 +6,7 @@ using UnityEngine;
 public class FoulzoneCollider : MonoBehaviour
 {
     private float timeElapsed = 0f;
-    private const float TIME_TO_WAIT_IN_FOUL_ZONE = 2f;
+    private const float TIME_TO_WAIT_IN_FOUL_ZONE = 1f;
 
 
     private void OnTriggerEnter2D(Collider2D collision)

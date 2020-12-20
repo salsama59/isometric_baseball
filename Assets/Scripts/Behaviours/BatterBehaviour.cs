@@ -23,6 +23,7 @@ public class BatterBehaviour : GenericPlayerBehaviour
         base.Start();
         IsSwingHasFinished = true;
         IsoRenderer.LastDirection = 6;
+        IsoRenderer.PreferredDirection = 6;
         IsoRenderer.SetDirection(Vector2.zero);
     }
 

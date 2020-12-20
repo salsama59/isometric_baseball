@@ -41,6 +41,11 @@ public class BallController : MonoBehaviour
     public void Update()
     {
 
+        if (IsMoving && !PlayersTurnManager.IsCommandPhase && !GameData.isPaused)
+        {
+            BallAnimator.enabled = true;
+        }
+
         if (Target.HasValue && Target.Value == this.transform.position)
         {
             Target = null;
@@ -80,23 +85,51 @@ public class BallController : MonoBehaviour
 
         if(direction.x == 0 && direction.y < 0)
         {
+            //SOUTH DIRECTION
+            BallAnimator.SetBool("reverse", false);
+        }
+        else if(direction.x == 0 && direction.y > 0)
+        {
+            //NORTH DIRECTION
             BallAnimator.SetBool("reverse", true);
         }
         else if(direction.x < 0 && direction.y == 0)
         {
-            BallAnimator.SetBool("reverse", false);
+            //WEST DIRECTION
+            BallAnimator.SetBool("reverse", true);
         }
-        else if(direction.x < 0 && direction.y < 0)
+        else if (direction.x > 0 && direction.y == 0)
         {
-            BallAnimator.SetBool("reverse", false);
+            //EAST DIRECTION
+            BallAnimator.SetBool("reverse", true);
         }
-        else
+        else if (direction.x > 0 && direction.y > 0)
         {
+            //NORTH EAST DIRECTION
+            BallAnimator.SetBool("reverse", true);
+        }
+        else if (direction.x < 0 && direction.y < 0)
+        {
+            //SOUTH WEST DIRECTION
+            BallAnimator.SetBool("reverse", true);
+        }
+        else if (direction.x < 0 && direction.y > 0)
+        {
+            //NORTH WEST DIRECTION
+            BallAnimator.SetBool("reverse", true);
+        }
+        else if (direction.x > 0 && direction.y < 0)
+        {
+            //SOUTH EAST DIRECTION
             BallAnimator.SetBool("reverse", true);
         }
 
-        float angle = MathUtils.CalculateDirectionAngle(direction);
-        this.transform.rotation = Quaternion.AngleAxis(angle - 90, Vector3.forward);
+        if (direction.x != 0)
+        {
+            float angle = MathUtils.CalculateDirectionAngle(direction);
+            this.transform.rotation = Quaternion.AngleAxis(angle - 90, Vector3.forward);
+        }
+
     }
 
     private BallHeightEnum GetBallHeightState(Vector3 ballStartPosition, Vector3 ballEndposition, Vector3 ballCurrentPosition)

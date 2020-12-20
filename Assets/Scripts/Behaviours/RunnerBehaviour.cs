@@ -18,6 +18,7 @@ public class RunnerBehaviour : GenericPlayerBehaviour
     public override void Start()
     {
         base.Start();
+        IsoRenderer.PreferredDirection = 4;
         PlayerStatus playerStatus = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
         if (playerStatus.IsAllowedToMove)
         {
@@ -61,9 +62,40 @@ public class RunnerBehaviour : GenericPlayerBehaviour
     {
         Debug.Log(this.name + " go to next base");
         this.IsStaying = false;
-        Vector3 nextPosition = new Vector3();
+        
         PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
         playersTurnManager.UpdatePlayerTurnAvailability(this.gameObject.name, TurnAvailabilityEnum.WAITING);
+
+        Vector3 nextPosition = this.GetNextBasePosition(currentBase);
+
+        this.Target = nextPosition;
+        this.EnableMovement = true;
+
+        GameManager gameManager = GameUtils.FetchGameManager();
+
+        if (!isAutomaticCommand)
+        {
+            Debug.Log(this.name + " proceed manually");
+            this.CalculateNextAction();
+        }
+        else if (isAutomaticCommand && gameManager.AttackTeamRunnerList.Count > 1)
+        {
+
+            if (this.gameObject.Equals(playersTurnManager.GetNextRunnerTakingAction()))
+            {
+                playersTurnManager.IsSkipNextRunnerTurnEnabled = true;
+            }
+
+            Debug.Log(this.name + " proceed automaticaly");
+
+            playersTurnManager.TurnState = TurnStateEnum.RUNNER_TURN;
+            PlayersTurnManager.IsCommandPhase = true;
+        }
+    }
+
+    private Vector3 GetNextBasePosition(BaseEnum currentBase)
+    {
+        Vector3 nextPosition = new Vector3();
 
         switch (currentBase)
         {
@@ -88,29 +120,7 @@ public class RunnerBehaviour : GenericPlayerBehaviour
                 break;
         }
 
-        this.Target = nextPosition;
-        this.EnableMovement = true;
-
-        GameManager gameManager = GameUtils.FetchGameManager();
-
-        if (!isAutomaticCommand)
-        {
-            Debug.Log(this.name + " proceed manually");
-            this.CalculateNextAction();
-        }
-        else if(isAutomaticCommand && gameManager.AttackTeamRunnerList.Count > 1)
-        {
-
-            if (this.gameObject.Equals(playersTurnManager.GetNextRunnerTakingAction()))
-            {
-                playersTurnManager.IsSkipNextRunnerTurnEnabled = true;
-            }
-
-            Debug.Log(this.name + " proceed automaticaly");
-            
-            playersTurnManager.TurnState = TurnStateEnum.RUNNER_TURN;
-            PlayersTurnManager.IsCommandPhase = true;
-        }
+        return nextPosition;
     }
 
     public void StayOnCurrentBase()
@@ -119,8 +129,7 @@ public class RunnerBehaviour : GenericPlayerBehaviour
         this.IsStaying = true;
         PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
         playersTurnManager.UpdatePlayerTurnAvailability(this.gameObject.name, TurnAvailabilityEnum.WAITING);
-        IsometricCharacterRenderer isometricCharacterRenderer = PlayerUtils.FetchPlayerIsometricRenderer(this.gameObject);
-        isometricCharacterRenderer.ReinitializeAnimator();
+        IsoRenderer.ReinitializeAnimator();
 
         GameManager gameManager = GameUtils.FetchGameManager();
 
@@ -143,7 +152,10 @@ public class RunnerBehaviour : GenericPlayerBehaviour
         {
             playersTurnManager.IsRunnersTurnsDone = true;
         }
-        
+
+        Vector3 nextBasePosition = this.GetNextBasePosition(this.CurrentBase);
+        IsoRenderer.LookAtFieldElementAnimation(nextBasePosition);
+
         this.CalculateNextAction();
     }
 
@@ -182,8 +194,7 @@ public class RunnerBehaviour : GenericPlayerBehaviour
                     TeamsScoreManager teamsScoreManagerScript = GameUtils.FetchTeamsScoreManager();
                     teamsScoreManagerScript.IncrementTeamScore(GameData.teamIdEnumMap[playerEnum]);
                     this.IsStaying = true;
-                    IsometricCharacterRenderer isometricCharacterRenderer = PlayerUtils.FetchPlayerIsometricRenderer(this.gameObject);
-                    isometricCharacterRenderer.ReinitializeAnimator();
+                    IsoRenderer.ReinitializeAnimator();
                     GameManager gameManager = GameUtils.FetchGameManager();
                     
                     this.gameObject.SetActive(false);
@@ -229,8 +240,7 @@ public class RunnerBehaviour : GenericPlayerBehaviour
                 {
                     this.IsInWalkState = false;
                     turnAvailabilityEnum = TurnAvailabilityEnum.WAITING;
-                    IsometricCharacterRenderer isometricCharacterRenderer = PlayerUtils.FetchPlayerIsometricRenderer(this.gameObject);
-                    isometricCharacterRenderer.ReinitializeAnimator();
+                    IsoRenderer.ReinitializeAnimator();
                 }
                 
                 playersTurnManager.UpdatePlayerTurnAvailability(this.gameObject.name, turnAvailabilityEnum);

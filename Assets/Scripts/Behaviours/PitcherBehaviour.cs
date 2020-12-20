@@ -12,6 +12,7 @@ public class PitcherBehaviour : GenericPlayerBehaviour
         base.Start();
         IsoRenderer.LastDirection = 4;
         IsoRenderer.SetDirection(Vector2.zero);
+        IsoRenderer.PreferredDirection = 4;
         ballControlerScript = BallUtils.FetchBallControllerScript(FieldBall);
     }
 

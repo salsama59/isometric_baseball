@@ -11,6 +11,7 @@ public class FielderBehaviour : GenericPlayerBehaviour
     {
         base.Start();
         IsoRenderer.LastDirection = 4;
+        IsoRenderer.PreferredDirection = 4;
         IsoRenderer.SetDirection(Vector2.zero);
     }
 
@@ -51,7 +52,7 @@ public class FielderBehaviour : GenericPlayerBehaviour
         BallController ballControlerScript = BallUtils.FetchBallControllerScript(FieldBall);
         if (FieldBall.activeInHierarchy && !HasSpottedBall)
         {
-            IsoRenderer.LookAtBallAnimation(FieldBall.transform.position);
+            IsoRenderer.LookAtFieldElementAnimation(FieldBall.transform.position);
             this.GetAngleToLookAt();
         }
         else if (HasSpottedBall && FieldBall.activeInHierarchy && !IsHoldingBall && ballControlerScript.IsTargetedByFielder)

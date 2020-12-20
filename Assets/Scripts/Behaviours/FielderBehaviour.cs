@@ -124,8 +124,9 @@ public class FielderBehaviour : GenericPlayerBehaviour
         tagOutRunnerBehaviourScript.EquipedBat = null;
         gameManager.AttackTeamRunnerList.Remove(targetToTagOut);
         targetToTagOut.SetActive(false);
-        playersTurnManager.PlayerTurnAvailability.Remove(targetToTagOut.name);
-        
+        playersTurnManager.UpdatePlayerTurnQueue(targetToTagOut);
+
+
         int runnersCount = gameManager.AttackTeamRunnerList.Count;
         
         bool isRunnersAllSafeAndStaying = gameManager.AttackTeamRunnerList.TrueForAll(runner => {

@@ -199,7 +199,7 @@ public class RunnerBehaviour : GenericPlayerBehaviour
                     
                     this.gameObject.SetActive(false);
                     gameManager.AttackTeamRunnerList.Remove(this.gameObject);
-                    playersTurnManager.PlayerTurnAvailability.Remove(this.gameObject.name);
+                    playersTurnManager.UpdatePlayerTurnQueue(this.gameObject);
                     gameManager.AttackTeamRunnerHomeList.Add(this.gameObject);
 
                     int batterCount = gameManager.AttackTeamBatterListClone.Count;

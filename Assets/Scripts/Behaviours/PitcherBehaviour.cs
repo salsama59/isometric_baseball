@@ -68,7 +68,7 @@ public class PitcherBehaviour : GenericPlayerBehaviour
 
             gameManager.AttackTeamRunnerList.Remove(runnerToGetOut);
             runnerToGetOut.SetActive(false);
-            playersTurnManager.PlayerTurnAvailability.Remove(runnerToGetOut.name);
+            playersTurnManager.UpdatePlayerTurnQueue(runnerToGetOut);
             gameManager.AttackTeamBatterListClone.First().SetActive(true);
             RunnerBehaviour runnerBehaviourScript = PlayerUtils.FetchRunnerBehaviourScript(runnerToGetOut);
             BatterBehaviour batterBehaviourScript = PlayerUtils.FetchBatterBehaviourScript(gameManager.AttackTeamBatterListClone.First());

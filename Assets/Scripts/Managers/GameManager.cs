@@ -857,8 +857,7 @@ public class GameManager : MonoBehaviour
         {
             catcherBehaviourScript.IsoRenderer = PlayerUtils.FetchPlayerIsometricRenderer(catcher);
         }
-        catcherBehaviourScript.IsoRenderer.LastDirection = 0;
-        catcherBehaviourScript.IsoRenderer.Animator.Play(IsometricCharacterRenderer.staticDirections[catcherBehaviourScript.IsoRenderer.LastDirection]);
+        catcherBehaviourScript.IsoRenderer.ReinitializeAnimator();
     }
 
     private void BuildGameField()

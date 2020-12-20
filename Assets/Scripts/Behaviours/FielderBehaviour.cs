@@ -11,6 +11,7 @@ public class FielderBehaviour : GenericPlayerBehaviour
     {
         base.Start();
         IsoRenderer.LastDirection = 4;
+        IsoRenderer.PreferredDirection = 4;
         IsoRenderer.SetDirection(Vector2.zero);
     }
 

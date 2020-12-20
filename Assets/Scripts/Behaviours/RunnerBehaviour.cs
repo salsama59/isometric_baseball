@@ -18,6 +18,7 @@ public class RunnerBehaviour : GenericPlayerBehaviour
     public override void Start()
     {
         base.Start();
+        IsoRenderer.PreferredDirection = 4;
         PlayerStatus playerStatus = PlayerUtils.FetchPlayerStatusScript(this.gameObject);
         if (playerStatus.IsAllowedToMove)
         {

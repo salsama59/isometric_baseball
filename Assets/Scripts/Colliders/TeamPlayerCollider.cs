@@ -23,10 +23,9 @@ public class TeamPlayerCollider : MonoBehaviour
                 {
                     PlayerActionsManager.InterceptBall(ballGameObject, ballControllerScript, genericPlayerBehaviourScript);
                     catcherBehaviour.CatcherMode = ModeConstants.CATCHER_NORMAL_MODE;
+                    this.gameObject.transform.position = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetCatcherZonePosition());
+                    catcherBehaviour.IsoRenderer.ReinitializeAnimator();
                 }
-
-                this.gameObject.transform.position = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetCatcherZonePosition());
-                catcherBehaviour.IsoRenderer.ReinitializeAnimator();
 
                 PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
                 playersTurnManager.TurnState = TurnStateEnum.CATCHER_TURN;

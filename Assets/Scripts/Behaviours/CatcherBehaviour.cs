@@ -56,7 +56,7 @@ public class CatcherBehaviour : GenericPlayerBehaviour
                 runnerBehaviour.EnableMovement = true;
                 this.SetUpNewBatter(gameManager);
                 bat.GetComponent<CapsuleCollider2D>().enabled = false;
-                StartCoroutine(this.WaitForAction(4f));
+                StartCoroutine(this.WaitForPeriod(4f));
             }
             else
             {
@@ -146,9 +146,20 @@ public class CatcherBehaviour : GenericPlayerBehaviour
         playerAbilities.AddAbility(passPlayerAbility);
     }
 
-    private IEnumerator WaitForAction(float secondsToWait)
+    private IEnumerator WaitForCondition()
     {
-        yield return new WaitForSeconds(secondsToWait);
+        //Wait while the commande pannel is displayed to avoid issues
+        yield return new WaitWhile(() => PlayersTurnManager.IsCommandPhase);
+        GameManager gameManager = GameUtils.FetchGameManager();
+
+        //Wait an additionnal 4 second to be sure the catcher wait tat the ball gone far enough
+        //Also check for the pannel display to be realy sure 
+        if (gameManager.AttackTeamRunnerList.Count > 1)
+        {
+            yield return new WaitForSeconds(4f);
+            yield return new WaitWhile(() => PlayersTurnManager.IsCommandPhase);
+        }
+       
         //Catcher must go look for the ball 
         PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
         CatcherBehaviour catcherBehaviour = PlayerUtils.FetchCatcherBehaviourScript(this.gameObject);
@@ -159,7 +170,15 @@ public class CatcherBehaviour : GenericPlayerBehaviour
 
         //Add the relevant abilities
         this.AddFielderAbilitiesToCatcher(this.gameObject);
-        
+       
+    }
+
+    private IEnumerator WaitForPeriod(float secondsToWait)
+    {
+        //wait for a period of time to simulate reaction delay when ball missed
+        yield return new WaitForSeconds(secondsToWait);
+        //wait for the good condition (no commande pannel displayed)
+        yield return this.WaitForCondition();
     }
 
     public void ReturnToInitialPosition(GameObject actionUser = null, GameObject targetPlayer = null)

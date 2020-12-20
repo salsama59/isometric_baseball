@@ -11,6 +11,7 @@ public class TeamsScoreManager : MonoBehaviour
     public GameObject scoreDisplayModel;
     private Dictionary<int, int> teamsScore;
     private GameObject scoreGameObject;
+    private GameManager gameManager;
 
     // Start is called before the first frame update
     void Start()
@@ -18,6 +19,7 @@ public class TeamsScoreManager : MonoBehaviour
         //this.ToggleScoreUiDisplay();
         TeamsScore = new Dictionary<int, int>();
         this.InitializeTeamsScore();
+        gameManager = GameUtils.FetchGameManager();
     }
 
     private void Awake()
@@ -32,6 +34,17 @@ public class TeamsScoreManager : MonoBehaviour
     void Update()
     {
         this.UpdateTeamsScore();
+        this.UpdateInning();
+    }
+
+    public void UpdateInning()
+    {
+        GameObject inningCountField =  GameObject.FindGameObjectWithTag(TagsConstants.INNING_COUNT_TAG);
+        GameObject inningPhaseField = GameObject.FindGameObjectWithTag(TagsConstants.INNING_PHASE_TAG);
+        TextMeshProUGUI inningCountText = inningCountField.GetComponentInChildren<TextMeshProUGUI>();
+        TextMeshProUGUI inningPhaseText = inningPhaseField.GetComponentInChildren<TextMeshProUGUI>();
+        inningCountText.text = gameManager.InningCount.ToString();
+        inningPhaseText.text = gameManager.CurrentInningPhase.ToString();
     }
 
     public void ToggleScoreUiDisplay()
@@ -42,16 +55,16 @@ public class TeamsScoreManager : MonoBehaviour
     public void UpdateTeamScore(TeamIdEnum teamIdEnum)
     {
         int teamId = (int)teamIdEnum;
-        string teamsInformationPanelTag = TagsConstants.TEAMS_INFORMATIONS_PANEL;
+        string teamsInformationPanelTag = TagsConstants.TEAMS_INFORMATIONS_PANEL_TAG;
         string scoreTextTag;
 
         switch (teamIdEnum)
         {
             case TeamIdEnum.TEAM_1:
-                scoreTextTag = TagsConstants.TEAM_1_SCORE;
+                scoreTextTag = TagsConstants.TEAM_1_SCORE_TAG;
                 break;
             case TeamIdEnum.TEAM_2:
-                scoreTextTag = TagsConstants.TEAM_2_SCORE;
+                scoreTextTag = TagsConstants.TEAM_2_SCORE_TAG;
                 break;
             default:
                 scoreTextTag = "";
@@ -67,16 +80,16 @@ public class TeamsScoreManager : MonoBehaviour
     public void UpdateTeamName(TeamIdEnum teamIdEnum, string teamName)
     {
         int teamId = (int)teamIdEnum;
-        string teamsInformationsPanelTag = TagsConstants.TEAMS_INFORMATIONS_PANEL;
+        string teamsInformationsPanelTag = TagsConstants.TEAMS_INFORMATIONS_PANEL_TAG;
         string nameTextTag;
 
         switch (teamIdEnum)
         {
             case TeamIdEnum.TEAM_1:
-                nameTextTag = TagsConstants.TEAM_1_NAME;
+                nameTextTag = TagsConstants.TEAM_1_NAME_TAG;
                 break;
             case TeamIdEnum.TEAM_2:
-                nameTextTag = TagsConstants.TEAM_2_NAME;
+                nameTextTag = TagsConstants.TEAM_2_NAME_TAG;
                 break;
             default:
                 nameTextTag = "";
@@ -94,6 +107,29 @@ public class TeamsScoreManager : MonoBehaviour
         int teamId = (int)teamIdEnum;
         int newScore = TeamsScore[teamId] + 1;
         TeamsScore[teamId] = newScore;
+    }
+
+    public TeamIdEnum CalculateCurrentWinnerTeam()
+    {
+        TeamIdEnum result;
+
+        int team1score = TeamsScore[(int)TeamIdEnum.TEAM_1];
+        int team2score = TeamsScore[(int)TeamIdEnum.TEAM_2];
+
+        if (team1score > team2score)
+        {
+            result = TeamIdEnum.TEAM_1;
+        }
+        else if(team2score > team1score)
+        {
+            result = TeamIdEnum.TEAM_2;
+        }
+        else
+        {
+            result = TeamIdEnum.NO_TEAM;
+        }
+
+        return result;
     }
 
     private void UpdateTeamsScore()
@@ -118,7 +154,7 @@ public class TeamsScoreManager : MonoBehaviour
 
     private void InitializeTeamsScore()
     {
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < GameData.playerNumber; i++)
         {
             TeamsScore.Add(i, 0);
         }

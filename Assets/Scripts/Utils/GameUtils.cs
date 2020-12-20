@@ -34,22 +34,28 @@ public class GameUtils : MonoBehaviour
 
     public static TeamsScoreManager FetchTeamsScoreManager()
     {
-        GameObject teamsScoreManagerObject = GameObject.FindGameObjectWithTag(TagsConstants.TEAMS_SCORE_MANAGER);
+        GameObject teamsScoreManagerObject = GameObject.FindGameObjectWithTag(TagsConstants.TEAMS_SCORE_MANAGER_TAG);
         TeamsScoreManager teamsScoreManager = teamsScoreManagerObject.GetComponent<TeamsScoreManager>();
         return teamsScoreManager;
     }
 
     public static DialogBoxManager FetchDialogBoxManager()
     {
-        GameObject dialogBoxManagerObject = GameObject.FindGameObjectWithTag(TagsConstants.DIALOG_BOX_MANAGER);
+        GameObject dialogBoxManagerObject = GameObject.FindGameObjectWithTag(TagsConstants.DIALOG_BOX_MANAGER_TAG);
         DialogBoxManager dialogBoxManager = dialogBoxManagerObject.GetComponent<DialogBoxManager>();
         return dialogBoxManager;
     }
 
     public static TargetSelectionManager FetchTargetSelectionManager()
     {
-        GameObject targetSelectionManagerObject = GameObject.FindGameObjectWithTag(TagsConstants.TARGET_SELECTION_MANAGER);
+        GameObject targetSelectionManagerObject = GameObject.FindGameObjectWithTag(TagsConstants.TARGET_SELECTION_MANAGER_TAG);
         TargetSelectionManager targetSelectionManager = targetSelectionManagerObject.GetComponent<TargetSelectionManager>();
         return targetSelectionManager;
+    }
+
+    public static GameObject FetchBaseGameObject(string tagName)
+    {
+        GameObject baseGameObject = GameObject.FindGameObjectWithTag(tagName);
+        return baseGameObject;
     }
 }

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -31,7 +31,7 @@ public class CatcherBehaviour : GenericPlayerBehaviour
     public void CalculateCatcherColliderInterraction(GameObject pitcherGameObject, GameObject ballGameObject, BallController ballControllerScript)
     {
         GameManager gameManager = GameUtils.FetchGameManager();
-        GameObject currentBatter = gameManager.AttackTeamBatterList.First();
+        GameObject currentBatter = gameManager.AttackTeamBatterListClone.First();
         BatterBehaviour currentBatterBehaviour = PlayerUtils.FetchBatterBehaviourScript(currentBatter);
         GameObject bat = currentBatterBehaviour.EquipedBat;
         PlayerStatus currentBatterStatus = PlayerUtils.FetchPlayerStatusScript(currentBatter);
@@ -54,10 +54,9 @@ public class CatcherBehaviour : GenericPlayerBehaviour
                 ballControllerScript.IsHit = true;
                 currentBatterStatus.IsAllowedToMove = true;
                 runnerBehaviour.EnableMovement = true;
-                this.SetUpNewBatter(gameManager, bat);
-
-                //TODO : wait half a second before continue
-                StartCoroutine(this.WaitForAction(4f));
+                this.SetUpNewBatter(gameManager);
+                bat.GetComponent<CapsuleCollider2D>().enabled = false;
+                StartCoroutine(this.WaitForPeriod(4f));
             }
             else
             {
@@ -81,8 +80,8 @@ public class CatcherBehaviour : GenericPlayerBehaviour
             if (currentBatterBehaviour.StrikeOutcomeCount == 3)
             {
                 currentBatter.SetActive(false);
-                gameManager.AttackTeamBatterList.Remove(currentBatter);
-                this.SetUpNewBatter(gameManager, bat);
+                gameManager.AttackTeamBatterListClone.Remove(currentBatter);
+                this.SetUpNewBatter(gameManager);
                 currentBatterBehaviour.StrikeOutcomeCount = 0;
                 currentBatterBehaviour.BallOutcomeCount = 0;
                 gameManager.BatterOutCount++;
@@ -99,7 +98,7 @@ public class CatcherBehaviour : GenericPlayerBehaviour
                 newRunnerBehaviour.EnableMovement = true;
                 currentBatterBehaviour.StrikeOutcomeCount = 0;
                 currentBatterBehaviour.BallOutcomeCount = 0;
-                this.SetUpNewBatter(gameManager, bat);
+                this.SetUpNewBatter(gameManager);
             }
             else
             {
@@ -117,8 +116,9 @@ public class CatcherBehaviour : GenericPlayerBehaviour
 
             if (isInningHalfEnd)
             {
-                //TODO team switch attack/defense
+                //Team switch attack/defense
                 gameManager.BatterOutCount = 0;
+                gameManager.ProcessNextInningHalf();
             }
 
             if (!isInWalkState && !isInningHalfEnd)
@@ -129,26 +129,37 @@ public class CatcherBehaviour : GenericPlayerBehaviour
         }
     }
 
-    private void SetUpNewBatter(GameManager gameManager, GameObject bat)
+    private void SetUpNewBatter(GameManager gameManager)
     {
-        GameObject newBatter = gameManager.AttackTeamBatterList.First();
-        TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.BATTER, newBatter, TeamUtils.GetPlayerIdFromPlayerFieldPosition(PlayerFieldPositionEnum.BATTER));
+        GameObject newBatter = gameManager.AttackTeamBatterListClone.First();
+        TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.BATTER, newBatter, TeamUtils.GetBaseballPlayerOwner(newBatter));
         newBatter.SetActive(true);
-        gameManager.EquipBatToPlayer(newBatter, bat);
+        gameManager.EquipBatToPlayer(newBatter);
     }
 
     public void AddFielderAbilitiesToCatcher(GameObject player)
     {
         PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
         PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(player);
-        playerAbilities.PlayerAbilityList.Clear();
+        playerAbilities.ReinitAbilities();
         PlayerAbility passPlayerAbility = new PlayerAbility("Pass to fielder", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.GenericPassAction, player, true);
         playerAbilities.AddAbility(passPlayerAbility);
     }
 
-    private IEnumerator WaitForAction(float secondsToWait)
+    private IEnumerator WaitForCondition()
     {
-        yield return new WaitForSeconds(secondsToWait);
+        //Wait while the commande pannel is displayed to avoid issues
+        yield return new WaitWhile(() => PlayersTurnManager.IsCommandPhase);
+        GameManager gameManager = GameUtils.FetchGameManager();
+
+        //Wait an additionnal 4 second to be sure the catcher wait tat the ball gone far enough
+        //Also check for the pannel display to be realy sure 
+        if (gameManager.AttackTeamRunnerList.Count > 1)
+        {
+            yield return new WaitForSeconds(4f);
+            yield return new WaitWhile(() => PlayersTurnManager.IsCommandPhase);
+        }
+       
         //Catcher must go look for the ball 
         PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
         CatcherBehaviour catcherBehaviour = PlayerUtils.FetchCatcherBehaviourScript(this.gameObject);
@@ -159,18 +170,21 @@ public class CatcherBehaviour : GenericPlayerBehaviour
 
         //Add the relevant abilities
         this.AddFielderAbilitiesToCatcher(this.gameObject);
-        
+       
+    }
+
+    private IEnumerator WaitForPeriod(float secondsToWait)
+    {
+        //wait for a period of time to simulate reaction delay when ball missed
+        yield return new WaitForSeconds(secondsToWait);
+        //wait for the good condition (no commande pannel displayed)
+        yield return this.WaitForCondition();
     }
 
     public void ReturnToInitialPosition(GameObject actionUser = null, GameObject targetPlayer = null)
     {
-        PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
-        PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(actionUser);
-        playerAbilities.PlayerAbilityList.Clear();
-        PlayerAbility catchPlayerAbility = new PlayerAbility("Catch ball", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.CatchBallAction, actionUser);
-        playerAbilities.AddAbility(catchPlayerAbility);
-        PlayerStatus playerStatus = PlayerUtils.FetchPlayerStatusScript(actionUser);
-        playerStatus.IsAllowedToMove = true;
+        GameManager gameManager = GameUtils.FetchGameManager();
+        gameManager.ReinitCatcher(this.gameObject);
         this.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetCatcherZonePosition());
     }
 

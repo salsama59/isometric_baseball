@@ -26,6 +26,10 @@ TagManager:
   - DialogBoxManager
   - TargetSelectionManager
   - PLayerSight
+  - LeftSideFoulZone
+  - RigthSideFoulZone
+  - InningCount
+  - InningPhase
   layers:
   - Default
   - TransparentFX

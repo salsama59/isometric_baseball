@@ -468,6 +468,8 @@ MonoBehaviour:
     type: 3}
   baseModel: {fileID: 1280159299384813743, guid: 604a6db8de9c1ff4e9c4d44510cb899c,
     type: 3}
+  foulZoneModel: {fileID: 8555848615024057882, guid: ed520972c1b17ea4cab644080d93295c,
+    type: 3}
 --- !u!4 &814905037
 Transform:
   m_ObjectHideFlags: 0

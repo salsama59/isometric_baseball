@@ -12,6 +12,7 @@ public class PitcherBehaviour : GenericPlayerBehaviour
         base.Start();
         IsoRenderer.LastDirection = 4;
         IsoRenderer.SetDirection(Vector2.zero);
+        IsoRenderer.PreferredDirection = 4;
         ballControlerScript = BallUtils.FetchBallControllerScript(FieldBall);
     }
 
@@ -67,17 +68,17 @@ public class PitcherBehaviour : GenericPlayerBehaviour
 
             gameManager.AttackTeamRunnerList.Remove(runnerToGetOut);
             runnerToGetOut.SetActive(false);
-            playersTurnManager.PlayerTurnAvailability.Remove(runnerToGetOut.name);
-            gameManager.AttackTeamBatterList.First().SetActive(true);
+            playersTurnManager.UpdatePlayerTurnQueue(runnerToGetOut);
+            gameManager.AttackTeamBatterListClone.First().SetActive(true);
             RunnerBehaviour runnerBehaviourScript = PlayerUtils.FetchRunnerBehaviourScript(runnerToGetOut);
-            BatterBehaviour batterBehaviourScript = PlayerUtils.FetchBatterBehaviourScript(gameManager.AttackTeamBatterList.First());
+            BatterBehaviour batterBehaviourScript = PlayerUtils.FetchBatterBehaviourScript(gameManager.AttackTeamBatterListClone.First());
             batterBehaviourScript.EquipedBat = runnerBehaviourScript.EquipedBat;
             runnerBehaviourScript.EquipedBat = null;
 
             if (runnersOnFieldCount == 1)
             {
                 GameData.isPaused = true;
-                StartCoroutine(gameManager.WaitAndReinit(dialogBoxManagerScript, PlayerUtils.FetchPlayerStatusScript(gameManager.AttackTeamBatterList.First()), FieldBall));
+                StartCoroutine(gameManager.WaitAndReinit(dialogBoxManagerScript, PlayerUtils.FetchPlayerStatusScript(gameManager.AttackTeamBatterListClone.First()), FieldBall));
                 return;
             }
             else
@@ -86,9 +87,9 @@ public class PitcherBehaviour : GenericPlayerBehaviour
                 bat.transform.SetParent(null);
                 bat.transform.position = FieldUtils.GetBatCorrectPosition(batterBehaviourScript.transform.position);
                 bat.transform.rotation = Quaternion.Euler(0f, 0f, -70f);
-                bat.transform.SetParent(gameManager.AttackTeamBatterList.First().transform);
+                bat.transform.SetParent(gameManager.AttackTeamBatterListClone.First().transform);
                 batterBehaviourScript.EquipedBat.SetActive(true);
-                TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.BATTER, batterBehaviourScript.gameObject, TeamUtils.GetPlayerIdFromPlayerFieldPosition(PlayerFieldPositionEnum.BATTER));
+                TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.BATTER, batterBehaviourScript.gameObject, TeamUtils.GetBaseballPlayerOwner(batterBehaviourScript.gameObject));
             }
             
         }
@@ -102,7 +103,7 @@ public class PitcherBehaviour : GenericPlayerBehaviour
             
             PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
             PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(this.gameObject);
-            playerAbilities.PlayerAbilityList.Clear();
+            playerAbilities.ReinitAbilities();
             PlayerAbility passPlayerAbility = new PlayerAbility("Pass to fielder", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.GenericPassAction, this.gameObject, true);
             playerAbilities.AddAbility(passPlayerAbility);
             playersTurnManager.TurnState = TurnStateEnum.PITCHER_TURN;

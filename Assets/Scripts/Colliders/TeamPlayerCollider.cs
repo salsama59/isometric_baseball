@@ -23,6 +23,8 @@ public class TeamPlayerCollider : MonoBehaviour
                 {
                     PlayerActionsManager.InterceptBall(ballGameObject, ballControllerScript, genericPlayerBehaviourScript);
                     catcherBehaviour.CatcherMode = ModeConstants.CATCHER_NORMAL_MODE;
+                    this.gameObject.transform.position = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetCatcherZonePosition());
+                    catcherBehaviour.IsoRenderer.ReinitializeAnimator();
                 }
 
                 PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
@@ -87,6 +89,7 @@ public class TeamPlayerCollider : MonoBehaviour
                 else if(baseReached == BaseEnum.FIRST_BASE && runnerBehaviour.IsInWalkState)
                 {
                     //Walk done after 4 ball from pitcher
+                    runnerBehaviour.CalculateRunnerColliderInterraction(FieldUtils.GetTileEnumFromName(collision.gameObject.name));
                     PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
                     playersTurnManager.TurnState = TurnStateEnum.PITCHER_TURN;
                     PlayersTurnManager.IsCommandPhase = true;

@@ -14,4 +14,9 @@ public class NameConstants
     //Players name
     public static string BATTER_NAME = "BATTER";
     public static string RUNNER_NAME = "RUNNER";
+
+    //Foul zones name
+    public static string LEFT_SIDE_FOUL_ZONE_NAME = "LeftSideFoulZone";
+    public static string RIGTH_SIDE_FOUL_ZONE_NAME = "RightSideFoulZone";
+
 }

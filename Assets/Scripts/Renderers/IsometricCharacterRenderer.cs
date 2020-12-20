@@ -12,6 +12,7 @@ public class IsometricCharacterRenderer : MonoBehaviour
     private Animator animator;
     private int lastDirection = 0;
     public static readonly int defaultStaticDirectionIndex = 4;
+    private int preferedDirection = 0;
 
     private void Awake()
     {
@@ -46,17 +47,17 @@ public class IsometricCharacterRenderer : MonoBehaviour
 
     public void ReinitializeAnimator()
     {
-        this.Animator.Play(staticDirections[defaultStaticDirectionIndex]);
-        //this.Animator.enabled = false;
+        this.Animator.Play(staticDirections[PreferredDirection]);
     }
 
-    public void LookAtBallAnimation(Vector3 ballPosition)
+    public void LookAtFieldElementAnimation(Vector3 fieldElementPosition)
     {
-        Vector2 direction = MathUtils.CalculateDirection(this.gameObject.transform.position, ballPosition);
+        Vector2 direction = MathUtils.CalculateDirection(this.gameObject.transform.position, fieldElementPosition);
         int directionIndex = AnimationUtils.DirectionToIndex(direction, 8);
         this.Animator.Play(staticDirections[directionIndex]);
     }
 
     public Animator Animator { get => animator; set => animator = value; }
     public int LastDirection { get => lastDirection; set => lastDirection = value; }
+    public int PreferredDirection { get => preferedDirection; set => preferedDirection = value; }
 }

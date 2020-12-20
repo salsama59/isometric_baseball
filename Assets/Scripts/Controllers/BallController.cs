@@ -26,6 +26,7 @@ public class BallController : MonoBehaviour
     private Nullable<Vector3> target;
     private Coroutine movementCoroutine;
     private bool isTargetedByPitcher;
+    private bool isInFoulState;
 
     // Start is called before the first frame update
     public void Start()
@@ -39,6 +40,11 @@ public class BallController : MonoBehaviour
     // Update is called once per frame
     public void Update()
     {
+
+        if (IsMoving && !PlayersTurnManager.IsCommandPhase && !GameData.isPaused)
+        {
+            BallAnimator.enabled = true;
+        }
 
         if (Target.HasValue && Target.Value == this.transform.position)
         {
@@ -79,23 +85,51 @@ public class BallController : MonoBehaviour
 
         if(direction.x == 0 && direction.y < 0)
         {
+            //SOUTH DIRECTION
+            BallAnimator.SetBool("reverse", false);
+        }
+        else if(direction.x == 0 && direction.y > 0)
+        {
+            //NORTH DIRECTION
             BallAnimator.SetBool("reverse", true);
         }
         else if(direction.x < 0 && direction.y == 0)
         {
-            BallAnimator.SetBool("reverse", false);
+            //WEST DIRECTION
+            BallAnimator.SetBool("reverse", true);
         }
-        else if(direction.x < 0 && direction.y < 0)
+        else if (direction.x > 0 && direction.y == 0)
         {
-            BallAnimator.SetBool("reverse", false);
+            //EAST DIRECTION
+            BallAnimator.SetBool("reverse", true);
         }
-        else
+        else if (direction.x > 0 && direction.y > 0)
         {
+            //NORTH EAST DIRECTION
+            BallAnimator.SetBool("reverse", true);
+        }
+        else if (direction.x < 0 && direction.y < 0)
+        {
+            //SOUTH WEST DIRECTION
+            BallAnimator.SetBool("reverse", true);
+        }
+        else if (direction.x < 0 && direction.y > 0)
+        {
+            //NORTH WEST DIRECTION
+            BallAnimator.SetBool("reverse", true);
+        }
+        else if (direction.x > 0 && direction.y < 0)
+        {
+            //SOUTH EAST DIRECTION
             BallAnimator.SetBool("reverse", true);
         }
 
-        float angle = MathUtils.CalculateDirectionAngle(direction);
-        this.transform.rotation = Quaternion.AngleAxis(angle - 90, Vector3.forward);
+        if (direction.x != 0)
+        {
+            float angle = MathUtils.CalculateDirectionAngle(direction);
+            this.transform.rotation = Quaternion.AngleAxis(angle - 90, Vector3.forward);
+        }
+
     }
 
     private BallHeightEnum GetBallHeightState(Vector3 ballStartPosition, Vector3 ballEndposition, Vector3 ballCurrentPosition)
@@ -175,4 +209,5 @@ public class BallController : MonoBehaviour
     public bool IsTargetedByPitcher { get => isTargetedByPitcher; set => isTargetedByPitcher = value; }
     public bool IsPassed { get => isPassed; set => isPassed = value; }
     public GameObject CurrentPasser { get => currentPasser; set => currentPasser = value; }
+    public bool IsInFoulState { get => isInFoulState; set => isInFoulState = value; }
 }

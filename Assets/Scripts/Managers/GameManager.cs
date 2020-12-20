@@ -26,6 +26,7 @@ public class GameManager : MonoBehaviour
     private Dictionary<string, TileTypeEnum> verticalyPaintedDirtDictionary = new Dictionary<string, TileTypeEnum>();
     private List<GameObject> attackTeamBatterListClone = new List<GameObject>();
     private List<GameObject> attackTeamRunnerList = new List<GameObject>();
+    private List<GameObject> attackTeamRunnerListClone = new List<GameObject>();
     private int batterOutCount = 0;
     private GameObject fieldBall;
     private bool isStateCheckAllowed;
@@ -354,6 +355,7 @@ public class GameManager : MonoBehaviour
         AttackTeamBatterList = new List<GameObject>(AttackTeamBatterListClone);
 
         AttackTeamRunnerList.Clear();
+        AttackTeamRunnerListClone.Clear();
 
         //Update fielders informations
         this.ReinitFielders(TeamUtils.fielderList);
@@ -1123,4 +1125,5 @@ public class GameManager : MonoBehaviour
     public TeamsScoreManager ScoreManager { get => scoreManager; set => scoreManager = value; }
     public DialogBoxManager DialogBoxManager { get => dialogBoxManager; set => dialogBoxManager = value; }
     public List<GameObject> AttackTeamRunnerHomeList { get => attackTeamRunnerHomeList; set => attackTeamRunnerHomeList = value; }
+    public List<GameObject> AttackTeamRunnerListClone { get => attackTeamRunnerListClone; set => attackTeamRunnerListClone = value; }
 }

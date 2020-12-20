@@ -18,6 +18,7 @@ public class PlayersTurnManager : MonoBehaviour
     private int currentIndex;
     private bool isSkipNextRunnerTurnEnabled;
     private Dictionary<string, TurnAvailabilityEnum> playerTurnAvailability;
+    private GameObject nextRunner;
 
     private void Start()
     {
@@ -76,97 +77,128 @@ public class PlayersTurnManager : MonoBehaviour
         }
     }
 
+    public void UpdatePlayerTurnQueue(GameObject player)
+    {
+        this.PlayerTurnAvailability.Remove(player.name);
+        if (player == this.NextRunner)
+        {
+            List<GameObject> runnerList = GameManager.AttackTeamRunnerListClone;
+            int runnerListCount = runnerList.Count;
+            int currentIndex = runnerList.IndexOf(this.CurrentRunner);
+            this.NextRunner = this.FullRunnerSearch(currentIndex, runnerListCount, runnerList);
+        }
+    }
+
     private GameObject GetNextRunner()
     {
-        if(PlayerTurnAvailability.Count != 0 && !PlayerTurnAvailability.ContainsValue(TurnAvailabilityEnum.READY))
-        {
-            GameManager gameManager = GameUtils.FetchGameManager();
-            gameManager.IsStateCheckAllowed = true;
-            TurnState = TurnStateEnum.STANDBY;
-            IsCommandPhase = false;
-            return null;
-        }
+        GameObject foundRunner;
 
-        List<GameObject> availableAndNotStayingRunnerList = GameManager.AttackTeamRunnerList
-               .Where(runner => {
-                   RunnerBehaviour runnerBehaviour = PlayerUtils.FetchRunnerBehaviourScript(runner);
-                   return this.IsplayerAvailable(runner.name) && !runnerBehaviour.IsStaying;
-                   })
-               .ToList();
-
-        int runnerCount = availableAndNotStayingRunnerList.Count;
-        if (CurrentRunner == null)
+        if(this.NextRunner == null)
         {
-            if(runnerCount > 0)
-            {
-                CurrentRunner = availableAndNotStayingRunnerList.First();
-            }
-            
-            CurrentIndex = 0;
-            if (runnerCount == 1 || runnerCount == 0)
-            {
-                IsRunnersTurnsDone = true;
-            }
+            List<GameObject> runnerList = GameManager.AttackTeamRunnerListClone;
+            int runnerListCount = runnerList.Count;
+            int currentIndex = runnerList.IndexOf(this.CurrentRunner);
+            foundRunner = this.FullRunnerSearch(currentIndex, runnerListCount, runnerList);
         }
         else
         {
-            int runnerIndex = availableAndNotStayingRunnerList.IndexOf(CurrentRunner);
+            int precalculatedRunnerIndex = GameManager.AttackTeamRunnerListClone.IndexOf(this.NextRunner);
+            RunnerBehaviour runnerBehaviour = PlayerUtils.FetchRunnerBehaviourScript(this.NextRunner);
+            if (this.IsplayerAvailable(this.NextRunner.name) && !runnerBehaviour.IsStaying && this.NextRunner.activeInHierarchy)
+            {
+                this.CurrentRunner = this.NextRunner;
+                
 
-            if(runnerIndex == -1 && runnerCount == 0)
-            {
-                GameManager gameManager = GameUtils.FetchGameManager();
-                IsRunnersTurnsDone = true;
-                gameManager.IsStateCheckAllowed = true;
-                TurnState = TurnStateEnum.STANDBY;
-                IsCommandPhase = false;
-                return null;
-            }
-            else if (runnerIndex == runnerCount - 1)
-            {
-                CurrentRunner = availableAndNotStayingRunnerList.First();
-                CurrentIndex = 0;
-                IsRunnersTurnsDone = true;
-            }
-            else if (runnerIndex == -1)
-            {
-                //Index can't be found
-                CurrentRunner = availableAndNotStayingRunnerList.First();
-                CurrentIndex = 0;
+                if (precalculatedRunnerIndex != GameManager.AttackTeamRunnerListClone.Count - 1)
+                {
+                    this.NextRunner = GameManager.AttackTeamRunnerListClone[precalculatedRunnerIndex + 1];
+                }
+                else
+                {
+                    this.NextRunner = GameManager.AttackTeamRunnerListClone.First();
+                }
+                foundRunner = this.CurrentRunner;
             }
             else
             {
-                int nextIndex = runnerIndex + 1;
-                CurrentRunner = availableAndNotStayingRunnerList[nextIndex];
-                CurrentIndex = nextIndex;
-            }
-
-            if (IsSkipNextRunnerTurnEnabled)
-            {
-                this.SkipNextRunner(runnerCount, availableAndNotStayingRunnerList);
+                foundRunner = this.FullRunnerSearch(precalculatedRunnerIndex, GameManager.AttackTeamRunnerListClone.Count, GameManager.AttackTeamRunnerListClone);
             }
         }
 
-        return CurrentRunner;
-        
+        if(foundRunner == null)
+        {
+            IsRunnersTurnsDone = true;
+            gameManager.IsStateCheckAllowed = true;
+            TurnState = TurnStateEnum.STANDBY;
+            IsCommandPhase = false;
+        }
+
+        return foundRunner;
     }
 
-    private void SkipNextRunner(int runnerCount, List<GameObject> availableRunnerList)
+    private GameObject FullRunnerSearch(int currentIndex, int runnerListCount, List<GameObject> runnerList)
     {
-        
-            Debug.Log("Skipping " + CurrentRunner.name + " Turn");
-            if (CurrentIndex == runnerCount - 1)
+        GameObject foundRunner = null;
+
+        int startSearchIndex;
+
+        if (currentIndex == runnerListCount - 1)
+        {
+            startSearchIndex = 0;
+        }
+        else
+        {
+            startSearchIndex = currentIndex + 1;
+        }
+
+        for (int i = startSearchIndex; i < runnerListCount; i++)
+        {
+            foundRunner = this.FilterCurrentSearchRunner(i, runnerList, runnerListCount);
+            if (foundRunner != null)
             {
-                CurrentRunner = availableRunnerList[0];
-                CurrentIndex = 0;
+                break;
+            }
+
+        }
+
+        //Do reverse search only in some cases
+        if (startSearchIndex != 0 && startSearchIndex != runnerListCount - 1 && foundRunner == null)
+        {
+            for (int i = startSearchIndex - 1; i > 0; i--)
+            {
+                foundRunner = this.FilterCurrentSearchRunner(i, runnerList, runnerListCount);
+                if (foundRunner != null)
+                {
+                    break;
+                }
+            }
+        }
+
+        return foundRunner;
+    }
+
+    private GameObject FilterCurrentSearchRunner(int i, List<GameObject> runnerList, int runnerListCount)
+    {
+        GameObject currentSearchRunner = runnerList[i];
+        RunnerBehaviour runnerBehaviour = PlayerUtils.FetchRunnerBehaviourScript(currentSearchRunner);
+
+        if (this.IsplayerAvailable(currentSearchRunner.name) && !runnerBehaviour.IsStaying && currentSearchRunner.activeInHierarchy)
+        {
+
+            if (i != runnerListCount - 1)
+            {
+                this.NextRunner = runnerList[i + 1];
             }
             else
             {
-                CurrentRunner = availableRunnerList[CurrentIndex + 1];
-                CurrentIndex += 1;
+                this.NextRunner = runnerList.First();
             }
 
-            IsSkipNextRunnerTurnEnabled = false;
-            Debug.Log("The turn will be " + CurrentRunner.name + "'s");
+            this.CurrentRunner = currentSearchRunner;
+            return this.CurrentRunner;
+        }
+
+        return null;
     }
 
     public GameObject GetNextRunnerTakingAction()
@@ -246,4 +278,5 @@ public class PlayersTurnManager : MonoBehaviour
     public int CurrentIndex { get => currentIndex; set => currentIndex = value; }
     public bool IsSkipNextRunnerTurnEnabled { get => isSkipNextRunnerTurnEnabled; set => isSkipNextRunnerTurnEnabled = value; }
     public Dictionary<string, TurnAvailabilityEnum> PlayerTurnAvailability { get => playerTurnAvailability; set => playerTurnAvailability = value; }
+    public GameObject NextRunner { get => nextRunner; set => nextRunner = value; }
 }

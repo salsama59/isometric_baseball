@@ -128,12 +128,15 @@ public class BatterBehaviour : GenericPlayerBehaviour
 
     public RunnerBehaviour ConvertBatterToRunner(PlayerStatus batterStatusScript)
     {
+        PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
         GameObject currentBatter = batterStatusScript.gameObject;
         GameObject bat = PlayerUtils.GetPlayerBatGameObject(currentBatter);
         GameManager gameManager = GameUtils.FetchGameManager();
         RunnerBehaviour runnerBehaviour = currentBatter.AddComponent<RunnerBehaviour>();
         gameManager.AttackTeamRunnerList.Add(runnerBehaviour.gameObject);
+        gameManager.AttackTeamRunnerListClone.Add(runnerBehaviour.gameObject);
         gameManager.AttackTeamBatterListClone.Remove(currentBatter);
+        playersTurnManager.CurrentRunner = runnerBehaviour.gameObject;
         runnerBehaviour.EquipedBat = bat;
         bat.SetActive(false);
         Destroy(currentBatter.GetComponent<BatterBehaviour>());
@@ -153,7 +156,7 @@ public class BatterBehaviour : GenericPlayerBehaviour
         string newRunnerName = NameConstants.RUNNER_NAME + "_" + runnerNumber;
         runnerBehaviour.gameObject.name = newRunnerName;
 
-        PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
+        
         playersTurnManager.TurnState = TurnStateEnum.STANDBY;
         
         return runnerBehaviour;

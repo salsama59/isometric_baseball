@@ -31,4 +31,5 @@ public class TagsConstants
     public static string RIGTH_SIDE_FOUL_ZONE_TAG = "RigthSideFoulZone";
     public static string INNING_COUNT_TAG = "InningCount";
     public static string INNING_PHASE_TAG = "InningPhase";
+    public static string TEAMS_SELECTION_MANAGER_TAG = "TeamsSelectionManager";
 }

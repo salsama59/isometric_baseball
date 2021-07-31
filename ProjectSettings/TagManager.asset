@@ -30,6 +30,7 @@ TagManager:
   - RigthSideFoulZone
   - InningCount
   - InningPhase
+  - TeamsSelectionManager
   layers:
   - Default
   - TransparentFX

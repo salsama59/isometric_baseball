@@ -53,6 +53,13 @@ public class GameUtils : MonoBehaviour
         return targetSelectionManager;
     }
 
+    public static TeamsSelectionManager FetchTeamsSelectionManager()
+    {
+        GameObject teamsSelectionManagerObject = GameObject.FindGameObjectWithTag(TagsConstants.TEAMS_SELECTION_MANAGER_TAG);
+        TeamsSelectionManager teamsSelectionManager = teamsSelectionManagerObject.GetComponent<TeamsSelectionManager>();
+        return teamsSelectionManager;
+    }
+
     public static GameObject FetchBaseGameObject(string tagName)
     {
         GameObject baseGameObject = GameObject.FindGameObjectWithTag(tagName);

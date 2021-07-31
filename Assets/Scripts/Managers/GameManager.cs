@@ -88,8 +88,8 @@ public class GameManager : MonoBehaviour
         playersTurnManager.TurnState = TurnStateEnum.PITCHER_TURN;
 
         ScoreManager = GameUtils.FetchTeamsScoreManager();
-        ScoreManager.UpdateTeamName(TeamIdEnum.TEAM_1, "FC.TOUTOU");
-        ScoreManager.UpdateTeamName(TeamIdEnum.TEAM_2, "AS.DETERMINE");
+        ScoreManager.UpdateTeamName(TeamIdEnum.TEAM_1, GameData.playerOneTeamChoice.TeamFullName);
+        ScoreManager.UpdateTeamName(TeamIdEnum.TEAM_2, GameData.playerTwoTeamChoice.TeamFullName);
 
         DialogBoxManager = GameUtils.FetchDialogBoxManager();
 
@@ -125,7 +125,7 @@ public class GameManager : MonoBehaviour
             }
             else
             {
-                this.ProcessInningDetails();
+               this.ProcessInningDetails();
             }
         }
         else if(inningCount >= MAXIMUM_INNING && CurrentInningPhase == InningPhaseEnum.BOTTOM)
@@ -134,7 +134,7 @@ public class GameManager : MonoBehaviour
 
             if(winnerTeam == TeamIdEnum.NO_TEAM)
             {
-                this.ProcessInningDetails();
+               this.ProcessInningDetails();
             }
             else
             {
@@ -144,7 +144,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            this.ProcessInningDetails();
+           this.ProcessInningDetails();
         }
 
     }
@@ -238,14 +238,17 @@ public class GameManager : MonoBehaviour
 
         for (int i = 0; i < GameData.playerNumber; i++)
         {
+            PlayerData[] playerDataList = null;
 
             if (i == (int)PlayerEnum.PLAYER_1)
             {
                 playerEnum = PlayerEnum.PLAYER_1;
+                playerDataList = GameData.playerOneTeamChoice.Players;
             }
             else
             {
                 playerEnum = PlayerEnum.PLAYER_2;
+                playerDataList = GameData.playerTwoTeamChoice.Players;
             }
 
             TeamSideEnum side = GameData.teamSideEnumMap[GameData.teamIdEnumMap[playerEnum]];
@@ -256,9 +259,11 @@ public class GameManager : MonoBehaviour
                 this.AttackTeamRunnerHomeList.Clear();
 
                 int batterNameIndex = 0;
+                int attackPlayerDataListIndex = 0;
                 foreach (KeyValuePair<int, GameObject> teamKeyValuePair in TeamUtils.GetPlayerTeam(playerEnum))
                 {
 
+                    PlayerData playerData = playerDataList[attackPlayerDataListIndex];
                     GameObject attackPlayer = teamKeyValuePair.Value;
                     PlayerStatus status = PlayerUtils.FetchPlayerStatusScript(attackPlayer);
 
@@ -280,13 +285,14 @@ public class GameManager : MonoBehaviour
                     status.PlayerFieldPosition = PlayerFieldPositionEnum.BATTER;
                     PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(attackPlayer);
 
-                    this.CalculatePlayerStats(FieldBall, attackPlayer, status, playerAbilities, playerActionsManager);
+                    this.CalculatePlayerStats(FieldBall, attackPlayer, status, playerAbilities, playerActionsManager, playerData);
                     attackPlayer.transform.position = TeamUtils.playerTeamMenberPositionLocation[status.PlayerFieldPosition];
                     AttackTeamBatterListClone.Add(attackPlayer);
                     attackPlayer.name += "_" + batterNameIndex;
                     attackPlayer.SetActive(false);
                     batterNameIndex++;
                     status.IsAllowedToMove = PlayerUtils.IsPlayerAllowedToMove(attackPlayer);
+                    attackPlayerDataListIndex++;
                 }
 
                 GameObject firstBatter = AttackTeamBatterListClone.First();
@@ -298,9 +304,11 @@ public class GameManager : MonoBehaviour
             else if (side == TeamSideEnum.DEFENSE)
             {
                 TeamUtils.fielderList.Clear();
+                int defensePlayerDataListIndex = 0;
                 foreach (GameObject defensePlayer in AttackTeamBatterList)
                 {
 
+                    PlayerData playerData = playerDataList[defensePlayerDataListIndex];
                     if (PlayerUtils.HasBatterPosition(defensePlayer))
                     {
                         Destroy(defensePlayer.GetComponent<BatterBehaviour>());
@@ -314,7 +322,7 @@ public class GameManager : MonoBehaviour
                     PlayerStatus status = PlayerUtils.FetchPlayerStatusScript(defensePlayer);
                     status.PlayerFieldPosition = status.DefaultPlayerFieldPosition;
                     PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(defensePlayer);
-                    this.CalculatePlayerStats(FieldBall, defensePlayer, status, playerAbilities, playerActionsManager);
+                    this.CalculatePlayerStats(FieldBall, defensePlayer, status, playerAbilities, playerActionsManager, playerData);
                     newPlayerDefenseTeamDictionary.Add((int)status.DefaultPlayerFieldPosition, defensePlayer);
                     defensePlayer.SetActive(true);
                     status.IsAllowedToMove = PlayerUtils.IsPlayerAllowedToMove(defensePlayer);
@@ -505,6 +513,17 @@ public class GameManager : MonoBehaviour
     private void SetPlayersCharacteristics(PlayerEnum playerId, GameObject ball)
     {
 
+        PlayerData[] playerDataList = null;
+
+        if (playerId == PlayerEnum.PLAYER_1)
+        {
+           playerDataList = GameData.playerOneTeamChoice.Players;
+        }
+        else if(playerId == PlayerEnum.PLAYER_2)
+        {
+            playerDataList = GameData.playerTwoTeamChoice.Players;
+        }
+
         List<PlayerFieldPositionEnum> eligibilityList = this.GetEligiblePlayerFieldPositionList(playerId);
 
         GameData.playerFieldPositionEnumListMap.Add(playerId, eligibilityList);
@@ -515,14 +534,12 @@ public class GameManager : MonoBehaviour
 
         if(side == TeamSideEnum.ATTACK)
         {
-            KeyValuePair<PlayerFieldPositionEnum, Vector3> batterKeyValuePair = new KeyValuePair<PlayerFieldPositionEnum, Vector3>(PlayerFieldPositionEnum.BATTER, TeamUtils.playerTeamMenberPositionLocation[PlayerFieldPositionEnum.BATTER]);
-            for (int i = 0; i < TeamUtils.teamSize; i++)
+            for (int i = 0; i < playerDataList.Length; i++)
             {
-                GameObject batter = this.ProcessPlayer(playerId, ball, batterKeyValuePair, side);
+                PlayerData playerData = playerDataList[i];
+                GameObject batter = this.ProcessPlayer(playerId, ball, PlayerFieldPositionEnum.BATTER, TeamUtils.playerTeamMenberPositionLocation[PlayerFieldPositionEnum.BATTER], side, playerData);
                 PlayerStatus status = PlayerUtils.FetchPlayerStatusScript(batter);
-                //TODO : Stop using this map as soon as possible!!!
-                status.DefaultPlayerFieldPosition = TeamUtils.genericPositionAllocationMap[i];
-                batter.name += "_" + i;
+                status.DefaultPlayerFieldPosition = EnumsUtils.StringToPlayerFieldPositionEnum(playerData.DefaultPlayerFieldPosition);
                 AttackTeamBatterList.Add(batter);
             }
 
@@ -530,40 +547,39 @@ public class GameManager : MonoBehaviour
             AttackTeamBatterListClone = new List<GameObject>(AttackTeamBatterList);
             GameObject firstBatter = AttackTeamBatterListClone.First();
             BatterBehaviour firstBatterBehaviour = PlayerUtils.FetchBatterBehaviourScript(firstBatter);
-            GameObject bat = Instantiate(batModel, FieldUtils.GetBatCorrectPosition(batterKeyValuePair.Value), Quaternion.Euler(0f, 0f, -70f));
+            GameObject bat = Instantiate(batModel, FieldUtils.GetBatCorrectPosition(TeamUtils.playerTeamMenberPositionLocation[PlayerFieldPositionEnum.BATTER]), Quaternion.Euler(0f, 0f, -70f));
             Bat = bat;
             bat.transform.parent = firstBatter.transform;
             firstBatter.SetActive(true);
             firstBatterBehaviour.EquipedBat = bat;
-            TeamUtils.AddPlayerTeamMember(batterKeyValuePair.Key, firstBatter, playerId);
+            TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.BATTER, firstBatter, playerId);
         }
         else if (side == TeamSideEnum.DEFENSE)
         {
-            foreach (KeyValuePair<PlayerFieldPositionEnum, Vector3> entry in TeamUtils.playerTeamMenberPositionLocation)
+            foreach (PlayerData playerInformations in playerDataList)
             {
-                if (eligibilityList.Contains(entry.Key))
-                {
-                    GameObject defensePlayer = this.ProcessPlayer(playerId, ball, entry, side);
-                    PlayerStatus status = PlayerUtils.FetchPlayerStatusScript(defensePlayer);
-                    status.DefaultPlayerFieldPosition = entry.Key;
-                }
+                GameObject defensePlayer = this.ProcessPlayer(playerId, ball, EnumsUtils.StringToPlayerFieldPositionEnum(playerInformations.PlayerFieldPosition), TeamUtils.playerTeamMenberPositionLocation[EnumsUtils.StringToPlayerFieldPositionEnum(playerInformations.PlayerFieldPosition)], side, playerInformations);
+                PlayerStatus status = PlayerUtils.FetchPlayerStatusScript(defensePlayer);
+                status.DefaultPlayerFieldPosition = EnumsUtils.StringToPlayerFieldPositionEnum(playerInformations.DefaultPlayerFieldPosition);
             }
         }
         
     }
 
-    private GameObject ProcessPlayer(PlayerEnum playerId, GameObject ball, KeyValuePair<PlayerFieldPositionEnum, Vector3> entry, TeamSideEnum teamSide)
+    private GameObject ProcessPlayer(PlayerEnum playerId, GameObject ball, PlayerFieldPositionEnum playerFieldPositionEnum, Vector3 playerFieldPosition, TeamSideEnum teamSide, PlayerData playerData)
     {
-        GameObject player = Instantiate(playerModel, entry.Value, Quaternion.identity);
+        GameObject player = Instantiate(playerModel, playerFieldPosition, Quaternion.identity);
         PlayerStatus playerStatus = PlayerUtils.FetchPlayerStatusScript(player);
-        playerStatus.PlayerFieldPosition = entry.Key;
+
+        playerStatus.PlayerFieldPosition = playerFieldPositionEnum;
+        
         playerStatus.IsAllowedToMove = PlayerUtils.IsPlayerAllowedToMove(player);
         playerStatus.PlayerOwner = playerId;
 
         PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(player);
 
         PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
-        this.CalculatePlayerStats(ball, player, playerStatus, playerAbilities, playerActionsManager);
+        this.CalculatePlayerStats(ball, player, playerStatus, playerAbilities, playerActionsManager, playerData);
         this.UpdatePlayerGenericBehaviour(ball, player, playerStatus);
 
         if (PlayerUtils.HasFielderPosition(player))
@@ -573,7 +589,7 @@ public class GameManager : MonoBehaviour
 
         if (teamSide == TeamSideEnum.DEFENSE)
         {
-            TeamUtils.AddPlayerTeamMember(entry.Key, player, playerId);
+            TeamUtils.AddPlayerTeamMember(EnumsUtils.StringToPlayerFieldPositionEnum(playerData.PlayerFieldPosition), player, playerId);
         }
 
         return player;
@@ -588,25 +604,29 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void CalculatePlayerStats(GameObject ball, GameObject player, PlayerStatus playerStatus, PlayerAbilities playerAbilities, PlayerActionsManager playerActionsManager)
+    private void CalculatePlayerStats(GameObject ball, GameObject player, PlayerStatus playerStatus, PlayerAbilities playerAbilities, PlayerActionsManager playerActionsManager, PlayerData playerData)
     {
         GenericPlayerBehaviour genericPlayerBehaviour = null;
         playerAbilities.ReinitAbilities();
 
+
+        playerStatus.BattingEfficiency = playerData.PlayerStatus.BattingEfficiency;
+        playerStatus.BattingPower = playerData.PlayerStatus.BattingPower;
+        playerStatus.PitchEfficiency = playerData.PlayerStatus.PitchEfficiency;
+        playerStatus.PitchingPower = playerData.PlayerStatus.PitchingPower;
+        playerStatus.PitchingEffect = playerData.PlayerStatus.PitchingEffect;
+        playerStatus.Speed = playerData.PlayerStatus.Speed;
+        playerStatus.CatchEfficiency = playerData.PlayerStatus.CatchEfficiency;
+
         switch (playerStatus.PlayerFieldPosition)
         {
             case PlayerFieldPositionEnum.BATTER:
-                playerStatus.BattingEfficiency = 10f;
-                playerStatus.BattingPower = 5;
                 genericPlayerBehaviour = player.AddComponent<BatterBehaviour>();
                 PlayerAbility hitBallPlayerAbility = new PlayerAbility("Hit ball", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.HitBallAction, player);
                 playerAbilities.AddAbility(hitBallPlayerAbility);
                 player.SetActive(false);
                 break;
             case PlayerFieldPositionEnum.PITCHER:
-                playerStatus.PitchEfficiency = 50f;
-                playerStatus.PitchingPower = 2;
-                playerStatus.PitchingEffect = 10f;
                 BallController ballControllerScript = BallUtils.FetchBallControllerScript(ball);
                 ballControllerScript.CurrentPitcher = player;
                 genericPlayerBehaviour = player.AddComponent<PitcherBehaviour>();
@@ -622,7 +642,6 @@ public class GameManager : MonoBehaviour
                 this.UpdatePlayerColliderSettings(player);
                 break;
             case PlayerFieldPositionEnum.RUNNER:
-                playerStatus.Speed = 2f;
                 genericPlayerBehaviour = player.AddComponent<RunnerBehaviour>();
                 PlayerAbility runPlayerAbility = new PlayerAbility("Run to next base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.RunAction, player);
                 PlayerAbility staySafePlayerAbility = new PlayerAbility("Stay on base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.StayOnBaseAction, player);
@@ -630,44 +649,29 @@ public class GameManager : MonoBehaviour
                 playerAbilities.AddAbility(staySafePlayerAbility);
                 break;
             case PlayerFieldPositionEnum.CATCHER:
-                playerStatus.CatchEfficiency = 100f;
                 genericPlayerBehaviour = player.AddComponent<CatcherBehaviour>();
                 PlayerAbility catchPlayerAbility = new PlayerAbility("Catch ball", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.CatchBallAction, player);
                 playerAbilities.AddAbility(catchPlayerAbility);
                 break;
             case PlayerFieldPositionEnum.FIRST_BASEMAN:
-                playerStatus.CatchEfficiency = 80f;
-                playerStatus.Speed = 2f;
                 genericPlayerBehaviour = player.AddComponent<FielderBehaviour>();
                 break;
             case PlayerFieldPositionEnum.THIRD_BASEMAN:
-                playerStatus.CatchEfficiency = 80f;
-                playerStatus.Speed = 2f;
                 genericPlayerBehaviour = player.AddComponent<FielderBehaviour>();
                 break;
             case PlayerFieldPositionEnum.SECOND_BASEMAN:
-                playerStatus.CatchEfficiency = 80f;
-                playerStatus.Speed = 2f;
                 genericPlayerBehaviour = player.AddComponent<FielderBehaviour>();
                 break;
             case PlayerFieldPositionEnum.SHORT_STOP:
-                playerStatus.CatchEfficiency = 80f;
-                playerStatus.Speed = 2f;
                 genericPlayerBehaviour = player.AddComponent<FielderBehaviour>();
                 break;
             case PlayerFieldPositionEnum.LEFT_FIELDER:
-                playerStatus.CatchEfficiency = 80f;
-                playerStatus.Speed = 2f;
                 genericPlayerBehaviour = player.AddComponent<FielderBehaviour>();
                 break;
             case PlayerFieldPositionEnum.RIGHT_FIELDER:
-                playerStatus.CatchEfficiency = 80f;
-                playerStatus.Speed = 2f;
                 genericPlayerBehaviour = player.AddComponent<FielderBehaviour>();
                 break;
             case PlayerFieldPositionEnum.CENTER_FIELDER:
-                playerStatus.CatchEfficiency = 80f;
-                playerStatus.Speed = 2f;
                 genericPlayerBehaviour = player.AddComponent<FielderBehaviour>();
                 break;
         }
@@ -681,7 +685,7 @@ public class GameManager : MonoBehaviour
             this.UpdatePlayerColliderSettings(player);
         }
 
-        player.name = playerStatus.PlayerFieldPosition.ToString();
+        player.name = playerData.PlayerFirstName + "_" + playerData.PlayerLastName;
         genericPlayerBehaviour.FieldBall = FieldBall;
     }
 

@@ -79,7 +79,7 @@ public class PlayersTurnManager : MonoBehaviour
 
     public void UpdatePlayerTurnQueue(GameObject player)
     {
-        this.PlayerTurnAvailability.Remove(player.name);
+       this.playerTurnAvailability.Remove(player.name);
         if (player == this.NextRunner)
         {
             List<GameObject> runnerList = GameManager.AttackTeamRunnerListClone;
@@ -246,23 +246,23 @@ public class PlayersTurnManager : MonoBehaviour
     {
         if (!this.PlayerTurnAvailability.ContainsKey(playerName))
         {
-            this.PlayerTurnAvailability.Add(playerName, turnAvailabilityEnum);
+           this.playerTurnAvailability.Add(playerName, turnAvailabilityEnum);
         }
         else
         {
-            this.PlayerTurnAvailability[playerName] = turnAvailabilityEnum;
+           this.playerTurnAvailability[playerName] = turnAvailabilityEnum;
         }
     }
 
     public bool IsplayerAvailable(string playerName)
     {
-        return this.PlayerTurnAvailability.ContainsKey(playerName) 
-            && this.PlayerTurnAvailability[playerName].Equals(TurnAvailabilityEnum.READY);
+        return this.playerTurnAvailability.ContainsKey(playerName) 
+            && this.playerTurnAvailability[playerName].Equals(TurnAvailabilityEnum.READY);
     }
 
     public void MakeAllPlayerAvailable()
     {
-        this.PlayerTurnAvailability = this.PlayerTurnAvailability
+       this.playerTurnAvailability =this.playerTurnAvailability
             .ToDictionary(entry => entry.Key
             , entry => TurnAvailabilityEnum.READY);
     }

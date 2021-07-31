@@ -9,4 +9,6 @@ public class GameData
     public static Dictionary<PlayerEnum, TeamIdEnum> teamIdEnumMap = new Dictionary<PlayerEnum, TeamIdEnum>();
     public static Dictionary<TeamIdEnum, TeamSideEnum> teamSideEnumMap = new Dictionary<TeamIdEnum, TeamSideEnum>();
     public static bool isPaused = false;
+    public static TeamData playerOneTeamChoice = null;
+    public static TeamData playerTwoTeamChoice = null;
 }

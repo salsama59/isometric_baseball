@@ -14,85 +14,85 @@ public class FieldUtils
 
     public static Vector2Int GetHomeBaseTilePosition()
     {
-        int xTilePosition = GameManager.ColumnMinimum;
-        int yTilePosition = GameManager.RowMinimum;
+        int xTilePosition = GameManager.DaimonFieldColumnMinimum;
+        int yTilePosition = GameManager.DaimonFieldRowMinimum;
         return new Vector2Int(xTilePosition, yTilePosition);
     }
 
     public static Vector2Int GetFirstBaseTilePosition()
     {
-        int xTilePosition = GameManager.ColumnMaximum;
-        int yTilePosition = GameManager.RowMinimum;
+        int xTilePosition = GameManager.DaimonFieldColumnMaximum;
+        int yTilePosition = GameManager.DaimonFieldRowMinimum;
         return new Vector2Int(xTilePosition, yTilePosition);
     }
 
     public static Vector2Int GetSecondBaseTilePosition()
     {
-        int xTilePosition = GameManager.ColumnMaximum;
-        int yTilePosition = GameManager.RowMaximum;
+        int xTilePosition = GameManager.DaimonFieldColumnMaximum;
+        int yTilePosition = GameManager.DaimonFieldRowMaximum;
         return new Vector2Int(xTilePosition, yTilePosition);
     }
 
     public static Vector2Int GetThirdBaseTilePosition()
     {
-        int xTilePosition = GameManager.ColumnMinimum;
-        int yTilePosition = GameManager.RowMaximum;
+        int xTilePosition = GameManager.DaimonFieldColumnMinimum;
+        int yTilePosition = GameManager.DaimonFieldRowMaximum;
         return new Vector2Int(xTilePosition, yTilePosition);
     }
 
     public static Vector2Int GetCatcherZonePosition()
     {
-        int xTilePosition = GameManager.ColumnMinimum - (int)GRID_SIZE * 2;
-        int yTilePosition = GameManager.RowMinimum - (int)GRID_SIZE * 2;
+        int xTilePosition = GameManager.DaimonFieldColumnMinimum - (int)GRID_SIZE * 2;
+        int yTilePosition = GameManager.DaimonFieldRowMinimum - (int)GRID_SIZE * 2;
         return new Vector2Int(xTilePosition, yTilePosition);
     }
 
     public static Vector2Int GetBatterTilePosition()
     {
-        int xTilePosition = GameManager.ColumnMinimum - (int)GRID_SIZE;
-        int yTilePosition = GameManager.RowMinimum;
+        int xTilePosition = GameManager.DaimonFieldColumnMinimum - (int)GRID_SIZE;
+        int yTilePosition = GameManager.DaimonFieldRowMinimum;
         return new Vector2Int(xTilePosition, yTilePosition);
     }
 
     public static Vector2Int GetSecondBasemanTilePosition()
     {
-        int xTilePosition = GameManager.ColumnMaximum + (GameManager.ColumnMaximum/3);
-        int yTilePosition = GameManager.RowMaximum - (GameManager.RowMaximum/3);
+        int xTilePosition = GameManager.DaimonFieldColumnMaximum + (GameManager.DaimonFieldColumnMaximum/3);
+        int yTilePosition = GameManager.DaimonFieldRowMaximum - (GameManager.DaimonFieldRowMaximum/3);
         return new Vector2Int(xTilePosition, yTilePosition);
     }
 
     public static Vector2Int GetShortStopTilePosition()
     {
-        int xTilePosition = GameManager.ColumnMaximum - (GameManager.ColumnMaximum / 3);
-        int yTilePosition = GameManager.RowMaximum + (GameManager.RowMaximum / 3);
+        int xTilePosition = GameManager.DaimonFieldColumnMaximum - (GameManager.DaimonFieldColumnMaximum / 3);
+        int yTilePosition = GameManager.DaimonFieldRowMaximum + (GameManager.DaimonFieldRowMaximum / 3);
         return new Vector2Int(xTilePosition, yTilePosition);
     }
 
     public static Vector2Int GetLeftFielderTilePosition()
     {
         int xTilePosition = 0;
-        int yTilePosition = GameManager.RowMaximum * 2;
+        int yTilePosition = GameManager.DaimonFieldRowMaximum * 2;
         return new Vector2Int(xTilePosition, yTilePosition);
     }
 
     public static Vector2Int GetRightFielderTilePosition()
     {
-        int xTilePosition = GameManager.ColumnMaximum * 2;
+        int xTilePosition = GameManager.DaimonFieldColumnMaximum * 2;
         int yTilePosition = 0;
         return new Vector2Int(xTilePosition, yTilePosition);
     }
 
     public static Vector2Int GetCenterFielderTilePosition()
     {
-        int xTilePosition = GameManager.ColumnMaximum * 2;
-        int yTilePosition = GameManager.RowMaximum * 2;
+        int xTilePosition = GameManager.DaimonFieldColumnMaximum * 2;
+        int yTilePosition = GameManager.DaimonFieldRowMaximum * 2;
         return new Vector2Int(xTilePosition, yTilePosition);
     }
 
     public static Vector2Int GetCathcherOutBallZonePosition()
     {
-        int xTilePosition = GameManager.ColumnMinimum - (int)GRID_SIZE * 3;
-        int yTilePosition = GameManager.RowMinimum - (int)GRID_SIZE * 3;
+        int xTilePosition = GameManager.DaimonFieldColumnMinimum - (int)GRID_SIZE * 3;
+        int yTilePosition = GameManager.DaimonFieldRowMinimum - (int)GRID_SIZE * 3;
         return new Vector2Int(xTilePosition, yTilePosition);
     }
 

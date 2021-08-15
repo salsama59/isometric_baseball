@@ -60,6 +60,13 @@ public class GameUtils : MonoBehaviour
         return teamsSelectionManager;
     }
 
+    public static PathFindingManager FetchPathFindingManager()
+    {
+        GameObject pathFindingManagerObject = GameObject.FindGameObjectWithTag(TagsConstants.PATH_FINDING_MANAGER_TAG);
+        PathFindingManager pathFindingManager = pathFindingManagerObject.GetComponent<PathFindingManager>();
+        return pathFindingManager;
+    }
+
     public static GameObject FetchBaseGameObject(string tagName)
     {
         GameObject baseGameObject = GameObject.FindGameObjectWithTag(tagName);

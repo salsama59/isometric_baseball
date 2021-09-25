@@ -67,6 +67,13 @@ public class GameUtils : MonoBehaviour
         return pathFindingManager;
     }
 
+    public static TextManager FetchTextManager()
+    {
+        GameObject pathFindingManagerObject = GameObject.FindGameObjectWithTag(TagsConstants.TEXT_MANAGER_TAG);
+        TextManager textManager = pathFindingManagerObject.GetComponent<TextManager>();
+        return textManager;
+    }
+
     public static GameObject FetchBaseGameObject(string tagName)
     {
         GameObject baseGameObject = GameObject.FindGameObjectWithTag(tagName);

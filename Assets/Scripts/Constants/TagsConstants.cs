@@ -29,4 +29,5 @@
     public static string INNING_PHASE_TAG = "InningPhase";
     public static string TEAMS_SELECTION_MANAGER_TAG = "TeamsSelectionManager";
     public static string PATH_FINDING_MANAGER_TAG = "PathFindingManager";
+    public static string TEXT_MANAGER_TAG = "TextManager";
 }

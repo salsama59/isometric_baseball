@@ -140,7 +140,6 @@ public class TargetSelectionManager : MonoBehaviour
 
     public void DisableSelection()
     {
-        //this.RemoveHighlightPath();
         ActionPlayerhighLightUi.SetActive(false);
         HighLightUi.SetActive(false);
         IsActivated = false;

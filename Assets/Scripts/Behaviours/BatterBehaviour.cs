@@ -87,7 +87,6 @@ public class BatterBehaviour : GenericPlayerBehaviour
 
             float ballOutcomeRate = ActionCalculationUtils.CalculateBallOutcomeProbability(ballControllerScript.CurrentPitcher);
             bool isBallOutcome = ActionCalculationUtils.HasActionSucceeded(ballOutcomeRate);
-            DialogBoxManager dialogBoxManagerScript = GameUtils.FetchDialogBoxManager();
             string outcomeMessage;
 
             if (!isBallOutcome)
@@ -104,7 +103,8 @@ public class BatterBehaviour : GenericPlayerBehaviour
 
             ballControllerScript.IsPitched = true;
             ballControllerScript.Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetCatcherZonePosition());
-            dialogBoxManagerScript.DisplayDialogAndTextForGivenAmountOfTime(1f, false, outcomeMessage);
+            TextManager textManagerScript = GameUtils.FetchTextManager();
+            textManagerScript.CreateText(this.transform.position, outcomeMessage, Color.black, 1f, true);
         }
     }
 

@@ -32,6 +32,7 @@ TagManager:
   - InningPhase
   - TeamsSelectionManager
   - PathFindingManager
+  - TextManager
   layers:
   - Default
   - TransparentFX

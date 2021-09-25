@@ -120,11 +120,13 @@ public class PlayerActionsManager : MonoBehaviour
 
     public void GenericTagOutAimAction(GameObject actionUser)
     {
-        List<GameObject> runners = PlayerUtils.GetRunnersOnField()
-           .OrderBy(runner => Vector3.Distance(actionUser.transform.position, runner.transform.position))
-           .ToList();
+        List<GameObject> runners = PlayerUtils.GetRunnersOnField().Where(runner => {
+            RunnerBehaviour runnerBehaviour = PlayerUtils.FetchRunnerBehaviourScript(runner);
+            return !runnerBehaviour.IsSafe && !runnerBehaviour.IsStaying;
+        }).OrderBy(runner => Vector3.Distance(actionUser.transform.position, runner.transform.position))
+        .ToList();
 
-        if(runners.Count > 1)
+        if (runners.Count > 1)
         {
             TargetSelectionManager.EnableSelection(runners.First().transform.position, runners, TagOutAimAction, actionUser);
             PlayersTurnManager.IsCommandPhase = true;

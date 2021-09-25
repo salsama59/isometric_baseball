@@ -5,9 +5,8 @@ using UnityEngine;
 
 public class TargetSelectionManager : MonoBehaviour
 {
-
-    public GameObject highLightUiModel = null;
     private GameObject highLightUi;
+    private GameObject actionPlayerhighLightUi;
     private bool isActivated;
     private List<GameObject> targetList;
     private int currentTargetSelectionIndex;
@@ -15,13 +14,24 @@ public class TargetSelectionManager : MonoBehaviour
     private Action<GameObject, GameObject> actionSelection;
     private GameObject actionUser;
     private readonly int DEFAULT_SELECTION_INDEX = 0;
+    private PathFindingManager isoPathFinder;
+    public GameObject fieldHighligthModel;
+    private List<GameObject> activePathHighlights;
 
     // Start is called before the first frame update
     void Start()
     {
+        isoPathFinder = GameUtils.FetchPathFindingManager();
         CameraController = CameraUtils.FetchCameraController();
-        HighLightUi = Instantiate(highLightUiModel, this.transform.position, this.transform.rotation);
+
+        ActionPlayerhighLightUi = Instantiate(fieldHighligthModel, this.transform.position, this.transform.rotation);
+        ActionPlayerhighLightUi.GetComponent<SpriteRenderer>().color = Color.blue;
+        ActionPlayerhighLightUi.SetActive(false);
+
+        HighLightUi = Instantiate(fieldHighligthModel, this.transform.position, this.transform.rotation);
+        HighLightUi.GetComponent<SpriteRenderer>().color = Color.red;
         HighLightUi.SetActive(false);
+
         currentTargetSelectionIndex = DEFAULT_SELECTION_INDEX;
     }
 
@@ -68,10 +78,50 @@ public class TargetSelectionManager : MonoBehaviour
         }
     }
 
+    private void DisplayHighlightPath(Vector2Int start, Vector2Int end)
+    {
+        List<Vector3Int> mapPath = isoPathFinder.GetCalculatedMapPath(start, end);
+        List<Vector3> tilePositions = new List<Vector3>();
+        this.activePathHighlights = new List<GameObject>();
+        if (mapPath != null)
+        {
+            foreach (Vector3Int pos in mapPath)
+            {
+                tilePositions.Add(FieldUtils.GetTileCenterPositionInGameWorld(new Vector2Int(pos.x, pos.y)));
+            }
+            for (int i = 0; i < tilePositions.Count; i++)
+            {
+                this.activePathHighlights.Add(Instantiate(fieldHighligthModel));
+                this.activePathHighlights[i].SetActive(true);
+                this.activePathHighlights[i].GetComponent<SpriteRenderer>().color = Color.magenta;
+                //activeHighlights[i].GetComponent<SpriteRenderer>().color = Color.Lerp(startColour, endColour, (float)i / (float)tilePositions.Count);
+                this.activePathHighlights[i].transform.position = tilePositions[i];
+            }
+        }
+    }
+
+    private void RemoveHighlightPath()
+    {
+        if(this.activePathHighlights != null)
+        {
+            for (int i = 0; i < this.activePathHighlights.Count; i++)
+            {
+                Destroy(this.activePathHighlights[i]);
+            }
+
+            this.activePathHighlights.Clear();
+        }
+    }
+
     public void EnableSelection(Vector3 initialPosition, List<GameObject> targetSelectionList, Action<GameObject, GameObject> actionForSelection = null, GameObject actionUser = null)
     {
+        //this.RemoveHighlightPath();
+        //this.DisplayHighlightPath(FieldUtils.GetGameObjectTilePositionOnField(actionUser), FieldUtils.GetGameObjectTilePositionOnField(targetSelectionList[currentTargetSelectionIndex]));
+
+        ActionPlayerhighLightUi.transform.position = actionUser.transform.position;
         HighLightUi.transform.position = initialPosition;
         TargetList = targetSelectionList;
+        ActionPlayerhighLightUi.SetActive(true);
         HighLightUi.SetActive(true);
         GameObject targetSelection = TargetList[currentTargetSelectionIndex];
         CameraController.FocusOnPlayer(targetSelection.transform);
@@ -90,6 +140,7 @@ public class TargetSelectionManager : MonoBehaviour
 
     public void DisableSelection()
     {
+        ActionPlayerhighLightUi.SetActive(false);
         HighLightUi.SetActive(false);
         IsActivated = false;
         currentTargetSelectionIndex = DEFAULT_SELECTION_INDEX;
@@ -97,8 +148,10 @@ public class TargetSelectionManager : MonoBehaviour
 
     private void SelectTarget(int nextSelectionIndex)
     {
+        //this.RemoveHighlightPath();
+        //this.DisplayHighlightPath(FieldUtils.GetGameObjectTilePositionOnField(this.actionUser), FieldUtils.GetGameObjectTilePositionOnField(TargetList[nextSelectionIndex]));
         GameObject targetSelection = TargetList[nextSelectionIndex];
-
+        ActionPlayerhighLightUi.transform.position = this.actionUser.transform.position;
         HighLightUi.transform.position = targetSelection.transform.position;
         CameraController.FocusOnPlayer(targetSelection.transform);
         currentTargetSelectionIndex = nextSelectionIndex;
@@ -126,4 +179,5 @@ public class TargetSelectionManager : MonoBehaviour
     public bool IsActivated { get => isActivated; set => isActivated = value; }
     public List<GameObject> TargetList { get => targetList; set => targetList = value; }
     public CameraController CameraController { get => cameraController; set => cameraController = value; }
+    public GameObject ActionPlayerhighLightUi { get => actionPlayerhighLightUi; set => actionPlayerhighLightUi = value; }
 }

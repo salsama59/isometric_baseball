@@ -10,10 +10,16 @@ using UnityEngine.Video;
 
 public class GameManager : MonoBehaviour
 {
-    private static int columnMaximum = 10;
-    private static int columnMinimum = -10;
-    private static int rowMinimum = -10;
-    private static int rowMaximum = 10;
+    private static int daimonFieldColumnMaximum = 10;
+    private static int daimonFieldColumnMinimum = -10;
+    private static int daimonFieldRowMinimum = -10;
+    private static int daimonFieldRowMaximum = 10;
+
+    private static int stadiumColumnMaximum = 30;
+    private static int stadiumColumnMinimum = -30;
+    private static int stadiumRowMinimum = -30;
+    private static int stadiumRowMaximum = 30;
+
     public Tilemap fieldTileMap = null;
     public Tilemap baseTileMap = null;
     public List<Tile> tilePool;
@@ -405,7 +411,7 @@ public class GameManager : MonoBehaviour
 
         float leftSidefoulZoneAngle = Mathf.Acos(homeBaseToLeftSideFictionalDistance / homeBaseToThirdBaseDistance);
         leftSideFoulzone.transform.rotation = Quaternion.Euler(0, 0, leftSidefoulZoneAngle * -1 * Mathf.Rad2Deg);
-        float leftSideZonePositioningAndEffectSize = (float)rowMinimum / 4f + (float)rowMinimum / 2f + (float)FieldUtils.GRID_SIZE;
+        float leftSideZonePositioningAndEffectSize = (float)daimonFieldRowMinimum / 4f + (float)daimonFieldRowMinimum / 2f + (float)FieldUtils.GRID_SIZE;
         leftSideFoulzone.transform.position = new Vector3(-homeBaseToLeftSideFictionalDistance/2f, -thridBaseToLeftSideFictionalDistance/2f, 0);
 
         BoxCollider2D leftSideFoulZoneCollider = leftSideFoulzone.GetComponent<BoxCollider2D>();
@@ -423,7 +429,7 @@ public class GameManager : MonoBehaviour
 
         float rigthSidefoulZoneAngle = Mathf.Acos(homeBaseToRigthSideFictionalDistance / homeBaseToFirstBaseDistance);
         rightSideFoulzone.transform.rotation = Quaternion.Euler(0, 0, rigthSidefoulZoneAngle * Mathf.Rad2Deg);
-        float rigthSideZonePositioningAndEffectSize = (float)rowMaximum / 4f + (float)rowMaximum / 2f - (float)FieldUtils.GRID_SIZE;
+        float rigthSideZonePositioningAndEffectSize = (float)daimonFieldRowMaximum / 4f + (float)daimonFieldRowMaximum / 2f - (float)FieldUtils.GRID_SIZE;
         rightSideFoulzone.transform.position = new Vector3(homeBaseToRigthSideFictionalDistance / 2f, -firstBaseToRigthSideFictionalDistance / 2f, 0);
 
         BoxCollider2D rightSideFoulZoneCollider = rightSideFoulzone.GetComponent<BoxCollider2D>();
@@ -873,9 +879,9 @@ public class GameManager : MonoBehaviour
         this.CalculateHorizontalyPaintedDirtPositions(HorizontalyPaintedDirtDictionary, FieldUtils.GetSecondBaseTilePosition(), FieldUtils.GetThirdBaseTilePosition(), TileTypeEnum.HORIZONTAL_PAINTED_DIRT);
         this.CalculateVerticalyPaintedDirtPositions(VerticalyPaintedDirtDictionary, FieldUtils.GetThirdBaseTilePosition(), FieldUtils.GetHomeBaseTilePosition(), TileTypeEnum.VERTICAL_PAINTED_DIRT);
 
-        for (int collumn = ColumnMinimum; collumn < ColumnMaximum + 1; collumn++)
+        for (int collumn = StadiumColumnMinimum; collumn < StadiumColumnMaximum + 1; collumn++)
         {
-            for (int row = RowMinimum; row < RowMaximum + 1; row++)
+            for (int row = StadiumRowMinimum; row < StadiumRowMaximum + 1; row++)
             {
                 Vector3Int localPlace = new Vector3Int(collumn, row, (int)fieldTileMap.transform.position.y);
                
@@ -885,12 +891,12 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        for (int collumn = ColumnMinimum; collumn < ColumnMaximum + 1; collumn++)
+        for (int collumn = DaimonFieldColumnMinimum; collumn < DaimonFieldColumnMaximum + 1; collumn++)
         {
-            for (int row = RowMinimum; row < RowMaximum + 1; row++)
+            for (int row = DaimonFieldRowMinimum; row < DaimonFieldRowMaximum + 1; row++)
             {
                 Vector3Int localPlace = new Vector3Int(collumn, row, (int)baseTileMap.transform.position.y);
-                TileInformation tileInformation = this.GetBaseTileInformation(localPlace, baseTileMap, collumn, row);
+                TileInformation tileInformation = this.GetBaseTileInformation(localPlace);
                 if(tileInformation != null)
                 {
                     Vector3 basePosition = FieldUtils.GetTileCenterPositionInGameWorld(new Vector2Int(localPlace.x, localPlace.y));
@@ -952,7 +958,7 @@ public class GameManager : MonoBehaviour
         return tileInformation;
     }
 
-    private TileInformation GetBaseTileInformation(Vector3Int localPlace, Tilemap tilemap, int collumn, int line)
+    private TileInformation GetBaseTileInformation(Vector3Int localPlace)
     {
 
         TileInformation tileInformation = new TileInformation();
@@ -1113,10 +1119,10 @@ public class GameManager : MonoBehaviour
 
     public Dictionary<string, TileTypeEnum> HorizontalyPaintedDirtDictionary { get => horizontalyPaintedDirtDictionary; set => horizontalyPaintedDirtDictionary = value; }
     public Dictionary<string, TileTypeEnum> VerticalyPaintedDirtDictionary { get => verticalyPaintedDirtDictionary; set => verticalyPaintedDirtDictionary = value; }
-    public static int ColumnMaximum { get => columnMaximum; set => columnMaximum = value; }
-    public static int ColumnMinimum { get => columnMinimum; set => columnMinimum = value; }
-    public static int RowMinimum { get => rowMinimum; set => rowMinimum = value; }
-    public static int RowMaximum { get => rowMaximum; set => rowMaximum = value; }
+    public static int DaimonFieldColumnMaximum { get => daimonFieldColumnMaximum; set => daimonFieldColumnMaximum = value; }
+    public static int DaimonFieldColumnMinimum { get => daimonFieldColumnMinimum; set => daimonFieldColumnMinimum = value; }
+    public static int DaimonFieldRowMinimum { get => daimonFieldRowMinimum; set => daimonFieldRowMinimum = value; }
+    public static int DaimonFieldRowMaximum { get => daimonFieldRowMaximum; set => daimonFieldRowMaximum = value; }
     public List<GameObject> AttackTeamBatterListClone { get => attackTeamBatterListClone; set => attackTeamBatterListClone = value; }
     public List<GameObject> AttackTeamRunnerList { get => attackTeamRunnerList; set => attackTeamRunnerList = value; }
     public int BatterOutCount { get => batterOutCount; set => batterOutCount = value; }
@@ -1130,4 +1136,8 @@ public class GameManager : MonoBehaviour
     public DialogBoxManager DialogBoxManager { get => dialogBoxManager; set => dialogBoxManager = value; }
     public List<GameObject> AttackTeamRunnerHomeList { get => attackTeamRunnerHomeList; set => attackTeamRunnerHomeList = value; }
     public List<GameObject> AttackTeamRunnerListClone { get => attackTeamRunnerListClone; set => attackTeamRunnerListClone = value; }
+    public static int StadiumColumnMaximum { get => stadiumColumnMaximum; set => stadiumColumnMaximum = value; }
+    public static int StadiumColumnMinimum { get => stadiumColumnMinimum; set => stadiumColumnMinimum = value; }
+    public static int StadiumRowMinimum { get => stadiumRowMinimum; set => stadiumRowMinimum = value; }
+    public static int StadiumRowMaximum { get => stadiumRowMaximum; set => stadiumRowMaximum = value; }
 }

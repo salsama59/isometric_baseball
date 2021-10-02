@@ -180,7 +180,7 @@ public class TeamsSelectionManager : MonoBehaviour
 
     private TeamData[] LoadTeamDatas()
     {
-        string jsonTeamDatasPath = Application.dataPath + "/GameDatas/model-exporter.json";
+        string jsonTeamDatasPath = Application.dataPath + "/GameDatas/teams-datas.json";
         string jsonString = File.ReadAllText(jsonTeamDatasPath);
         return JsonUtils.FromJson<TeamData>("{\n\t\"items\":\t" + jsonString + "\n}");
     }

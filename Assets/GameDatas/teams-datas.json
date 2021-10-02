@@ -21,11 +21,11 @@
 					"speed": 31.5,
 					"stamina": 12.5,
 					"catchEfficiency": 20.5,
-					"pitchEfficiency": 60.5,
-					"passEfficiency": 15,
+					"pitchEfficiency": 40.5,
+					"passEfficiency": 30,
 					"battingEfficiency": 60.5,
-					"battingPower": 39.5,
-					"pitchingPower": 35.5,
+					"battingPower": 10,
+					"pitchingPower": 1,
 					"pitchingEffect": 73
 				}
 			},
@@ -45,9 +45,9 @@
 					"profileName": "DEFENSE TYPE C",
 					"speed": 52.5,
 					"stamina": 82.5,
-					"catchEfficiency": 9.5,
-					"pitchEfficiency": 70.5,
-					"passEfficiency": 88.5,
+					"catchEfficiency": 70,
+					"pitchEfficiency": 30.5,
+					"passEfficiency": 60.5,
 					"battingEfficiency": 60.5,
 					"battingPower": 18,
 					"pitchingPower": 17.5,
@@ -70,11 +70,11 @@
 					"profileName": "DEFENSE TYPE D",
 					"speed": 11.5,
 					"stamina": 99.5,
-					"catchEfficiency": 64,
+					"catchEfficiency": 30,
 					"pitchEfficiency": 0,
-					"passEfficiency": 14.5,
-					"battingEfficiency": 17,
-					"battingPower": 0,
+					"passEfficiency": 60,
+					"battingEfficiency": 80,
+					"battingPower": 10,
 					"pitchingPower": 27.5,
 					"pitchingEffect": 14.5
 				}
@@ -95,13 +95,13 @@
 					"profileName": "DEFENSE TYPE B",
 					"speed": 53,
 					"stamina": 48,
-					"catchEfficiency": 73.5,
-					"pitchEfficiency": 68.5,
-					"passEfficiency": 43,
-					"battingEfficiency": 51,
-					"battingPower": 38.5,
-					"pitchingPower": 53.5,
-					"pitchingEffect": 63
+					"catchEfficiency": 30,
+					"pitchEfficiency": 0,
+					"passEfficiency": 60,
+					"battingEfficiency": 80,
+					"battingPower": 10,
+					"pitchingPower": 27.5,
+					"pitchingEffect": 14.5
 				}
 			},
 			{
@@ -120,13 +120,13 @@
 					"profileName": "DEFENSE TYPE A",
 					"speed": 31.5,
 					"stamina": 12.5,
-					"catchEfficiency": 20.5,
-					"pitchEfficiency": 60.5,
-					"passEfficiency": 15,
-					"battingEfficiency": 60.5,
-					"battingPower": 39.5,
-					"pitchingPower": 35.5,
-					"pitchingEffect": 73
+					"catchEfficiency": 30,
+					"pitchEfficiency": 0,
+					"passEfficiency": 60,
+					"battingEfficiency": 80,
+					"battingPower": 10,
+					"pitchingPower": 27.5,
+					"pitchingEffect": 14.5
 				}
 			},
 			{
@@ -145,13 +145,13 @@
 					"profileName": "DEFENSE TYPE C",
 					"speed": 52.5,
 					"stamina": 82.5,
-					"catchEfficiency": 9.5,
-					"pitchEfficiency": 70.5,
-					"passEfficiency": 88.5,
-					"battingEfficiency": 60.5,
-					"battingPower": 18,
-					"pitchingPower": 17.5,
-					"pitchingEffect": 12.5
+					"catchEfficiency": 30,
+					"pitchEfficiency": 0,
+					"passEfficiency": 60,
+					"battingEfficiency": 80,
+					"battingPower": 10,
+					"pitchingPower": 27.5,
+					"pitchingEffect": 14.5
 				}
 			},
 			{
@@ -170,13 +170,13 @@
 					"profileName": "DEFENSE TYPE A",
 					"speed": 31.5,
 					"stamina": 12.5,
-					"catchEfficiency": 20.5,
-					"pitchEfficiency": 60.5,
-					"passEfficiency": 15,
-					"battingEfficiency": 60.5,
-					"battingPower": 39.5,
-					"pitchingPower": 35.5,
-					"pitchingEffect": 73
+					"catchEfficiency": 30,
+					"pitchEfficiency": 0,
+					"passEfficiency": 60,
+					"battingEfficiency": 80,
+					"battingPower": 10,
+					"pitchingPower": 27.5,
+					"pitchingEffect": 14.5
 				}
 			},
 			{
@@ -195,13 +195,13 @@
 					"profileName": "DEFENSE TYPE C",
 					"speed": 52.5,
 					"stamina": 82.5,
-					"catchEfficiency": 9.5,
-					"pitchEfficiency": 70.5,
-					"passEfficiency": 88.5,
-					"battingEfficiency": 60.5,
-					"battingPower": 18,
-					"pitchingPower": 17.5,
-					"pitchingEffect": 12.5
+					"catchEfficiency": 30,
+					"pitchEfficiency": 0,
+					"passEfficiency": 60,
+					"battingEfficiency": 80,
+					"battingPower": 10,
+					"pitchingPower": 27.5,
+					"pitchingEffect": 14.5
 				}
 			},
 			{
@@ -220,13 +220,13 @@
 					"profileName": "DEFENSE TYPE C",
 					"speed": 52.5,
 					"stamina": 82.5,
-					"catchEfficiency": 9.5,
-					"pitchEfficiency": 70.5,
-					"passEfficiency": 88.5,
-					"battingEfficiency": 60.5,
-					"battingPower": 18,
-					"pitchingPower": 17.5,
-					"pitchingEffect": 12.5
+					"catchEfficiency": 30,
+					"pitchEfficiency": 0,
+					"passEfficiency": 60,
+					"battingEfficiency": 80,
+					"battingPower": 10,
+					"pitchingPower": 27.5,
+					"pitchingEffect": 14.5
 				}
 			}
 		]
@@ -252,13 +252,13 @@
 					"profileName": "DEFENSE TYPE A",
 					"speed": 31.5,
 					"stamina": 12.5,
-					"catchEfficiency": 20.5,
-					"pitchEfficiency": 60.5,
-					"passEfficiency": 15,
+					"catchEfficiency": 40.5,
+					"pitchEfficiency": 39.5,
+					"passEfficiency": 40,
 					"battingEfficiency": 60.5,
-					"battingPower": 39.5,
-					"pitchingPower": 35.5,
-					"pitchingEffect": 73
+					"battingPower": 10,
+					"pitchingPower": 2,
+					"pitchingEffect": 30
 				}
 			},
 			{
@@ -277,11 +277,11 @@
 					"profileName": "DEFENSE TYPE C",
 					"speed": 52.5,
 					"stamina": 82.5,
-					"catchEfficiency": 9.5,
-					"pitchEfficiency": 70.5,
+					"catchEfficiency": 70,
+					"pitchEfficiency": 20,
 					"passEfficiency": 88.5,
 					"battingEfficiency": 60.5,
-					"battingPower": 18,
+					"battingPower": 10,
 					"pitchingPower": 17.5,
 					"pitchingEffect": 12.5
 				}
@@ -302,11 +302,11 @@
 					"profileName": "DEFENSE TYPE D",
 					"speed": 11.5,
 					"stamina": 99.5,
-					"catchEfficiency": 64,
+					"catchEfficiency": 30,
 					"pitchEfficiency": 0,
-					"passEfficiency": 14.5,
-					"battingEfficiency": 17,
-					"battingPower": 0,
+					"passEfficiency": 60,
+					"battingEfficiency": 80,
+					"battingPower": 10,
 					"pitchingPower": 27.5,
 					"pitchingEffect": 14.5
 				}
@@ -327,13 +327,13 @@
 					"profileName": "DEFENSE TYPE B",
 					"speed": 53,
 					"stamina": 48,
-					"catchEfficiency": 73.5,
-					"pitchEfficiency": 68.5,
-					"passEfficiency": 43,
-					"battingEfficiency": 51,
-					"battingPower": 38.5,
-					"pitchingPower": 53.5,
-					"pitchingEffect": 63
+					"catchEfficiency": 30,
+					"pitchEfficiency": 0,
+					"passEfficiency": 60,
+					"battingEfficiency": 80,
+					"battingPower": 10,
+					"pitchingPower": 27.5,
+					"pitchingEffect": 14.5
 				}
 			},
 			{
@@ -352,13 +352,13 @@
 					"profileName": "DEFENSE TYPE A",
 					"speed": 31.5,
 					"stamina": 12.5,
-					"catchEfficiency": 20.5,
-					"pitchEfficiency": 60.5,
-					"passEfficiency": 15,
-					"battingEfficiency": 60.5,
-					"battingPower": 39.5,
-					"pitchingPower": 35.5,
-					"pitchingEffect": 73
+					"catchEfficiency": 30,
+					"pitchEfficiency": 0,
+					"passEfficiency": 60,
+					"battingEfficiency": 80,
+					"battingPower": 10,
+					"pitchingPower": 27.5,
+					"pitchingEffect": 14.5
 				}
 			},
 			{
@@ -377,13 +377,13 @@
 					"profileName": "DEFENSE TYPE C",
 					"speed": 52.5,
 					"stamina": 82.5,
-					"catchEfficiency": 9.5,
-					"pitchEfficiency": 70.5,
-					"passEfficiency": 88.5,
-					"battingEfficiency": 60.5,
-					"battingPower": 18,
-					"pitchingPower": 17.5,
-					"pitchingEffect": 12.5
+					"catchEfficiency": 30,
+					"pitchEfficiency": 0,
+					"passEfficiency": 60,
+					"battingEfficiency": 80,
+					"battingPower": 10,
+					"pitchingPower": 27.5,
+					"pitchingEffect": 14.5
 				}
 			},
 			{
@@ -402,13 +402,13 @@
 					"profileName": "DEFENSE TYPE A",
 					"speed": 31.5,
 					"stamina": 12.5,
-					"catchEfficiency": 20.5,
-					"pitchEfficiency": 60.5,
-					"passEfficiency": 15,
-					"battingEfficiency": 60.5,
-					"battingPower": 39.5,
-					"pitchingPower": 35.5,
-					"pitchingEffect": 73
+					"catchEfficiency": 30,
+					"pitchEfficiency": 0,
+					"passEfficiency": 60,
+					"battingEfficiency": 80,
+					"battingPower": 10,
+					"pitchingPower": 27.5,
+					"pitchingEffect": 14.5
 				}
 			},
 			{
@@ -427,13 +427,13 @@
 					"profileName": "DEFENSE TYPE C",
 					"speed": 52.5,
 					"stamina": 82.5,
-					"catchEfficiency": 9.5,
-					"pitchEfficiency": 70.5,
-					"passEfficiency": 88.5,
-					"battingEfficiency": 60.5,
-					"battingPower": 18,
-					"pitchingPower": 17.5,
-					"pitchingEffect": 12.5
+					"catchEfficiency": 30,
+					"pitchEfficiency": 0,
+					"passEfficiency": 60,
+					"battingEfficiency": 80,
+					"battingPower": 10,
+					"pitchingPower": 27.5,
+					"pitchingEffect": 14.5
 				}
 			},
 			{
@@ -452,13 +452,13 @@
 					"profileName": "DEFENSE TYPE C",
 					"speed": 52.5,
 					"stamina": 82.5,
-					"catchEfficiency": 9.5,
-					"pitchEfficiency": 70.5,
-					"passEfficiency": 88.5,
-					"battingEfficiency": 60.5,
-					"battingPower": 18,
-					"pitchingPower": 17.5,
-					"pitchingEffect": 12.5
+					"catchEfficiency": 30,
+					"pitchEfficiency": 0,
+					"passEfficiency": 60,
+					"battingEfficiency": 80,
+					"battingPower": 10,
+					"pitchingPower": 27.5,
+					"pitchingEffect": 14.5
 				}
 			}
 		]

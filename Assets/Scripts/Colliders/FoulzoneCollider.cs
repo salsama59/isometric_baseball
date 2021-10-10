@@ -6,7 +6,7 @@ using UnityEngine;
 public class FoulzoneCollider : MonoBehaviour
 {
     private float timeElapsed = 0f;
-    private const float TIME_TO_WAIT_IN_FOUL_ZONE = 1f;
+    private const float TIME_TO_WAIT_IN_FOUL_ZONE = 0.5f;
 
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -32,6 +32,7 @@ public class FoulzoneCollider : MonoBehaviour
 
             if (ballControllerScript.IsHit)
             {
+                ballControllerScript.IsInFoulState = true;
 
                 timeElapsed += Time.deltaTime;
 
@@ -39,9 +40,9 @@ public class FoulzoneCollider : MonoBehaviour
                 {
                     Debug.Log("the ball is foul");
                     timeElapsed = 0;
-                    
-                    DialogBoxManager dialogBoxManagerScript = GameUtils.FetchDialogBoxManager();
-                    dialogBoxManagerScript.DisplayDialogAndTextForGivenAmountOfTime(1f, false, "FOUL!!");
+                    Vector3 textPosition = new Vector3(ball.transform.position.x, ball.transform.position.y, ball.transform.position.z);
+                    TextManager textManagerScript = GameUtils.FetchTextManager();
+                    textManagerScript.CreateText(textPosition, "FOUL!!", Color.black, 1f, true);
                     PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
                     GameObject pitcher = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.PITCHER, TeamUtils.GetPlayerIdFromPlayerFieldPosition(PlayerFieldPositionEnum.PITCHER));
                     GameManager gameManager = GameUtils.FetchGameManager();

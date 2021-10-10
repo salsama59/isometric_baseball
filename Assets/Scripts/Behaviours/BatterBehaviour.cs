@@ -59,6 +59,7 @@ public class BatterBehaviour : GenericPlayerBehaviour
             int ballPositionIndex = Random.Range(0, ballPositionList.Count - 1);
             Vector2Int ballTilePosition = ballPositionList[ballPositionIndex];
             ballControllerScript.StopCoroutine(ballControllerScript.MovementCoroutine);
+            ballControllerScript.gameObject.transform.position = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetHomeBaseTilePosition());
             ballControllerScript.Target = FieldUtils.GetTileCenterPositionInGameWorld(ballTilePosition);
             Vector2 direction = MathUtils.CalculateDirection(ballControllerScript.gameObject.transform.position, ballControllerScript.Target.Value);
             float ballDirectionAngle = MathUtils.CalculateDirectionAngle(direction);
@@ -69,7 +70,7 @@ public class BatterBehaviour : GenericPlayerBehaviour
             float homeBaseToRigthSideFictionalDistance = Vector3.Distance(homeBasePosition, rigthSideFictionalPosition);
             float foulZoneAngle = Mathf.Acos(homeBaseToRigthSideFictionalDistance / homeBaseToFirstBaseDistance);
 
-            //Fix calcul when the ball go to the left zone
+            //if ball not sent in foul zone
             if (ballDirectionAngle < MathUtils.HALF_CIRCLE_ANGLE_IN_DEGREE - foulZoneAngle * Mathf.Rad2Deg && ballDirectionAngle > foulZoneAngle * Mathf.Rad2Deg)
             {
                 RunnerBehaviour runnerBehaviour = this.ConvertBatterToRunner(playerStatusScript);
@@ -77,7 +78,7 @@ public class BatterBehaviour : GenericPlayerBehaviour
                 playerStatusScript.IsAllowedToMove = true;
                 runnerBehaviour.EnableMovement = true;
             }
-            
+
             playersTurnManager.IsRunnersTurnsDone = false;
 
             StartCoroutine(this.WaitToEnableBatCollider());

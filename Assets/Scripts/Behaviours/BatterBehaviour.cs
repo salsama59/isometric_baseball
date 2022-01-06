@@ -40,15 +40,14 @@ public class BatterBehaviour : GenericPlayerBehaviour
         }
     }
 
-    public void CalculateBatterColliderInterraction(GameObject pitcherGameObject, BallController ballControllerScript, PlayerStatus playerStatusScript)
+    public void CalculateBatterColliderInterraction(GameObject pitcherGameObject, BallController ballControllerScript)
     {
         float pitchSuccesRate = ActionCalculationUtils.CalculatePitchSuccessRate(pitcherGameObject, this.gameObject);
-        StartCoroutine(this.WaitForSwing(pitchSuccesRate, ballControllerScript, playerStatusScript));
+        StartCoroutine(this.WaitForSwing(pitchSuccesRate, ballControllerScript));
     }
 
-    private void DoBattingAction(BallController ballControllerScript, PlayerStatus playerStatusScript, float pitchSuccesRate)
+    private void DoBattingAction(BallController ballControllerScript, float pitchSuccesRate)
     {
-        PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
         if (!ActionCalculationUtils.HasActionSucceeded(pitchSuccesRate))
         {
             this.EquipedBat.GetComponent<CapsuleCollider2D>().enabled = false;
@@ -61,26 +60,9 @@ public class BatterBehaviour : GenericPlayerBehaviour
             ballControllerScript.StopCoroutine(ballControllerScript.MovementCoroutine);
             ballControllerScript.gameObject.transform.position = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetHomeBaseTilePosition());
             ballControllerScript.Target = FieldUtils.GetTileCenterPositionInGameWorld(ballTilePosition);
-            Vector2 direction = MathUtils.CalculateDirection(ballControllerScript.gameObject.transform.position, ballControllerScript.Target.Value);
-            float ballDirectionAngle = MathUtils.CalculateDirectionAngle(direction);
-            Vector3 firstBasePosition = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetFirstBaseTilePosition());
-            Vector3 homeBasePosition = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetHomeBaseTilePosition());
-            float homeBaseToFirstBaseDistance = Vector3.Distance(homeBasePosition, firstBasePosition);
-            Vector3 rigthSideFictionalPosition = new Vector3(firstBasePosition.x, homeBasePosition.y, 0);
-            float homeBaseToRigthSideFictionalDistance = Vector3.Distance(homeBasePosition, rigthSideFictionalPosition);
-            float foulZoneAngle = Mathf.Acos(homeBaseToRigthSideFictionalDistance / homeBaseToFirstBaseDistance);
-
-            //if ball not sent in foul zone
-            if (ballDirectionAngle < MathUtils.HALF_CIRCLE_ANGLE_IN_DEGREE - foulZoneAngle * Mathf.Rad2Deg && ballDirectionAngle > foulZoneAngle * Mathf.Rad2Deg)
-            {
-                RunnerBehaviour runnerBehaviour = this.ConvertBatterToRunner(playerStatusScript);
-                this.AddRunnerAbilitiesToBatter(this.gameObject);
-                playerStatusScript.IsAllowedToMove = true;
-                runnerBehaviour.EnableMovement = true;
-            }
-
-            playersTurnManager.IsRunnersTurnsDone = false;
-
+            //Do the calculation in advance to keep the original result before managing the foul state of the ball
+            ballControllerScript.BallHitDirection = MathUtils.CalculateDirection(ballControllerScript.gameObject.transform.position, ballControllerScript.Target.Value);
+            StartCoroutine(this.ManageFoulStateActions(ballControllerScript));
             StartCoroutine(this.WaitToEnableBatCollider());
         }
         else
@@ -110,57 +92,61 @@ public class BatterBehaviour : GenericPlayerBehaviour
     }
 
 
+    private IEnumerator ManageFoulStateActions(BallController ballControllerScript)
+    {
+        yield return new WaitForSeconds(0.6f);
+        GameObject ball = ballControllerScript.gameObject;
+        GameManager gameManager = GameUtils.FetchGameManager();
+        float ballDirectionAngle = MathUtils.CalculateDirectionAngle(ballControllerScript.BallHitDirection);
+        Vector3 firstBasePosition = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetFirstBaseTilePosition());
+        Vector3 homeBasePosition = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetHomeBaseTilePosition());
+        float homeBaseToFirstBaseDistance = Vector3.Distance(homeBasePosition, firstBasePosition);
+        Vector3 rigthSideFictionalPosition = new Vector3(firstBasePosition.x, homeBasePosition.y, 0);
+        float homeBaseToRigthSideFictionalDistance = Vector3.Distance(homeBasePosition, rigthSideFictionalPosition);
+        float foulZoneAngle = Mathf.Acos(homeBaseToRigthSideFictionalDistance / homeBaseToFirstBaseDistance);
+
+        //if ball not sent in foul zone
+        if (ballDirectionAngle < MathUtils.HALF_CIRCLE_ANGLE_IN_DEGREE - foulZoneAngle * Mathf.Rad2Deg && ballDirectionAngle > foulZoneAngle * Mathf.Rad2Deg)
+        {
+            ballControllerScript.IsInFoulState = false;
+            GameObject currentBatter = gameManager.AttackTeamBatterListClone.First();
+            PlayerStatus playerStatusScript = PlayerUtils.FetchPlayerStatusScript(currentBatter);
+            RunnerBehaviour runnerBehaviour = RunnerUtils.ConvertBatterToRunner(playerStatusScript);
+            RunnerUtils.AddRunnerAbilitiesToBatter(currentBatter);
+            playerStatusScript.IsAllowedToMove = true;
+            runnerBehaviour.EnableMovement = true;
+            PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
+            playersTurnManager.IsRunnersTurnsDone = false;
+        }
+        else
+        {
+            ballControllerScript.IsInFoulState = true;
+            Vector3 textPosition = new Vector3(ball.transform.position.x, ball.transform.position.y, ball.transform.position.z);
+            TextManager textManagerScript = GameUtils.FetchTextManager();
+            textManagerScript.CreateText(textPosition, "FOUL!!", Color.black, 1f, true);
+            PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
+            GameObject pitcher = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.PITCHER, TeamUtils.GetPlayerIdFromPlayerFieldPosition(PlayerFieldPositionEnum.PITCHER));
+
+            GameObject currentBatter = gameManager.AttackTeamBatterListClone.First();
+            BatterBehaviour currentBatterBehaviour = PlayerUtils.FetchBatterBehaviourScript(currentBatter);
+            GameObject bat = currentBatterBehaviour.EquipedBat;
+            currentBatterBehaviour.FoulOutcomeCount += 1;
+            currentBatter.transform.rotation = Quaternion.identity;
+            bat.transform.position = FieldUtils.GetBatCorrectPosition(currentBatter.transform.position);
+            bat.transform.rotation = Quaternion.Euler(0f, 0f, -70f);
+            gameManager.ReinitPitcher(pitcher);
+            gameManager.ReturnBallToPitcher(ballControllerScript.gameObject);
+            gameManager.ReinitRunners(gameManager.AttackTeamRunnerList);
+            playersTurnManager.TurnState = TurnStateEnum.PITCHER_TURN;
+            PlayersTurnManager.IsCommandPhase = true;
+        }
+    }
+
+
     private IEnumerator WaitToEnableBatCollider()
     {
         yield return new WaitForSeconds(2f);
         this.EquipedBat.GetComponent<CapsuleCollider2D>().enabled = true;
-    }
-
-    public void AddRunnerAbilitiesToBatter(GameObject player)
-    {
-        PlayerActionsManager playerActionsManager = GameUtils.FetchPlayerActionsManager();
-        PlayerAbilities playerAbilities = PlayerUtils.FetchPlayerAbilitiesScript(player);
-        playerAbilities.ReinitAbilities();
-        PlayerAbility runPlayerAbility = new PlayerAbility("Run to next base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.RunAction, player);
-        PlayerAbility StaySafePlayerAbility = new PlayerAbility("Stay on base", AbilityTypeEnum.BASIC, AbilityCategoryEnum.NORMAL, playerActionsManager.StayOnBaseAction, player);
-        playerAbilities.AddAbility(runPlayerAbility);
-        playerAbilities.AddAbility(StaySafePlayerAbility);
-    }
-
-    public RunnerBehaviour ConvertBatterToRunner(PlayerStatus batterStatusScript)
-    {
-        PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
-        GameObject currentBatter = batterStatusScript.gameObject;
-        GameObject bat = PlayerUtils.GetPlayerBatGameObject(currentBatter);
-        GameManager gameManager = GameUtils.FetchGameManager();
-        RunnerBehaviour runnerBehaviour = currentBatter.AddComponent<RunnerBehaviour>();
-        gameManager.AttackTeamRunnerList.Add(runnerBehaviour.gameObject);
-        gameManager.AttackTeamRunnerListClone.Add(runnerBehaviour.gameObject);
-        gameManager.AttackTeamBatterListClone.Remove(currentBatter);
-        playersTurnManager.CurrentRunner = runnerBehaviour.gameObject;
-        runnerBehaviour.EquipedBat = bat;
-        bat.SetActive(false);
-        Destroy(currentBatter.GetComponent<BatterBehaviour>());
-
-        batterStatusScript.PlayerFieldPosition = PlayerFieldPositionEnum.RUNNER;
-        TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.RUNNER, currentBatter, TeamUtils.GetBaseballPlayerOwner(currentBatter));
-        
-        int batterCount = gameManager.AttackTeamBatterListClone.Count;
-        if (batterCount > 0)
-        {
-            GameObject nextBatter = gameManager.AttackTeamBatterListClone.First();
-            gameManager.EquipBatToPlayer(nextBatter);
-            TeamUtils.AddPlayerTeamMember(PlayerFieldPositionEnum.BATTER, nextBatter, TeamUtils.GetBaseballPlayerOwner(nextBatter));
-        }
-
-        string runnerNumber = runnerBehaviour.gameObject.name.Split('_').Last();
-        string newRunnerName = NameConstants.RUNNER_NAME + "_" + runnerNumber;
-        runnerBehaviour.gameObject.name = newRunnerName;
-
-        
-        playersTurnManager.TurnState = TurnStateEnum.STANDBY;
-        
-        return runnerBehaviour;
     }
 
     private IEnumerator RotatePlayer(GameObject player)
@@ -169,10 +155,10 @@ public class BatterBehaviour : GenericPlayerBehaviour
         yield return null;
     }
 
-    private IEnumerator WaitForSwing(float pitchSuccesRate, BallController ballControllerScript, PlayerStatus playerStatusScript)
+    private IEnumerator WaitForSwing(float pitchSuccesRate, BallController ballControllerScript)
     {
         yield return new WaitUntil(() => IsSwingHasFinished == true);
-        this.DoBattingAction(ballControllerScript, playerStatusScript, pitchSuccesRate);
+        this.DoBattingAction(ballControllerScript, pitchSuccesRate);
     }
 
     public bool IsReadyToSwing { get => isReadyToSwing; set => isReadyToSwing = value; }

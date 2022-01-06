@@ -24,6 +24,7 @@ public class BallController : MonoBehaviour
     private Coroutine movementCoroutine;
     private bool isTargetedByPitcher;
     private bool isInFoulState;
+    private Vector2 ballHitDirection;
 
     // Start is called before the first frame update
     public void Start()
@@ -191,4 +192,5 @@ public class BallController : MonoBehaviour
     public bool IsPassed { get => isPassed; set => isPassed = value; }
     public GameObject CurrentPasser { get => currentPasser; set => currentPasser = value; }
     public bool IsInFoulState { get => isInFoulState; set => isInFoulState = value; }
+    public Vector2 BallHitDirection { get => ballHitDirection; set => ballHitDirection = value; }
 }

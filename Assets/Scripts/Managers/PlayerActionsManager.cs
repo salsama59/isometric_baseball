@@ -41,7 +41,6 @@ public class PlayerActionsManager : MonoBehaviour
 
     public void CatchBallAction(GameObject actionUser)
     {
-        //CATCHER TURN
         GameObject catcher = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.CATCHER, TeamUtils.GetPlayerIdFromPlayerFieldPosition(PlayerFieldPositionEnum.CATCHER));
         PlayerStatus catcherStatusScript = PlayerUtils.FetchPlayerStatusScript(catcher);
         CatcherBehaviour genericCatcherBehaviourScript = ((CatcherBehaviour)PlayerUtils.FetchCorrespondingPlayerBehaviourScript(catcher, catcherStatusScript));
@@ -50,7 +49,6 @@ public class PlayerActionsManager : MonoBehaviour
 
     public void HitBallAction(GameObject actionUser)
     {
-        //BATTER TURN
         GameObject batter = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.BATTER, TeamUtils.GetPlayerIdFromPlayerFieldPosition(PlayerFieldPositionEnum.BATTER));
         BatterBehaviour batterBehaviourScript = PlayerUtils.FetchBatterBehaviourScript(batter);
 
@@ -59,8 +57,7 @@ public class PlayerActionsManager : MonoBehaviour
         
         if (PlayerUtils.HasBatterPosition(batter))
         {
-            PlayerStatus playerStatusScript = PlayerUtils.FetchPlayerStatusScript(batter);
-            batterBehaviourScript.CalculateBatterColliderInterraction(PitcherGameObject, BallControllerScript, playerStatusScript);
+            batterBehaviourScript.CalculateBatterColliderInterraction(PitcherGameObject, BallControllerScript);
         }
     }
 

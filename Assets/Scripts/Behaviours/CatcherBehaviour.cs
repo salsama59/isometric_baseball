@@ -47,8 +47,8 @@ public class CatcherBehaviour : GenericPlayerBehaviour
 
             if(currentBatterBehaviour.StrikeOutcomeCount == 3)
             {
-                RunnerBehaviour runnerBehaviour = currentBatterBehaviour.ConvertBatterToRunner(currentBatterStatus);
-                currentBatterBehaviour.AddRunnerAbilitiesToBatter(currentBatter);
+                RunnerBehaviour runnerBehaviour = RunnerUtils.ConvertBatterToRunner(currentBatterStatus);
+                RunnerUtils.AddRunnerAbilitiesToBatter(currentBatter);
 
                 //Not realy hit but rather not catch properly!!!!!
                 ballControllerScript.IsHit = true;
@@ -90,8 +90,8 @@ public class CatcherBehaviour : GenericPlayerBehaviour
             {
                 isInWalkState = true;
                 
-                RunnerBehaviour newRunnerBehaviour = currentBatterBehaviour.ConvertBatterToRunner(currentBatterStatus);
-                currentBatterBehaviour.AddRunnerAbilitiesToBatter(currentBatter);
+                RunnerBehaviour newRunnerBehaviour = RunnerUtils.ConvertBatterToRunner(currentBatterStatus);
+                RunnerUtils.AddRunnerAbilitiesToBatter(currentBatter);
 
                 newRunnerBehaviour.IsInWalkState = isInWalkState;
                 currentBatterStatus.IsAllowedToMove = true;

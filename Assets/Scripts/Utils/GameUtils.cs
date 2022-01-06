@@ -53,6 +53,27 @@ public class GameUtils : MonoBehaviour
         return targetSelectionManager;
     }
 
+    public static TeamsSelectionManager FetchTeamsSelectionManager()
+    {
+        GameObject teamsSelectionManagerObject = GameObject.FindGameObjectWithTag(TagsConstants.TEAMS_SELECTION_MANAGER_TAG);
+        TeamsSelectionManager teamsSelectionManager = teamsSelectionManagerObject.GetComponent<TeamsSelectionManager>();
+        return teamsSelectionManager;
+    }
+
+    public static PathFindingManager FetchPathFindingManager()
+    {
+        GameObject pathFindingManagerObject = GameObject.FindGameObjectWithTag(TagsConstants.PATH_FINDING_MANAGER_TAG);
+        PathFindingManager pathFindingManager = pathFindingManagerObject.GetComponent<PathFindingManager>();
+        return pathFindingManager;
+    }
+
+    public static TextManager FetchTextManager()
+    {
+        GameObject pathFindingManagerObject = GameObject.FindGameObjectWithTag(TagsConstants.TEXT_MANAGER_TAG);
+        TextManager textManager = pathFindingManagerObject.GetComponent<TextManager>();
+        return textManager;
+    }
+
     public static GameObject FetchBaseGameObject(string tagName)
     {
         GameObject baseGameObject = GameObject.FindGameObjectWithTag(tagName);

@@ -6,6 +6,12 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/MainMenuScene.unity
+    guid: 5638e91a7bd6118488f9520f50385ecd
+  - enabled: 1
+    path: Assets/Scenes/TeamSelectionScene.unity
+    guid: d59340f300f6def42b03c8a155316bee
+  - enabled: 1
     path: Assets/Scenes/MatchScene.unity
     guid: 2cda990e2423bbf4892e6590ba056729
   m_configObjects: {}

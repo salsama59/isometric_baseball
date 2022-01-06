@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public class TagsConstants
+﻿public class TagsConstants
 {
     public static string MAIN_CAMERA = "MainCamera";
     public static string GAME_MANAGER_TAG = "GameManager";
@@ -31,4 +27,7 @@ public class TagsConstants
     public static string RIGTH_SIDE_FOUL_ZONE_TAG = "RigthSideFoulZone";
     public static string INNING_COUNT_TAG = "InningCount";
     public static string INNING_PHASE_TAG = "InningPhase";
+    public static string TEAMS_SELECTION_MANAGER_TAG = "TeamsSelectionManager";
+    public static string PATH_FINDING_MANAGER_TAG = "PathFindingManager";
+    public static string TEXT_MANAGER_TAG = "TextManager";
 }

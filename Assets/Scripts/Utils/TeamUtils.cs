@@ -21,18 +21,6 @@ public class TeamUtils : MonoBehaviour
     };
     private static Dictionary<int, GameObject> player1Team = new Dictionary<int, GameObject>();
     private static Dictionary<int, GameObject> player2Team = new Dictionary<int, GameObject>();
-    public static Dictionary<int, PlayerFieldPositionEnum> genericPositionAllocationMap = new Dictionary<int, PlayerFieldPositionEnum>()
-    {
-        {0,  PlayerFieldPositionEnum.PITCHER},
-        {1,  PlayerFieldPositionEnum.CATCHER},
-        {2,  PlayerFieldPositionEnum.FIRST_BASEMAN},
-        {3,  PlayerFieldPositionEnum.THIRD_BASEMAN},
-        {4,  PlayerFieldPositionEnum.SECOND_BASEMAN},
-        {5,  PlayerFieldPositionEnum.SHORT_STOP},
-        {6,  PlayerFieldPositionEnum.LEFT_FIELDER},
-        {7,  PlayerFieldPositionEnum.RIGHT_FIELDER},
-        {8,  PlayerFieldPositionEnum.CENTER_FIELDER}
-    };
 
     public static List<GameObject> fielderList = new List<GameObject>();
 

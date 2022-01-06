@@ -41,7 +41,6 @@ public class PlayerActionsManager : MonoBehaviour
 
     public void CatchBallAction(GameObject actionUser)
     {
-        //CATCHER TURN
         GameObject catcher = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.CATCHER, TeamUtils.GetPlayerIdFromPlayerFieldPosition(PlayerFieldPositionEnum.CATCHER));
         PlayerStatus catcherStatusScript = PlayerUtils.FetchPlayerStatusScript(catcher);
         CatcherBehaviour genericCatcherBehaviourScript = ((CatcherBehaviour)PlayerUtils.FetchCorrespondingPlayerBehaviourScript(catcher, catcherStatusScript));
@@ -50,7 +49,6 @@ public class PlayerActionsManager : MonoBehaviour
 
     public void HitBallAction(GameObject actionUser)
     {
-        //BATTER TURN
         GameObject batter = TeamUtils.GetPlayerTeamMember(PlayerFieldPositionEnum.BATTER, TeamUtils.GetPlayerIdFromPlayerFieldPosition(PlayerFieldPositionEnum.BATTER));
         BatterBehaviour batterBehaviourScript = PlayerUtils.FetchBatterBehaviourScript(batter);
 
@@ -59,8 +57,7 @@ public class PlayerActionsManager : MonoBehaviour
         
         if (PlayerUtils.HasBatterPosition(batter))
         {
-            PlayerStatus playerStatusScript = PlayerUtils.FetchPlayerStatusScript(batter);
-            batterBehaviourScript.CalculateBatterColliderInterraction(PitcherGameObject, BallControllerScript, playerStatusScript);
+            batterBehaviourScript.CalculateBatterColliderInterraction(PitcherGameObject, BallControllerScript);
         }
     }
 
@@ -120,11 +117,13 @@ public class PlayerActionsManager : MonoBehaviour
 
     public void GenericTagOutAimAction(GameObject actionUser)
     {
-        List<GameObject> runners = PlayerUtils.GetRunnersOnField()
-           .OrderBy(runner => Vector3.Distance(actionUser.transform.position, runner.transform.position))
-           .ToList();
+        List<GameObject> runners = PlayerUtils.GetRunnersOnField().Where(runner => {
+            RunnerBehaviour runnerBehaviour = PlayerUtils.FetchRunnerBehaviourScript(runner);
+            return !runnerBehaviour.IsSafe && !runnerBehaviour.IsStaying;
+        }).OrderBy(runner => Vector3.Distance(actionUser.transform.position, runner.transform.position))
+        .ToList();
 
-        if(runners.Count > 1)
+        if (runners.Count > 1)
         {
             TargetSelectionManager.EnableSelection(runners.First().transform.position, runners, TagOutAimAction, actionUser);
             PlayersTurnManager.IsCommandPhase = true;

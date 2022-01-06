@@ -104,6 +104,7 @@ public class FielderBehaviour : GenericPlayerBehaviour
         PlayerStatus newBatterStatus = null;
         GameManager gameManager = GameUtils.FetchGameManager();
         DialogBoxManager dialogBoxManagerScript = GameUtils.FetchDialogBoxManager();
+        TextManager textManagerScript = GameUtils.FetchTextManager();
         PlayersTurnManager playersTurnManager = GameUtils.FetchPlayersTurnManager();
         
 
@@ -119,8 +120,8 @@ public class FielderBehaviour : GenericPlayerBehaviour
             newbatterBehaviourScript.EquipedBat = tagOutRunnerBehaviourScript.EquipedBat;
             newBatter.SetActive(true);
         }
-        
-        dialogBoxManagerScript.DisplayDialogAndTextForGivenAmountOfTime(1f, false, "TAG OUT !!!!!!!");
+
+        textManagerScript.CreateText(targetToTagOut.transform.position, "TAG OUT !!!!!!!", Color.black, 1f, true);
         tagOutRunnerBehaviourScript.EquipedBat = null;
         gameManager.AttackTeamRunnerList.Remove(targetToTagOut);
         targetToTagOut.SetActive(false);

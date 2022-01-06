@@ -16,25 +16,22 @@ public class BallController : MonoBehaviour
     private bool isPassed;
     private GameObject currentPasser;
 
-    private bool allowDiagonals = false;
-    private bool correctDiagonalSpeed = false;
-    private float t;
-    private float factor;
-    protected float moveSpeed = 0.2f;
+    private float distanceDelta;
+    protected float moveSpeed;
     private float gridSize = 1f;
     private bool isMoving = false;
     private Nullable<Vector3> target;
     private Coroutine movementCoroutine;
     private bool isTargetedByPitcher;
     private bool isInFoulState;
+    private Vector2 ballHitDirection;
 
     // Start is called before the first frame update
     public void Start()
     {
-        //BallHeight = BallHeightEnum.NONE;
         BallAnimator = this.GetComponent<Animator>();
         Target = FieldUtils.GetTileCenterPositionInGameWorld(FieldUtils.GetHomeBaseTilePosition());
-        moveSpeed = 0.6f;
+        moveSpeed = 6f;
     }
 
     // Update is called once per frame
@@ -56,7 +53,7 @@ public class BallController : MonoBehaviour
             }
         }
 
-        if (!IsMoving && !PlayersTurnManager.IsCommandPhase && !GameData.isPaused)
+        if (IsMoving && !PlayersTurnManager.IsCommandPhase && !GameData.isPaused)
         {
             //Move inside first if statement to avoid graphical bugs
             if (Target.HasValue && Target.Value != this.transform.position)
@@ -66,6 +63,7 @@ public class BallController : MonoBehaviour
             }
             else
             {
+                IsMoving = false;
                 BallAnimator.enabled = false;
             }
         }
@@ -75,6 +73,23 @@ public class BallController : MonoBehaviour
         }
 
         IsMoving = (IsHit || IsPitched || IsPassed) && Target.HasValue;
+    }
+
+    private IEnumerator Move(Vector3 startPosition, Vector3 endPosition, bool enableHeightVariation)
+    {
+        distanceDelta = 0;
+
+        yield return new WaitUntil(() => !PlayersTurnManager.IsCommandPhase && !GameData.isPaused);
+
+        distanceDelta += Time.deltaTime * (moveSpeed / gridSize);
+        transform.position = Vector3.MoveTowards(transform.position, endPosition, distanceDelta);
+
+        if (enableHeightVariation)
+        {
+            BallHeight = GetBallHeightState(startPosition, endPosition, this.transform.position);
+        }
+
+        yield return 0;
     }
 
     private void AnimateBall()
@@ -162,39 +177,6 @@ public class BallController : MonoBehaviour
         return resultingState;
     }
 
-    private IEnumerator Move(Vector3 startPosition, Vector3 endPosition, bool enableHeightVariation)
-    {
-        t = 0;
-
-        if (allowDiagonals && correctDiagonalSpeed)
-        {
-            factor = 0.7071f;
-        }
-        else
-        {
-            factor = 1f;
-        }
-
-        while (t < 1f)
-        {
-
-            yield return new WaitUntil(() => !PlayersTurnManager.IsCommandPhase && !GameData.isPaused);
-
-            t += Time.deltaTime * (moveSpeed / gridSize) * factor;
-            transform.position = Vector3.Lerp(startPosition, endPosition, t);
-
-            if (enableHeightVariation)
-            {
-                BallHeight = GetBallHeightState(startPosition, endPosition, this.transform.position);
-            }
-            
-            yield return null;
-        }
-
-        IsMoving = false;
-        yield return 0;
-    }
-
     public bool IsMoving { get => isMoving; set => isMoving = value; }
     public Nullable<Vector3> Target { get => target; set => target = value; }
     public bool IsPitched { get => isPitched; set => isPitched = value; }
@@ -210,4 +192,5 @@ public class BallController : MonoBehaviour
     public bool IsPassed { get => isPassed; set => isPassed = value; }
     public GameObject CurrentPasser { get => currentPasser; set => currentPasser = value; }
     public bool IsInFoulState { get => isInFoulState; set => isInFoulState = value; }
+    public Vector2 BallHitDirection { get => ballHitDirection; set => ballHitDirection = value; }
 }

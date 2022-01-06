@@ -58,10 +58,10 @@ public class PitcherBehaviour : GenericPlayerBehaviour
             
             GameManager gameManager = GameUtils.FetchGameManager();
             DialogBoxManager dialogBoxManagerScript = GameUtils.FetchDialogBoxManager();
-            dialogBoxManagerScript.DisplayDialogAndTextForGivenAmountOfTime(1f, false, "TAG OUT !!!!!!!");
+            TextManager textManagerScript = GameUtils.FetchTextManager();
+            textManagerScript.CreateText(runnerToGetOut.transform.position, "TAG OUT !!!!!!!", Color.black, 1f, true);
 
             ballControllerScript.Target = null;
-            
             
             PlayerActionsManager.InterceptBall(ballGameObject, ballControllerScript, genericPlayerBehaviourScript);
             hasIntercepted = true;
